@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Unity.Services.Core.Internal;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.Serialization;
 
 namespace Unity.Services.Core.Editor
 {
@@ -178,12 +178,12 @@ namespace Unity.Services.Core.Editor
             }
         }
 
-        internal class RequestNotAuthorizedException : Exception { }
+        internal class RequestNotAuthorizedException : Exception {}
 
-        class CurrentUserNotFoundException : Exception { }
+        class CurrentUserNotFoundException : Exception {}
 
-        class UserListNotFoundException : Exception { }
+        class UserListNotFoundException : Exception {}
 
-        class UnknownUserRoleException : Exception { }
+        class UnknownUserRoleException : Exception {}
     }
 }

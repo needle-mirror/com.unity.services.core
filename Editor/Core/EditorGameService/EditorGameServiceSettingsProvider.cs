@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.Connect;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Unity.Services.Core.Internal;
 
 namespace Unity.Services.Core.Editor
 {
@@ -213,7 +214,7 @@ namespace Unity.Services.Core.Editor
         void DrawAccessTokenErrorUI(VisualElement parentVisualElement)
         {
             AccessTokenErrorUiHelper.AddAccessTokenErrorUI(parentVisualElement);
-            Debug.LogWarning(k_AuthenticationErrorMessage);
+            CoreLogger.LogWarning(k_AuthenticationErrorMessage);
         }
 
         internal static bool IsUserLoggedIn(ProjectState projectState)

@@ -6,8 +6,12 @@ namespace Unity.Services.Core.Editor
     static class ExceptionHelper
     {
         const string k_UxmlPath = "Packages/com.unity.services.core/Editor/Core/UiHelpers/UXML/ExceptionVisual.uxml";
-        const string k_ExceptionContext = "exception-context";
-        const string k_ExceptionMessage = "exception-message";
+
+        internal static class UiClass
+        {
+            public const string ExceptionContext = "exception-context";
+            public const string ExceptionMessage = "exception-message";
+        }
 
         public static void AddExceptionVisual(VisualElement exceptionContainer, string exceptionContext, string exceptionMessage)
         {
@@ -19,8 +23,8 @@ namespace Unity.Services.Core.Editor
             {
                 visualTreeAsset.CloneTree(exceptionContainer);
 
-                SetLabelText(exceptionContainer, k_ExceptionContext, exceptionContext);
-                SetLabelText(exceptionContainer, k_ExceptionMessage, exceptionMessage);
+                SetLabelText(exceptionContainer, UiClass.ExceptionContext, exceptionContext);
+                SetLabelText(exceptionContainer, UiClass.ExceptionMessage, exceptionMessage);
             }
         }
 

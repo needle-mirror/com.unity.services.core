@@ -1,21 +1,21 @@
 {
   "name": "com.unity.services.core",
-  "version": "1.0.1",
   "displayName": "Services Core",
+  "version": "1.1.0-pre.7",
   "unity": "2019.4",
-  "description": "This package defines common components used by multiple Game Service packages.\nThese are standardized and aim to unify the overall experience of working with Game Services packages.",
+  "description": "This package defines common components used by multiple Game Service packages.\nThese are standardized and aim to unify the overall experience of working with Game Services SDK.",
   "dependencies": {
     "com.unity.modules.unitywebrequest": "1.0.0"
   },
   "relatedPackages": {
-    "com.unity.services.core.tests": "1.0.1"
+    "com.unity.services.core.tests": "1.1.0-pre.7"
   },
   "upmCi": {
-    "footprint": "7b67ec7dadaffa50b991105bde503477193a5c1f"
+    "footprint": "6c41cbcda4225ae1d58d88d4d79006e8790dd04f"
   },
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/operate-services-sdk.git",
     "type": "git",
-    "revision": "4cd880d4fd5c60597629249bf4f324e4c8d7aa2e"
+    "revision": "6d5c4163d7c136fe09a9bbcedf13e07888a0897f"
   }
 }

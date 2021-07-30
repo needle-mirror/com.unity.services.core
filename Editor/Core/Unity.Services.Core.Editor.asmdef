@@ -1,6 +1,11 @@
 {
     "name": "Unity.Services.Core.Editor",
-    "references": [],
+    "rootNamespace": "",
+    "references": [
+        "Unity.Services.Core",
+        "Unity.Services.Core.Networking",
+        "Unity.Services.Core.Internal"
+    ],
     "includePlatforms": [
         "Editor"
     ],
@@ -10,5 +15,12 @@
     "precompiledReferences": [],
     "autoReferenced": false,
     "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "Unity",
+            "expression": "2021.1",
+            "define": "UNITY_OPERATE_SERVICE_ENABLED"
+        }
+    ],
     "noEngineReferences": false
 }

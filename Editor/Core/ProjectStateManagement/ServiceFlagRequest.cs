@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine;
 using UnityEngine.Networking;
+using Unity.Services.Core.Internal;
 
 namespace Unity.Services.Core.Editor
 {
-    class ServiceFlagRequest: IServiceFlagRequest
+    class ServiceFlagRequest : IServiceFlagRequest
     {
         const string k_ServiceFlagsKey = "service_flags";
 
@@ -83,7 +83,7 @@ namespace Unity.Services.Core.Editor
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"Exception occurred when fetching service flags:\n{ex.Message}");
+                    CoreLogger.LogError($"Exception occurred when fetching service flags:\n{ex.Message}");
                     flags = new Dictionary<string, object>();
                 }
             }
