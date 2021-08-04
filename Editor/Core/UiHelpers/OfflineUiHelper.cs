@@ -7,7 +7,11 @@ namespace Unity.Services.Core.Editor
     static class OfflineUiHelper
     {
         const string k_UxmlPath = "Packages/com.unity.services.core/Editor/Core/UiHelpers/UXML/Offline.uxml";
-        const string k_ButtonClassName = "submit-button";
+
+        internal static class UiClass
+        {
+            public const string Button = "submit-button";
+        }
 
         public static void AddOfflineUI(VisualElement offlineContainer, Action buttonClickAction)
         {
@@ -25,7 +29,7 @@ namespace Unity.Services.Core.Editor
 
         static void SetupButton(VisualElement buttonContainer, Action buttonClickAction)
         {
-            var button = buttonContainer.Q<Button>(className: k_ButtonClassName);
+            var button = buttonContainer.Q<Button>(className: UiClass.Button);
             if (button != null)
             {
                 button.clickable.clicked += () => buttonClickAction?.Invoke();

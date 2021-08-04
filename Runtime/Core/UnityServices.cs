@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -19,6 +20,12 @@ namespace Unity.Services.Core
         {
             get
             {
+                if (!MainThreadUtils.IsRunningOnMainThread)
+                {
+                    throw new ServicesInitializationException("You are attempting to access UnityServices.State in a non-Unity Thread." +
+                        " UnityServices.State can only be accessed in Unity Thread");
+                }
+
                 if (Instance != null)
                 {
                     return Instance.State;
@@ -55,6 +62,12 @@ namespace Unity.Services.Core
         /// </returns>
         public static async Task InitializeAsync(InitializationOptions options)
         {
+            if (!MainThreadUtils.IsRunningOnMainThread)
+            {
+                throw new ServicesInitializationException("You are attempting to initialize Unity Services in a non-Unity Thread." +
+                    " Unity Services can only be initialized in Unity Thread");
+            }
+
             if (!Application.isPlaying)
             {
                 throw new ServicesInitializationException("You are attempting to initialize Unity Services in Edit Mode." +
