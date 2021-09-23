@@ -41,17 +41,18 @@ namespace Unity.Services.Core.Editor
 
         static void ConfigureDashboardButton(Action dashboardButtonClick, VisualElement projectSettingsHeaderVisualElement)
         {
-            var dashboardLinkButton = projectSettingsHeaderVisualElement.Q<TextElement>(UxmlNodeName.dashboardLinkButton);
-            if (dashboardLinkButton != null)
+            if (dashboardButtonClick == null)
             {
-                if (dashboardButtonClick != null)
+                var dashboardButtonContainer = projectSettingsHeaderVisualElement.Q(UxmlNodeName.dashboardButtonContainer);
+                if (dashboardButtonContainer != null)
                 {
-                    dashboardLinkButton.AddManipulator(new Clickable(dashboardButtonClick));
+                    dashboardButtonContainer.style.display = DisplayStyle.None;
                 }
-                else
-                {
-                    dashboardLinkButton.visible = false;
-                }
+            }
+            else
+            {
+                var dashboardLinkButton = projectSettingsHeaderVisualElement.Q<TextElement>(UxmlNodeName.dashboardLinkButton);
+                dashboardLinkButton?.AddManipulator(new Clickable(dashboardButtonClick));
             }
         }
 
@@ -97,6 +98,7 @@ namespace Unity.Services.Core.Editor
         static class UxmlNodeName
         {
             internal const string dashboardLinkButton = "dashboard-link-button";
+            internal const string dashboardButtonContainer = "dashboard-button-container";
             internal const string serviceTitle = "service-title";
             internal const string serviceDescription = "service-description";
             internal const string serviceToggle = "service-toggle";

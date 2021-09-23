@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.Services.Core.Internal;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 using SuppressMessage = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 
@@ -14,7 +13,7 @@ namespace Unity.Services.Core.Internal
         /// <summary>
         /// Get the only registry of this project.
         /// </summary>
-        public static CoreRegistry Instance { get; internal set; } = new CoreRegistry();
+        public static CoreRegistry Instance { get; internal set; }
 
         [NotNull]
         internal IPackageRegistry PackageRegistry { get; private set; }
@@ -87,7 +86,6 @@ namespace Unity.Services.Core.Internal
         /// <exception cref="KeyNotFoundException">
         /// Thrown if the requested type of <typeparamref name="TComponent"/> hasn't been registered yet.
         /// </exception>
-        [NotNull]
         public TComponent GetServiceComponent<TComponent>()
             where TComponent : IServiceComponent
         {

@@ -14,9 +14,9 @@ namespace Unity.Services.Core.Editor
                     dest = JsonUtility.FromJson<T>(json);
                     return true;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    // ignored, JSON parsing failed, we'll return null
+                    Debug.LogWarning(e);
                 }
             }
 

@@ -15,7 +15,6 @@ namespace Unity.Services.Core.Editor
     {
         const string k_BasePath = "Project/Services/{0}";
         const string k_InsufficientPermissionMsg = "You do not have the required permissions to activate or deactivate a service";
-        const string k_UserNameAnonymous = "anonymous";
         const string k_AuthenticationErrorMessage = "An authentication error has occurred while trying to get access" +
             " to the service, if the error persists please try restarting the editor.";
 
@@ -219,8 +218,7 @@ namespace Unity.Services.Core.Editor
 
         internal static bool IsUserLoggedIn(ProjectState projectState)
         {
-            return !string.IsNullOrEmpty(projectState.UserId) &&
-                !projectState.UserName.Equals(k_UserNameAnonymous, StringComparison.InvariantCultureIgnoreCase);
+            return projectState.IsLoggedIn;
         }
 
         static void DrawLoggedOutUI(VisualElement parentVisualElement)

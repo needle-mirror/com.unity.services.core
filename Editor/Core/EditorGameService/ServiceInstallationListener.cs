@@ -1,11 +1,15 @@
-#if ENABLE_EDITOR_GAME_SERVICES
+#if UNITY_2020_1_OR_NEWER
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Services.Core.Editor.ActivationPopup;
+using Unity.Services.Core.Editor.ProjectBindRedirect;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEngine;
+
+#if ENABLE_EDITOR_GAME_SERVICES
+using Unity.Services.Core.Editor.ActivationPopup;
+#endif
 
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
@@ -33,12 +37,26 @@ namespace Unity.Services.Core.Editor
             var newServices = GetNewServices(packageInfos);
             if (newServices.Any())
             {
+#if ENABLE_EDITOR_GAME_SERVICES
                 var inactiveServices = new HashSet<IEditorGameService>(newServices.Where(IsServiceInactive));
                 if (inactiveServices.Any())
                 {
                     ServiceActivationPopupWindow.CreateAndShowPopup(inactiveServices);
                 }
+#else
+                var request = new ProjectStateRequest();
+                var projectState = request.GetProjectState();
+                if (ShouldShowRedirect(projectState))
+                {
+                    ProjectBindRedirectPopupWindow.CreateAndShowPopup();
+                }
+#endif
             }
+        }
+
+        internal static bool ShouldShowRedirect(ProjectState projectState)
+        {
+            return !projectState.ProjectBound || !projectState.IsLoggedIn;
         }
 
         static IEnumerable<IEditorGameService> GetNewServices(IEnumerable<PackageInfo> packageInfos)

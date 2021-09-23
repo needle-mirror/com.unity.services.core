@@ -26,6 +26,16 @@ namespace Unity.Services.Core
         public const int ServiceUnavailable = 3;
 
         /// <summary>
+        /// The API does not exist.
+        /// </summary>
+        public const int ApiMissing = 4;
+
+        /// <summary>
+        /// The request was rejected. Typically returned when the request was rejected before any reaching the API. See title/details for more information.
+        /// </summary>
+        public const int RequestRejected = 5;
+
+        /// <summary>
         /// Request was rate limited. The client is making requests too frequently.
         /// </summary>
         public const int TooManyRequests = 50;
@@ -44,5 +54,15 @@ namespace Unity.Services.Core
         /// User does not have permission to perform the requested operation.
         /// </summary>
         public const int Forbidden = 53;
+
+        /// <summary>
+        /// The requested resource was not found.
+        /// </summary>
+        public const int NotFound = 54;
+
+        /// <summary>
+        /// The request was understood but the API refused to process it because something about it was invalid.
+        /// </summary>
+        public const int InvalidRequest = 55;
     }
 }

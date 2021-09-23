@@ -157,7 +157,7 @@ namespace Unity.Services.Core.Editor
     /// <typeparam name="T">The object to populate with fields from the CDN JSON file</typeparam>
     public class CdnConfiguredEndpoint<T> : EditorGameServiceRemoteConfiguration<T> where T : new()
     {
-        const string k_CdnUrl = "https://public-cdn.cloud.unity3d.com/config/proxy/production";
+        const string k_CdnUrl = "https://public-cdn.cloud.unity3d.com/config/production";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CdnConfiguredEndpoint{T}" /> class.

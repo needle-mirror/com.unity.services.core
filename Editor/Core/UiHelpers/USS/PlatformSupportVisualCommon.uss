@@ -12,11 +12,11 @@
 }
 
 .platform-tag {
-    -unity-font-style:bold;
+    -unity-font-style:normal;
     margin-left:4px;
     margin-bottom:4px;
-    border-radius:2px;
     padding:2px 5px;
+    border-width: 1px;
 }
 
 .multi-field-block .tag-container {

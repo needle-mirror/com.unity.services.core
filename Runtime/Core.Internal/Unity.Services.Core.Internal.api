@@ -60,7 +60,7 @@ namespace Unity.Services.Core.Internal
     public sealed class CoreRegistry
     {
         public static Unity.Services.Core.Internal.CoreRegistry Instance { get; }
-        [JetBrains.Annotations.NotNull] public TComponent GetServiceComponent<TComponent>() where TComponent : Unity.Services.Core.Internal.IServiceComponent;
+        public TComponent GetServiceComponent<TComponent>() where TComponent : Unity.Services.Core.Internal.IServiceComponent;
         public Unity.Services.Core.Internal.CoreRegistration RegisterPackage<TPackage>([JetBrains.Annotations.NotNull] TPackage package) where TPackage : Unity.Services.Core.Internal.IInitializablePackage;
         public void RegisterServiceComponent<TComponent>([JetBrains.Annotations.NotNull] TComponent component) where TComponent : Unity.Services.Core.Internal.IServiceComponent;
     }

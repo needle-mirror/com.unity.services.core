@@ -21,13 +21,13 @@ namespace Unity.Services.Core.Editor.ActivationPopup
 
         public bool HadException { get; private set; }
 
-        public void Init(VisualElement parentVisual, IEnumerable<IEditorGameService> services, VisualElement buttonsContainer)
+        public void Init(VisualElement parentVisual, IEnumerable<IEditorGameService> services, VisualElement buttonsContainer = null)
         {
             m_CoppaDrawer = new CoppaDrawer();
             m_CoppaDrawer.stateChangeButtonFired += EndVisual;
             m_CoppaDrawer.exceptionCallback += ShowExceptionVisual;
 
-            var visualAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(ServiceActivationPopupVisual.UxmlPath.ProjectBind);
+            var visualAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(ServiceActivationPopupVisual.UxmlPath.CoppaCompliance);
             if (visualAsset != null)
             {
                 visualAsset.CloneTree(parentVisual);
@@ -44,7 +44,7 @@ namespace Unity.Services.Core.Editor.ActivationPopup
 
         void SetupCoppaVisual(VisualElement parentVisual)
         {
-            m_CoppaContainer = parentVisual?.Q(className: ServiceActivationPopupVisual.UxmlClassNames.CoppaVisual);
+            m_CoppaContainer = parentVisual?.Q(className: ServiceActivationPopupVisual.UxmlClassNames.CoppaComplianceVisual);
             m_CoppaContainer?.Add(m_CoppaDrawer.GetVisualElement());
         }
 

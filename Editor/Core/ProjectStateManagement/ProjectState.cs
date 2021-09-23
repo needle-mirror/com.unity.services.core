@@ -27,12 +27,21 @@ namespace Unity.Services.Core.Editor
 #endif
         /// <inheritdoc cref="CloudProjectSettings.projectBound"/>
         public bool ProjectBound;
+
+        /// <summary>
+        /// Is the user connected to the internet.
+        /// </summary>
         public bool IsOnline;
+
+        /// <summary>
+        /// Is the user logged in.
+        /// </summary>
+        public bool IsLoggedIn;
 
 #if ENABLE_EDITOR_GAME_SERVICES
         public ProjectState(string userId, string userName, string accessToken, string projectId, string projectName,
                             string organizationId, string organizationName, CoppaCompliance coppaCompliance, bool projectBound,
-                            bool isOnline)
+                            bool isOnline, bool isLoggedIn)
         {
             UserId = userId;
             UserName = userName;
@@ -44,11 +53,12 @@ namespace Unity.Services.Core.Editor
             ProjectBound = projectBound;
             CoppaCompliance = coppaCompliance;
             IsOnline = isOnline;
+            IsLoggedIn = isLoggedIn;
         }
 
 #else
         public ProjectState(string userId, string userName, string accessToken, string projectId, string projectName,
-                            string organizationId, string organizationName, bool projectBound, bool isOnline)
+                            string organizationId, string organizationName, bool projectBound, bool isOnline, bool isLoggedIn)
         {
             UserId = userId;
             UserName = userName;
@@ -59,6 +69,7 @@ namespace Unity.Services.Core.Editor
             OrganizationName = organizationName;
             ProjectBound = projectBound;
             IsOnline = isOnline;
+            IsLoggedIn = isLoggedIn;
         }
 
 #endif
@@ -77,7 +88,8 @@ namespace Unity.Services.Core.Editor
 #if ENABLE_EDITOR_GAME_SERVICES
                 this.CoppaCompliance.Equals(projectStateObj.CoppaCompliance) &&
 #endif
-                this.IsOnline.Equals(projectStateObj.IsOnline));
+                this.IsOnline.Equals(projectStateObj.IsOnline) &&
+                this.IsLoggedIn.Equals(projectStateObj.IsLoggedIn));
         }
     }
 }

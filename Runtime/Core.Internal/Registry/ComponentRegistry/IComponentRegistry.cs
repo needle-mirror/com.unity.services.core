@@ -8,7 +8,6 @@ namespace Unity.Services.Core.Internal
             [NotNull] TComponent component)
             where TComponent : IServiceComponent;
 
-        [NotNull]
         TComponent GetServiceComponent<TComponent>()
             where TComponent : IServiceComponent;
     }

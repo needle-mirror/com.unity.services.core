@@ -39,6 +39,7 @@ namespace Unity.Services.Core
         /// <summary>
         /// Creates an exception.
         /// </summary>
+        /// <remarks>
         /// <para>
         ///     The exception message is typically the "detail" field from the error
         ///     response returned by the service when it is available.

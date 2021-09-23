@@ -6,7 +6,8 @@
         "Unity.Services.Core.Environments",
         "Unity.Services.Core.Environments.Internal",
         "Unity.Services.Core.Configuration",
-        "Unity.Services.Core"
+        "Unity.Services.Core",
+        "Unity.Services.Core.Telemetry"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

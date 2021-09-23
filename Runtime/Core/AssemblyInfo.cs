@@ -11,6 +11,8 @@ using System.Runtime.CompilerServices;
 // Test assemblies
 #if UNITY_INCLUDE_TESTS
 [assembly: InternalsVisibleTo("Unity.Services.Core.Tests")]
+[assembly: InternalsVisibleTo("Unity.Services.Core.TestUtils")]
+[assembly: InternalsVisibleTo("Unity.Services.Core.TestUtils.Tests")]
 
 // Required for access to Networking API
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]

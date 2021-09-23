@@ -4,7 +4,7 @@
 
 .project-settings-title-container {
     flex-direction:row;
-    padding:10px 4px 4px 8px;
+    padding:10px 8px 4px 8px;
 }
 
 .service-title{
@@ -27,7 +27,7 @@
 .link-button {
     flex-grow:0;
     align-self:flex-start;
-    padding:5px 5px 5px 0px;
+    padding:5px 0 5px 0;
     cursor:link;
     flex-direction:row;
     background-color:rgba(0, 0, 0, 0);
@@ -40,6 +40,19 @@
 .link-button:hover {
     background-color:rgba(0, 0, 0, 0);
     border-color:rgba(0, 0, 0, 0);
+}
+
+.unity-text-element.link-button {
+    color:#5481F7;
+}
+
+.external-link-icon {
+    margin-left:5px;
+    width:15px;
+    height:15px;
+    cursor:link;
+    background-image:resource("Packages/com.unity.services.core/Editor/Core/UiHelpers/Images/ExternalLinkIcon.png");
+    align-self: center;
 }
 
 .separator {

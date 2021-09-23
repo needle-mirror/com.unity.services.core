@@ -203,6 +203,7 @@ namespace Unity.Services.Core.Editor.ActivationPopup
             public const string Common = "Packages/com.unity.services.core/Editor/Core/ServiceActivationPopup/Visuals/UXML/General.uxml";
             public const string ProjectBindAndUserRequest = "Packages/com.unity.services.core/Editor/Core/ServiceActivationPopup/Visuals/UXML/ProjectBindingAndUserRequest.uxml";
             public const string ProjectBind = "Packages/com.unity.services.core/Editor/Core/ServiceActivationPopup/Visuals/UXML/ProjectBind.uxml";
+            public const string CoppaCompliance = "Packages/com.unity.services.core/Editor/Core/ServiceActivationPopup/Visuals/UXML/CoppaCompliance.uxml";
             public const string EndConfirmation = "Packages/com.unity.services.core/Editor/Core/ServiceActivationPopup/Visuals/UXML/EndConfirmation.uxml";
             public const string InsufficientPermission = "Packages/com.unity.services.core/Editor/Core/ServiceActivationPopup/Visuals/UXML/InsufficientPermission.uxml";
         }
@@ -215,7 +216,7 @@ namespace Unity.Services.Core.Editor.ActivationPopup
             public const string UserRequestContainer = "user-request";
             public const string UserRequestLabel = "user-request-text";
             public const string ProjectBindVisual = "project-bind-visual";
-            public const string CoppaVisual = "project-bind-visual";
+            public const string CoppaComplianceVisual = "coppa-compliance-visual";
             public const string Exception = "exception";
             public const string Separator = "separator";
             public const string ConfirmationButton = "confirmation-button";
