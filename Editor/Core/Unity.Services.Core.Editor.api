@@ -3,6 +3,13 @@
 // make sure the XML doc file is present and located next to the scraped dll
 namespace Unity.Services.Core.Editor
 {
+    public class AccessTokens
+    {
+        public AccessTokens() {}
+        public static string GetGenesisToken();
+        [System.Diagnostics.DebuggerStepThrough] [System.Runtime.CompilerServices.AsyncStateMachine(typeof(Unity.Services.Core.Editor.AccessTokens.<GetServicesGatewayTokenAsync>d__4))] public System.Threading.Tasks.Task<string> GetServicesGatewayTokenAsync();
+    }
+
     public class CdnConfiguredEndpoint<T> : Unity.Services.Core.Editor.EditorGameServiceRemoteConfiguration<T> where T : new()
     {
         public CdnConfiguredEndpoint() {}

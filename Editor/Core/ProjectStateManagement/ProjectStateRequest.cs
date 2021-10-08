@@ -14,7 +14,7 @@ namespace Unity.Services.Core.Editor
             return new ProjectState(CloudProjectSettings.userId, CloudProjectSettings.userName, CloudProjectSettings.accessToken,
                 CloudProjectSettings.projectId, CloudProjectSettings.projectName, CloudProjectSettings.organizationId,
                 CloudProjectSettings.organizationName, CloudProjectSettings.coppaCompliance, CloudProjectSettings.projectBound,
-                IsInternetReachable());
+                IsInternetReachable(), IsLoggedIn());
 #else
             return new ProjectState(CloudProjectSettings.userId, CloudProjectSettings.userName, CloudProjectSettings.accessToken,
                 CloudProjectSettings.projectId, CloudProjectSettings.projectName, CloudProjectSettings.organizationId,

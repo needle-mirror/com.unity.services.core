@@ -8,6 +8,7 @@ namespace Unity.Services.Core.Configuration.Editor
     static class IoUtils
     {
         const string k_MetaExtension = ".meta";
+        public const string packageDefaultPath = "Packages/com.unity.services.core/Editor/Core";
 
         public static bool TryDeleteAssetFile(string path)
         {

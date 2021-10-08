@@ -1,10 +1,13 @@
 using System;
+using System.IO;
 using System.Text;
+using Unity.Services.Core.Configuration.Editor;
 using Unity.Services.Core.Internal;
 using Unity.Services.Core.Networking;
 using Unity.Services.Core.Networking.Internal;
 using UnityEditor;
 using UnityEngine;
+using HttpStatusCode = System.Net.HttpStatusCode;
 
 namespace Unity.Services.Core.Editor
 {
@@ -125,11 +128,33 @@ namespace Unity.Services.Core.Editor
 
             void OnRequestCompleted(IAsyncOperation<ReadOnlyHttpResponse> configFetchOperation)
             {
-                var config = configFetchOperation.Status == AsyncOperationStatus.Succeeded
-                    ? SafeGetUTF8StringFromBytes(configFetchOperation.Result.Data)
-                    : null;
+                int successStatusCode = (int)HttpStatusCode.OK;
+                string config = null;
+                if (configFetchOperation.Status == AsyncOperationStatus.Succeeded &&
+                    configFetchOperation.Result.StatusCode == successStatusCode)
+                {
+                    config = SafeGetUTF8StringFromBytes(configFetchOperation.Result.Data);
+                }
+
+                if (config == null)
+                {
+                    config = LoadDefaultConfigurations();
+                }
                 operation.Succeed(config);
             }
+        }
+
+        static string LoadDefaultConfigurations()
+        {
+            var productionFilePath = "Configuration/productionUrls.json";
+            var targetFile =  Path.Combine(IoUtils.packageDefaultPath, productionFilePath);
+            string productionUrls = null;
+            if (File.Exists(targetFile))
+            {
+                productionUrls = File.ReadAllText(targetFile);
+            }
+
+            return productionUrls;
         }
 
         static string SafeGetUTF8StringFromBytes(byte[] bytes)

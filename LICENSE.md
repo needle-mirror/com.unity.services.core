@@ -1,4 +1,5 @@
-com.unity.services.core copyright © 2021 Unity Technologies ApS
-Source code of the package is licensed under the Unity Companion License (see https://unity3d.com/legal/licenses/unity_companion_license); otherwise licensed under the Unity Package Distribution License (see https://unity3d.com/legal/licenses/Unity_Package_Distribution_License ).
+com.unity.services.core copyright © 2021 Unity Technologies.
 
-Unless expressly provided otherwise, the software under this license is made available strictly on an “AS IS” BASIS WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. Please review the license for details on these and other terms and conditions.
+This software is subject to, and made available under, the terms of service for com.unity.services.core (see https://unity3d.com/legal/one-operate-services-terms-of-service), and is an “Operate Service” as defined therein. Your use of the Services constitutes your acceptance of such terms. 
+
+Unless expressly provided otherwise, the software under this license is made available strictly on an “AS IS” BASIS WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. Please review the terms of service for details on these and other terms and conditions.

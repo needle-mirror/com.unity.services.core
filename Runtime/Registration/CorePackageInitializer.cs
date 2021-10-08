@@ -8,6 +8,7 @@ using Unity.Services.Core.Device.Internal;
 using Unity.Services.Core.Environments;
 using Unity.Services.Core.Environments.Internal;
 using Unity.Services.Core.Internal;
+using Unity.Services.Core.Scheduler.Internal;
 using UnityEngine;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 
@@ -20,6 +21,8 @@ namespace Unity.Services.Core.Registration
         {
             CoreRegistry.Instance.RegisterPackage(new CorePackageInitializer())
                 .ProvidesComponent<IInstallationId>()
+                .ProvidesComponent<ICloudProjectId>()
+                .ProvidesComponent<IActionScheduler>()
                 .ProvidesComponent<IEnvironments>()
                 .ProvidesComponent<IProjectConfiguration>();
         }
@@ -40,9 +43,21 @@ namespace Unity.Services.Core.Registration
             // RegisterInstallationId as the _very first_ thing we do.
             RegisterInstallationId(registry);
 
-            var projectConfiguration = await RegisterProjectConfigurationAsync(
-                registry, UnityServices.Instance.Options);
-            RegisterEnvironments(registry, projectConfiguration);
+            var scheduler = RegisterActionScheduler(registry);
+            try
+            {
+                var projectConfiguration = await RegisterProjectConfigurationAsync(
+                    registry, UnityServices.Instance.Options);
+                RegisterEnvironments(registry, projectConfiguration);
+                RegisterCloudProjectId(registry);
+            }
+            catch (Exception)
+            {
+                // We keep a reference to the scheduler and monitor other components registration
+                // to be able to revert the changes done to external systems in case of failure.
+                scheduler?.QuitPlayerLoopSystem();
+                throw;
+            }
         }
 
         internal static void RegisterInstallationId(CoreRegistry registry)
@@ -50,6 +65,20 @@ namespace Unity.Services.Core.Registration
             var installationId = new InstallationId();
             installationId.CreateIdentifier();
             registry.RegisterServiceComponent<IInstallationId>(installationId);
+        }
+
+        internal static ActionScheduler RegisterActionScheduler(CoreRegistry registry)
+        {
+            var scheduler = new ActionScheduler();
+            scheduler.JoinPlayerLoopSystem();
+            registry.RegisterServiceComponent<IActionScheduler>(scheduler);
+            return scheduler;
+        }
+
+        internal static void RegisterCloudProjectId(CoreRegistry registry)
+        {
+            var cloudProjectId = new CloudProjectId();
+            registry.RegisterServiceComponent<ICloudProjectId>(cloudProjectId);
         }
 
         internal static void RegisterEnvironments(CoreRegistry registry, IProjectConfiguration projectConfiguration)

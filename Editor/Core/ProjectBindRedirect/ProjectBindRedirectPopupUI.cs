@@ -14,6 +14,7 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
         {
             SetupUxmlAndUss(parentElement);
             SetupButtons(parentElement);
+            AddProjectBindRedirectContentUI(parentElement);
 
             EditorGameServiceSettingsProvider.TranslateStringsInTree(parentElement);
 
@@ -22,24 +23,30 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
 
         static void SetupUxmlAndUss(VisualElement containerElement)
         {
-            var visualAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(UxmlPath.Base);
+            var visualAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(ProjectBindRedirectUiConstants.UxmlPath.Popup);
             if (visualAsset != null)
             {
                 visualAsset.CloneTree(containerElement);
             }
 
-            VisualElementHelper.AddStyleSheetFromPath(containerElement, UssPath.Base);
+            VisualElementHelper.AddStyleSheetFromPath(containerElement, ProjectBindRedirectUiConstants.UssPath.Popup);
+        }
+
+        static void AddProjectBindRedirectContentUI(VisualElement parentElement)
+        {
+            var contentContainer = parentElement.Q(className: ProjectBindRedirectUiConstants.UxmlClassNames.ContentContainer) ?? parentElement;
+            var contentUi = new ProjectBindRedirectContentUI(contentContainer);
         }
 
         void SetupButtons(VisualElement containerElement)
         {
-            var cancelButton = containerElement.Q<Button>(className: UxmlClassNames.CancelButton);
+            var cancelButton = containerElement.Q<Button>(className: ProjectBindRedirectUiConstants.UxmlClassNames.CancelButton);
             if (cancelButton != null)
             {
                 cancelButton.clickable.clicked += CloseButtonAction;
             }
 
-            var confirmButton = containerElement.Q<Button>(className: UxmlClassNames.ConfirmationButton);
+            var confirmButton = containerElement.Q<Button>(className: ProjectBindRedirectUiConstants.UxmlClassNames.ConfirmationButton);
             if (confirmButton != null)
             {
                 confirmButton.clickable.clicked += ConfirmButtonAction;
@@ -55,22 +62,6 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
         {
             SettingsService.OpenProjectSettings(k_ProjectSettingsPath);
             CloseButtonAction();
-        }
-
-        static class UxmlPath
-        {
-            public const string Base = "Packages/com.unity.services.core/Editor/Core/ProjectBindRedirect/UXML/General.uxml";
-        }
-
-        static class UxmlClassNames
-        {
-            public const string CancelButton = "cancel-button";
-            public const string ConfirmationButton = "confirmation-button";
-        }
-
-        static class UssPath
-        {
-            public const string Base = "Packages/com.unity.services.core/Editor/Core/ProjectBindRedirect/USS/ServiceActivationWindow.uss";
         }
     }
 }

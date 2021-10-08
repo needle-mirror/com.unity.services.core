@@ -8,5 +8,6 @@ using UnityEngine.Scripting;
 // Test assemblies
 #if UNITY_INCLUDE_TESTS
 [assembly: InternalsVisibleTo("Unity.Services.Core.Tests")]
+[assembly: InternalsVisibleTo("Unity.Services.Core.AdsIntegration.Tests")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 #endif

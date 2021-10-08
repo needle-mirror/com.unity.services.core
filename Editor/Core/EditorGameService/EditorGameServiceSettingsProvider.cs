@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Services.Core.Editor.ProjectBindRedirect;
 using UnityEditor;
 using UnityEditor.Connect;
 using UnityEngine;
@@ -163,9 +164,9 @@ namespace Unity.Services.Core.Editor
 
         VisualElement GetSetupOrServiceUI(ProjectState projectState)
         {
-#if ENABLE_EDITOR_GAME_SERVICES
             var uiBody = new VisualElement();
 
+#if ENABLE_EDITOR_GAME_SERVICES
             if (!IsUserOnline(projectState))
             {
                 DrawOfflineUI(uiBody);
@@ -196,7 +197,7 @@ namespace Unity.Services.Core.Editor
             }
             return uiBody;
 #else
-            return GenerateUnsupportedDetailUI();
+            return projectState.ProjectBound ? GenerateUnsupportedDetailUI() : GenerateProjectBindRedirectUI(uiBody);
 #endif
         }
 
@@ -311,6 +312,12 @@ namespace Unity.Services.Core.Editor
         internal static bool IsUserAllowedToEditCoppaCompliance(UserRole userRole)
         {
             return userRole == UserRole.Manager || userRole == UserRole.Owner;
+        }
+
+        static VisualElement GenerateProjectBindRedirectUI(VisualElement parentElement)
+        {
+            var projectBindRedirectContentUI = new ProjectBindRedirectProjectSettingsUi(parentElement);
+            return parentElement;
         }
 
         /// <summary>

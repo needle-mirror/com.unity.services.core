@@ -17,6 +17,11 @@ namespace Unity.Services.Authentication.Internal
 
 namespace Unity.Services.Core.Configuration.Internal
 {
+    public interface ICloudProjectId : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public abstract string GetCloudProjectId();
+    }
+
     public interface IProjectConfiguration : Unity.Services.Core.Internal.IServiceComponent
     {
         public abstract bool GetBool(string key, bool defaultValue = False);
@@ -72,5 +77,14 @@ namespace Unity.Services.Core.Internal
 
     public interface IServiceComponent
     {
+    }
+}
+
+namespace Unity.Services.Core.Scheduler.Internal
+{
+    public interface IActionScheduler : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public abstract void CancelAction(long actionId);
+        public abstract long ScheduleAction(System.Action action, double delaySeconds = 0);
     }
 }
