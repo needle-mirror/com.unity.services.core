@@ -19,7 +19,9 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
 
         public static class UssPath
         {
-            public const string Popup = "Packages/com.unity.services.core/Editor/Core/ProjectBindRedirect/USS/ProjectBindRedirectPopup.uss";
+            public const string Popup = "Packages/com.unity.services.core/Editor/Core/ProjectBindRedirect/USS/ProjectBindRedirectPopupCommon.uss";
+            public const string PopupLight = "Packages/com.unity.services.core/Editor/Core/ProjectBindRedirect/USS/ProjectBindRedirectPopupLight.uss";
+            public const string PopupDark = "Packages/com.unity.services.core/Editor/Core/ProjectBindRedirect/USS/ProjectBindRedirectPopupDark.uss";
             public const string ProjectSettings = "Packages/com.unity.services.core/Editor/Core/ProjectBindRedirect/USS/ProjectBindRedirectProjectSettings.uss";
         }
     }

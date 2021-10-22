@@ -30,6 +30,15 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
             }
 
             VisualElementHelper.AddStyleSheetFromPath(containerElement, ProjectBindRedirectUiConstants.UssPath.Popup);
+
+            if (EditorGUIUtility.isProSkin)
+            {
+                VisualElementHelper.AddStyleSheetFromPath(containerElement, ProjectBindRedirectUiConstants.UssPath.PopupDark);
+            }
+            else
+            {
+                VisualElementHelper.AddStyleSheetFromPath(containerElement, ProjectBindRedirectUiConstants.UssPath.PopupLight);
+            }
         }
 
         static void AddProjectBindRedirectContentUI(VisualElement parentElement)

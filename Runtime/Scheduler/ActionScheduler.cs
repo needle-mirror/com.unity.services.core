@@ -31,9 +31,11 @@ namespace Unity.Services.Core.Scheduler.Internal
         MinimumBinaryHeap<ScheduledInvocation> m_ScheduledActions = new MinimumBinaryHeap<ScheduledInvocation>();
         Dictionary<long, ScheduledInvocation> m_IdScheduledInvocationMap = new Dictionary<long, ScheduledInvocation>();
 
+        const long k_MinimumIdValue = 1;
+
         readonly PlayerLoopSystem m_SchedulerLoopSystem;
 
-        long m_NextId = long.MinValue;
+        long m_NextId = k_MinimumIdValue;
 
         public ActionScheduler()
         {
@@ -59,6 +61,11 @@ namespace Unity.Services.Core.Scheduler.Internal
                 InvocationTime = DateTime.UtcNow.AddSeconds(delaySeconds),
                 ActionId = m_NextId++
             };
+
+            if (m_NextId < k_MinimumIdValue)
+            {
+                m_NextId = k_MinimumIdValue;
+            }
 
             m_ScheduledActions.Insert(scheduledInvocation);
             m_IdScheduledInvocationMap.Add(scheduledInvocation.ActionId, scheduledInvocation);
