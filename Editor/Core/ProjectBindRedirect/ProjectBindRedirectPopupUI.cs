@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine.UIElements;
+using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Unity.Services.Core.Editor.ProjectBindRedirect
 {
@@ -9,9 +11,14 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
         const string k_ProjectSettingsPath = "Project/Services";
 
         Action m_OnCloseButtonFired;
+        [NotNull]
+        List<string> m_InstalledPackages;
+        IEditorGameServiceAnalyticsSender m_EditorGameServiceAnalyticsSender;
 
-        public ProjectBindRedirectPopupUI(VisualElement parentElement, Action closeAction)
+        public ProjectBindRedirectPopupUI(VisualElement parentElement, Action closeAction, [NotNull] List<string> installedPackages, [NotNull] IEditorGameServiceAnalyticsSender editorGameServiceAnalyticsSender)
         {
+            m_EditorGameServiceAnalyticsSender = editorGameServiceAnalyticsSender;
+
             SetupUxmlAndUss(parentElement);
             SetupButtons(parentElement);
             AddProjectBindRedirectContentUI(parentElement);
@@ -19,6 +26,7 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
             EditorGameServiceSettingsProvider.TranslateStringsInTree(parentElement);
 
             m_OnCloseButtonFired = closeAction;
+            m_InstalledPackages = installedPackages;
         }
 
         static void SetupUxmlAndUss(VisualElement containerElement)
@@ -62,15 +70,23 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
             }
         }
 
-        void CloseButtonAction()
+        internal void CloseButtonAction()
         {
+            foreach (var package in m_InstalledPackages)
+            {
+                m_EditorGameServiceAnalyticsSender.SendProjectBindPopupCloseActionEvent(package);
+            }
             m_OnCloseButtonFired?.Invoke();
         }
 
-        void ConfirmButtonAction()
+        internal void ConfirmButtonAction()
         {
+            foreach (var package in m_InstalledPackages)
+            {
+                m_EditorGameServiceAnalyticsSender.SendProjectBindPopupOpenProjectSettingsEvent(package);
+            }
             SettingsService.OpenProjectSettings(k_ProjectSettingsPath);
-            CloseButtonAction();
+            m_OnCloseButtonFired?.Invoke();
         }
     }
 }

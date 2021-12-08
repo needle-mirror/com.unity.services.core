@@ -8,7 +8,8 @@ namespace Unity.Services.Core.Internal
         static void CreateStaticInstance()
         {
             CoreRegistry.Instance = new CoreRegistry();
-            UnityServices.Instance = new UnityServicesInternal(CoreRegistry.Instance);
+            CoreMetrics.Instance = new CoreMetrics();
+            UnityServices.Instance = new UnityServicesInternal(CoreRegistry.Instance, CoreMetrics.Instance);
             UnityServices.InstantiationCompletion?.TrySetResult(null);
         }
 

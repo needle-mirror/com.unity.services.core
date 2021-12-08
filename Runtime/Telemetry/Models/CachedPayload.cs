@@ -3,7 +3,8 @@ using System;
 namespace Unity.Services.Core.Telemetry.Internal
 {
     [Serializable]
-    struct CachedPayload
+    class CachedPayload<TPayload>
+        where TPayload : ITelemetryPayload
     {
         /// <summary>
         /// Time, in ticks, the first event of this payload was recorded.
@@ -11,6 +12,6 @@ namespace Unity.Services.Core.Telemetry.Internal
         /// </summary>
         public long TimeOfOccurenceTicks;
 
-        public MetricsPayload Payload;
+        public TPayload Payload;
     }
 }

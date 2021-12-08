@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 
@@ -19,15 +20,20 @@ namespace Unity.Services.Core.Internal
 
         internal bool CanInitialize;
 
+        Stopwatch m_InitStopwatch;
+
         AsyncOperation m_Initialization;
 
         [NotNull]
         CoreRegistry Registry { get; }
 
-        public UnityServicesInternal(
-            [NotNull] CoreRegistry registry)
+        [NotNull]
+        CoreMetrics Metrics { get; }
+
+        public UnityServicesInternal([NotNull] CoreRegistry registry, [NotNull] CoreMetrics metrics)
         {
             Registry = registry;
+            Metrics = metrics;
         }
 
         /// <summary>
@@ -79,6 +85,10 @@ namespace Unity.Services.Core.Internal
         void StartInitialization()
         {
             State = ServicesInitializationState.Initializing;
+
+            m_InitStopwatch = new Stopwatch();
+            m_InitStopwatch.Start();
+
             var sortedPackageTypeHashes = new List<int>(
                 Registry.PackageRegistry.Tree?.PackageTypeHashToInstance.Count ?? 0);
 
@@ -115,15 +125,21 @@ namespace Unity.Services.Core.Internal
                     State = ServicesInitializationState.Initialized;
                     Registry.LockComponentRegistration();
 
+                    m_InitStopwatch.Stop();
+                    Metrics.SendAllPackagesInitSuccessMetric();
+                    Metrics.SendAllPackagesInitTimeMetric(m_InitStopwatch.Elapsed.TotalSeconds);
+
                     break;
                 }
                 default:
                 {
                     State = ServicesInitializationState.Uninitialized;
-
+                    m_InitStopwatch.Stop();
                     break;
                 }
             }
+
+            m_InitStopwatch = null;
         }
 
         internal void EnableInitialization()

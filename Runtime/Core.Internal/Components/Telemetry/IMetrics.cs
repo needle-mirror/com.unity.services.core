@@ -3,15 +3,10 @@ using System.Collections.Generic;
 namespace Unity.Services.Core.Telemetry.Internal
 {
     /// <summary>
-    /// Object used to send metrics event to the backend.
+    /// Object used to send metrics events to the backend.
     /// </summary>
-    interface IMetrics
+    public interface IMetrics
     {
-        /// <summary>
-        /// All tags sent along with any events sent by this sender.
-        /// </summary>
-        IDictionary<string, string> CommonTags { get; }
-
         /// <summary>
         /// Send a metric that can arbitrarily go up or down to the telemetry service.
         /// </summary>
@@ -24,7 +19,7 @@ namespace Unity.Services.Core.Telemetry.Internal
         /// <param name="tags">
         /// Event tags.
         /// </param>
-        void SendMeasuredMetric(string name, double value = 0, IDictionary<string, string> tags = null);
+        void SendGaugeMetric(string name, double value = 0, IDictionary<string, string> tags = null);
 
         /// <summary>
         /// Send a metric that lasts over time to the telemetry service.
@@ -38,7 +33,7 @@ namespace Unity.Services.Core.Telemetry.Internal
         /// <param name="tags">
         /// Event tags.
         /// </param>
-        void SendTimedMetric(string name, double time, IDictionary<string, string> tags = null);
+        void SendHistogramMetric(string name, double time, IDictionary<string, string> tags = null);
 
         /// <summary>
         /// Send a metric that can only be incremented to the telemetry service.
@@ -52,6 +47,6 @@ namespace Unity.Services.Core.Telemetry.Internal
         /// <param name="tags">
         /// Event tags.
         /// </param>
-        void SendCountedMetric(string name, double value = 1, IDictionary<string, string> tags = null);
+        void SendSumMetric(string name, double value = 1, IDictionary<string, string> tags = null);
     }
 }

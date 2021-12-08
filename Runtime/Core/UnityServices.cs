@@ -1,5 +1,3 @@
-using System;
-using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -20,7 +18,7 @@ namespace Unity.Services.Core
         {
             get
             {
-                if (!MainThreadUtils.IsRunningOnMainThread)
+                if (!UnityThreadUtils.IsRunningOnUnityThread)
                 {
                     throw new ServicesInitializationException("You are attempting to access UnityServices.State in a non-Unity Thread." +
                         " UnityServices.State can only be accessed in Unity Thread");
@@ -62,7 +60,7 @@ namespace Unity.Services.Core
         /// </returns>
         public static async Task InitializeAsync(InitializationOptions options)
         {
-            if (!MainThreadUtils.IsRunningOnMainThread)
+            if (!UnityThreadUtils.IsRunningOnUnityThread)
             {
                 throw new ServicesInitializationException("You are attempting to initialize Unity Services in a non-Unity Thread." +
                     " Unity Services can only be initialized in Unity Thread");
@@ -80,8 +78,15 @@ namespace Unity.Services.Core
                 {
                     InstantiationCompletion = new TaskCompletionSource<object>();
                 }
+
                 await InstantiationCompletion.Task;
             }
+
+            if (options is null)
+            {
+                options = new InitializationOptions();
+            }
+
             await Instance.InitializeAsync(options);
         }
     }

@@ -5,6 +5,9 @@ namespace Unity.Services.Core.Configuration.Internal
     /// <summary>
     /// Component for project configuration.
     /// </summary>
+    /// <remarks>
+    /// For WebGL platform, the configuration is only accessable if the application is hosted behind https. Behind http you will get an error: `Insecure connection not allowed`.
+    /// </remarks>
     public interface IProjectConfiguration : IServiceComponent
     {
         /// <summary>

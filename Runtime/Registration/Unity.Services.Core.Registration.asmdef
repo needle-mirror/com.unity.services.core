@@ -8,7 +8,8 @@
         "Unity.Services.Core.Configuration",
         "Unity.Services.Core",
         "Unity.Services.Core.Telemetry",
-        "Unity.Services.Core.Scheduler"
+        "Unity.Services.Core.Scheduler",
+        "Unity.Services.Core.Threading"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

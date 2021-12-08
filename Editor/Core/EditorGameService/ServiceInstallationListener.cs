@@ -13,9 +13,23 @@ namespace Unity.Services.Core.Editor
 {
     static class ServiceInstallationListener
     {
+        static IEditorGameServiceAnalyticsSender s_EditorGameServiceAnalyticsSender;
+        static IEditorGameServiceAnalyticsSender EditorGameServiceAnalyticsSender
+        {
+            get
+            {
+                if (s_EditorGameServiceAnalyticsSender == null)
+                {
+                    s_EditorGameServiceAnalyticsSender = new EditorGameServiceAnalyticsSender();
+                }
+                return s_EditorGameServiceAnalyticsSender;
+            }
+        }
+
         [InitializeOnLoadMethod]
         static void RegisterToEvents()
         {
+
             Events.registeredPackages -= OnPackagesRegistered;
             Events.registeredPackages += OnPackagesRegistered;
         }
@@ -37,7 +51,12 @@ namespace Unity.Services.Core.Editor
                 var projectState = request.GetProjectState();
                 if (ShouldShowRedirect(projectState))
                 {
-                    ProjectBindRedirectPopupWindow.CreateAndShowPopup();
+                    List<string> installedPackages = new List<string>();
+                    foreach (var service in newServices)
+                    {
+                        installedPackages.Add(service.Name);
+                    }
+                    ProjectBindRedirectPopupWindow.CreateAndShowPopup(installedPackages, EditorGameServiceAnalyticsSender);
                 }
             }
         }

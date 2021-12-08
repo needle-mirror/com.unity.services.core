@@ -1,3 +1,4 @@
+using Unity.Services.Core.Configuration.Internal;
 using UnityEditor.Build;
 
 namespace Unity.Services.Core.Configuration.Editor

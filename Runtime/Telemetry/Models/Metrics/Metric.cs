@@ -6,7 +6,7 @@ using Newtonsoft.Json.Converters;
 namespace Unity.Services.Core.Telemetry.Internal
 {
     [Serializable]
-    struct Metric
+    struct Metric : ITelemetryEvent
     {
         [JsonProperty("name")]
         public string Name;
@@ -19,6 +19,6 @@ namespace Unity.Services.Core.Telemetry.Internal
         public MetricType Type;
 
         [JsonProperty("tags")]
-        public Dictionary<string, string> Tags;
+        public IDictionary<string, string> Tags;
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Unity.Services.Core.Configuration;
 using Unity.Services.Core.Configuration.Internal;
@@ -9,6 +10,8 @@ using Unity.Services.Core.Environments;
 using Unity.Services.Core.Environments.Internal;
 using Unity.Services.Core.Internal;
 using Unity.Services.Core.Scheduler.Internal;
+using Unity.Services.Core.Telemetry.Internal;
+using Unity.Services.Core.Threading.Internal;
 using UnityEngine;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 
@@ -16,6 +19,10 @@ namespace Unity.Services.Core.Registration
 {
     class CorePackageInitializer : IInitializablePackage
     {
+        internal const string CorePackageName = "com.unity.services.core";
+
+        ActionScheduler m_ActionScheduler;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Register()
         {
@@ -24,7 +31,10 @@ namespace Unity.Services.Core.Registration
                 .ProvidesComponent<ICloudProjectId>()
                 .ProvidesComponent<IActionScheduler>()
                 .ProvidesComponent<IEnvironments>()
-                .ProvidesComponent<IProjectConfiguration>();
+                .ProvidesComponent<IProjectConfiguration>()
+                .ProvidesComponent<IMetricsFactory>()
+                .ProvidesComponent<IDiagnosticsFactory>()
+                .ProvidesComponent<IUnityThreadUtils>();
         }
 
         /// <summary>
@@ -39,25 +49,44 @@ namespace Unity.Services.Core.Registration
         /// </returns>
         public async Task Initialize(CoreRegistry registry)
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             // There are potential race conditions with other services we're trying to avoid by calling
             // RegisterInstallationId as the _very first_ thing we do.
             RegisterInstallationId(registry);
 
-            var scheduler = RegisterActionScheduler(registry);
+            if (m_ActionScheduler is null)
+            {
+                m_ActionScheduler = new ActionScheduler();
+            }
+
+            RegisterActionScheduler(registry, m_ActionScheduler);
             try
             {
                 var projectConfiguration = await RegisterProjectConfigurationAsync(
                     registry, UnityServices.Instance.Options);
-                RegisterEnvironments(registry, projectConfiguration);
-                RegisterCloudProjectId(registry);
+                var environments = RegisterEnvironments(registry, projectConfiguration);
+                var cloudProjectId = RegisterCloudProjectId(registry);
+
+                var metricsFactory = RegisterMetrics(
+                    registry, m_ActionScheduler, projectConfiguration, cloudProjectId, environments);
+                var coreMetrics = metricsFactory.Create(CorePackageName);
+                CoreMetrics.Instance.Metrics = coreMetrics;
+
+                RegisterDiagnostics(registry, m_ActionScheduler, projectConfiguration, cloudProjectId, environments);
+                RegisterThreadingUtils(registry);
             }
             catch (Exception)
             {
                 // We keep a reference to the scheduler and monitor other components registration
                 // to be able to revert the changes done to external systems in case of failure.
-                scheduler?.QuitPlayerLoopSystem();
+                m_ActionScheduler.QuitPlayerLoopSystem();
                 throw;
             }
+
+            stopwatch.Stop();
+            CoreMetrics.Instance.SendCorePackageInitTimeMetric(stopwatch.Elapsed.TotalSeconds);
         }
 
         internal static void RegisterInstallationId(CoreRegistry registry)
@@ -67,25 +96,25 @@ namespace Unity.Services.Core.Registration
             registry.RegisterServiceComponent<IInstallationId>(installationId);
         }
 
-        internal static ActionScheduler RegisterActionScheduler(CoreRegistry registry)
+        internal static void RegisterActionScheduler(CoreRegistry registry, ActionScheduler scheduler)
         {
-            var scheduler = new ActionScheduler();
             scheduler.JoinPlayerLoopSystem();
             registry.RegisterServiceComponent<IActionScheduler>(scheduler);
-            return scheduler;
         }
 
-        internal static void RegisterCloudProjectId(CoreRegistry registry)
+        internal static ICloudProjectId RegisterCloudProjectId(CoreRegistry registry)
         {
             var cloudProjectId = new CloudProjectId();
             registry.RegisterServiceComponent<ICloudProjectId>(cloudProjectId);
+            return cloudProjectId;
         }
 
-        internal static void RegisterEnvironments(CoreRegistry registry, IProjectConfiguration projectConfiguration)
+        internal static IEnvironments RegisterEnvironments(CoreRegistry registry, IProjectConfiguration projectConfiguration)
         {
             var environments = new Environments.Internal.Environments();
             environments.Current = projectConfiguration.GetString(EnvironmentsOptionsExtensions.EnvironmentNameKey, "production");
             registry.RegisterServiceComponent<IEnvironments>(environments);
+            return environments;
         }
 
         internal static async Task<IProjectConfiguration> RegisterProjectConfigurationAsync(
@@ -122,6 +151,31 @@ namespace Unity.Services.Core.Registration
                     $"\n{e.StackTrace}");
                 return SerializableProjectConfiguration.Empty;
             }
+        }
+
+        internal static IMetricsFactory RegisterMetrics(
+            CoreRegistry registry, IActionScheduler scheduler, IProjectConfiguration projectConfiguration,
+            ICloudProjectId cloudProjectId, IEnvironments environments)
+        {
+            var metricsFactory = TelemetryUtils.CreateMetricsFactory(
+                scheduler, projectConfiguration, cloudProjectId, environments);
+            registry.RegisterServiceComponent<IMetricsFactory>(metricsFactory);
+            return metricsFactory;
+        }
+
+        internal static void RegisterDiagnostics(
+            CoreRegistry registry, IActionScheduler scheduler, IProjectConfiguration projectConfiguration,
+            ICloudProjectId cloudProjectId, IEnvironments environments)
+        {
+            var diagnosticsFactory = TelemetryUtils.CreateDiagnosticsFactory(
+                scheduler, projectConfiguration, cloudProjectId, environments);
+            registry.RegisterServiceComponent<IDiagnosticsFactory>(diagnosticsFactory);
+        }
+
+        internal static void RegisterThreadingUtils(CoreRegistry registry)
+        {
+            var threadingUtils = new UnityThreadUtilsInternal();
+            registry.RegisterServiceComponent<IUnityThreadUtils>(threadingUtils);
         }
     }
 }

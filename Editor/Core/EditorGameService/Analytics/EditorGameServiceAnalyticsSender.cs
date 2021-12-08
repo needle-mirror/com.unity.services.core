@@ -4,24 +4,43 @@ using UnityEngine;
 
 namespace Unity.Services.Core.Editor
 {
-    static class EditorGameServiceAnalyticsSender
+    class EditorGameServiceAnalyticsSender : IEditorGameServiceAnalyticsSender
     {
         static class AnalyticsComponent
         {
             public const string ProjectSettings = "Project Settings";
+            public const string ProjectBindPopup = "Project Bind Popup";
         }
 
         static class AnalyticsAction
         {
             public const string GoToDashboard = "Go to Dashboard";
+            public const string OpenProjectSettings = "Open Project Settings";
+            public const string CloseProjectBindPopup = "Close Project Bind Popup";
+            public const string ProjectBindPopupDisplayed = "Project Bind Popup Displayed";
         }
 
         const int k_Version = 1;
         const string k_EventName = "editorgameserviceeditor";
 
-        internal static void SendProjectSettingsGoToDashboardEvent(string package)
+        public void SendProjectSettingsGoToDashboardEvent(string package)
         {
             SendEvent(AnalyticsComponent.ProjectSettings, AnalyticsAction.GoToDashboard, package);
+        }
+
+        public void SendProjectBindPopupCloseActionEvent(string package)
+        {
+            SendEvent(AnalyticsComponent.ProjectBindPopup, AnalyticsAction.CloseProjectBindPopup, package);
+        }
+
+        public void SendProjectBindPopupOpenProjectSettingsEvent(string package)
+        {
+            SendEvent(AnalyticsComponent.ProjectBindPopup, AnalyticsAction.OpenProjectSettings, package);
+        }
+
+        public void SendProjectBindPopupDisplayedEvent(string package)
+        {
+            SendEvent(AnalyticsComponent.ProjectBindPopup, AnalyticsAction.ProjectBindPopupDisplayed, package);
         }
 
         static void SendEvent(string component, string action, string package)

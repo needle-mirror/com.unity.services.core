@@ -4,6 +4,22 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.0-pre.41] - 2021-12-08
+### Added
+- `IDiagnosticsFactory` & `IDiagnostics` to enable package developers to send diagnostics for their package.
+
+## [1.1.0-pre.24] - 2021-11-19
+### Added
+- Add `AnalyticsOptionsExtensions` with `SetAnalyticsUserId(string identifier)` to set a custom analytics user id.
+
+## [1.1.0-pre.18] - 2021-11-11
+### Added
+- `IMetricsFactory` & `IMetrics` to enable package developers to send metrics for their package.
+
+## [1.1.0-pre.15] - 2021-11-06
+### Fixed
+- Calling `UnityServices.InitializeAsync(null)` throwing a null reference exception.
+
 ## [1.1.0-pre.11] - 2021-10-22
 ### Added
 - Getter methods for `ConfigurationBuilder`.

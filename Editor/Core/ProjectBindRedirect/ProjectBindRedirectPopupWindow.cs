@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,12 +11,13 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
         const string k_WindowTitle = "Link your Unity project";
 
         ProjectBindRedirectPopupUI m_PopupUI;
+        IEditorGameServiceAnalyticsSender m_EditorGameServiceAnalyticsSender;
 
         void Update()
         {
             if (RequiresInitialization())
             {
-                Initialize();
+                Initialize(new List<string>());
             }
         }
 
@@ -23,19 +26,29 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
             return m_PopupUI == null;
         }
 
-        internal static ProjectBindRedirectPopupWindow CreateAndShowPopup()
+        internal static ProjectBindRedirectPopupWindow CreateAndShowPopup([NotNull] List<string> installedPackages, [NotNull] IEditorGameServiceAnalyticsSender editorGameServiceAnalyticsSender)
         {
             var popupWindow = GetWindow<ProjectBindRedirectPopupWindow>(k_WindowTitle);
-            popupWindow.Initialize();
+            popupWindow.m_EditorGameServiceAnalyticsSender = editorGameServiceAnalyticsSender;
+            popupWindow.Initialize(installedPackages);
 
             return popupWindow;
         }
 
-        void Initialize()
+        void TrackDisplayedPopup([NotNull] List<string> packageList)
+        {
+            foreach (var package in packageList)
+            {
+                m_EditorGameServiceAnalyticsSender.SendProjectBindPopupDisplayedEvent(package);
+            }
+        }
+
+        void Initialize(List<string> installedPackages)
         {
             rootVisualElement?.Clear();
 
-            m_PopupUI = new ProjectBindRedirectPopupUI(rootVisualElement, Close);
+            m_PopupUI = new ProjectBindRedirectPopupUI(rootVisualElement, Close, installedPackages, m_EditorGameServiceAnalyticsSender);
+            TrackDisplayedPopup(installedPackages);
 
             maxSize = minSize = PopupSize;
         }

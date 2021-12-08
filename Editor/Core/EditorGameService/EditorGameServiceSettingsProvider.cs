@@ -22,7 +22,7 @@ namespace Unity.Services.Core.Editor
         VisualElement m_ParentVisualElement;
         IProjectStateRequest m_ProjectStateRequest;
         ProjectState m_CurrentProjectState;
-
+        IEditorGameServiceAnalyticsSender m_EditorGameServiceAnalyticsSender;
 
 #if ENABLE_EDITOR_GAME_SERVICES
         IProjectEditorDrawerFactory m_ProjectBindDrawerFactory;
@@ -55,7 +55,9 @@ namespace Unity.Services.Core.Editor
 
 #if ENABLE_EDITOR_GAME_SERVICES
         internal EditorGameServiceSettingsProvider(string path, SettingsScope scopes, IProjectEditorDrawerFactory projectBindDrawer,
-                                                   IProjectEditorDrawerFactory projectCoppaDrawer, IProjectStateRequest projectStateRequest = null, IUserRoleHandler userRoleHandler = null, IEnumerable<string> keywords = null)
+                                                   IProjectEditorDrawerFactory projectCoppaDrawer, IProjectStateRequest projectStateRequest = null,
+                                                   IUserRoleHandler userRoleHandler = null, IEditorGameServiceAnalyticsSender editorGameServiceAnalyticsSender = null,
+                                                   IEnumerable<string> keywords = null)
             : base(path, scopes, keywords)
         {
             m_ProjectStateRequest = projectStateRequest ?? new ProjectStateRequest();
@@ -63,6 +65,7 @@ namespace Unity.Services.Core.Editor
             m_ProjectBindDrawerFactory = projectBindDrawer;
             m_CoppaDrawerFactory = projectCoppaDrawer;
             m_UserRoleHandler = userRoleHandler ?? EditorGameServiceRegistry.Instance.UserRoleHandler;
+            m_EditorGameServiceAnalyticsSender = editorGameServiceAnalyticsSender ?? new EditorGameServiceAnalyticsSender();
             activateHandler = ActivateSettingsProvider;
             deactivateHandler = DeactivateSettingsProvider;
         }
@@ -363,7 +366,7 @@ namespace Unity.Services.Core.Editor
             {
                 if (EditorGameService != null && EditorGameService.HasDashboard)
                 {
-                    dashboardLinkClickAction = EditorGameService.OpenDashboard;
+                    dashboardLinkClickAction = OnDashboardLinkClick;
                 }
 
                 if (EditorGameService?.Enabler != null)
@@ -385,6 +388,11 @@ namespace Unity.Services.Core.Editor
 #else
             return SettingsCommonHeaderUiHelper.GenerateCommonHeader(Title, Description);
 #endif
+        }
+
+        void OnDashboardLinkClick()
+        {
+            EditorGameService.OpenDashboard(m_EditorGameServiceAnalyticsSender);
         }
 
 #if ENABLE_EDITOR_GAME_SERVICES

@@ -55,7 +55,7 @@ namespace Unity.Services.Core.Internal
         public CircularDependencyException(string message) {}
     }
 
-    public struct CoreRegistration
+    [System.Runtime.CompilerServices.IsReadOnly] public struct CoreRegistration
     {
         public Unity.Services.Core.Internal.CoreRegistration DependsOn<T>() where T : Unity.Services.Core.Internal.IServiceComponent;
         public Unity.Services.Core.Internal.CoreRegistration OptionallyDependsOn<T>() where T : Unity.Services.Core.Internal.IServiceComponent;
@@ -86,5 +86,32 @@ namespace Unity.Services.Core.Scheduler.Internal
     {
         public abstract void CancelAction(long actionId);
         public abstract long ScheduleAction(System.Action action, double delaySeconds = 0);
+    }
+}
+
+namespace Unity.Services.Core.Telemetry.Internal
+{
+    public interface IDiagnostics
+    {
+        public abstract void SendDiagnostic(string name, string message, System.Collections.Generic.IDictionary<string, string> tags = default(System.Collections.Generic.IDictionary<string, string>));
+    }
+
+    public interface IDiagnosticsFactory : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public abstract System.Collections.Generic.IReadOnlyDictionary<string, string> CommonTags { get; }
+        public abstract Unity.Services.Core.Telemetry.Internal.IDiagnostics Create(string packageName);
+    }
+
+    public interface IMetrics
+    {
+        public abstract void SendGaugeMetric(string name, double value = 0, System.Collections.Generic.IDictionary<string, string> tags = default(System.Collections.Generic.IDictionary<string, string>));
+        public abstract void SendHistogramMetric(string name, double time, System.Collections.Generic.IDictionary<string, string> tags = default(System.Collections.Generic.IDictionary<string, string>));
+        public abstract void SendSumMetric(string name, double value = 1, System.Collections.Generic.IDictionary<string, string> tags = default(System.Collections.Generic.IDictionary<string, string>));
+    }
+
+    public interface IMetricsFactory : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public abstract System.Collections.Generic.IReadOnlyDictionary<string, string> CommonTags { get; }
+        public abstract Unity.Services.Core.Telemetry.Internal.IMetrics Create(string packageName);
     }
 }

@@ -8,12 +8,21 @@ namespace Unity.Services.Core.Editor
     /// </summary>
     public static class EditorGameServiceDashboardHelper
     {
+        static IEditorGameServiceAnalyticsSender s_DefaultEditorGameServiceAnalyticsSender = new EditorGameServiceAnalyticsSender();
+
         /// <summary>
         /// Opens the dashboard of the <see cref="IEditorGameService"/>
         /// </summary>
         /// <param name="editorGameService">The <see cref="IEditorGameService"/> who's dashboard should open</param>
         public static void OpenDashboard(this IEditorGameService editorGameService)
         {
+            OpenDashboard(editorGameService, s_DefaultEditorGameServiceAnalyticsSender);
+        }
+
+        internal static void OpenDashboard(this IEditorGameService editorGameService, IEditorGameServiceAnalyticsSender editorGameServiceAnalyticsSender)
+        {
+            var analyticsSender = editorGameServiceAnalyticsSender ?? s_DefaultEditorGameServiceAnalyticsSender;
+
             if (!editorGameService.HasDashboard)
             {
                 throw new InvalidOperationException($"The service '{editorGameService.Name}' is not configured to use a Dashboard. " +
@@ -23,7 +32,7 @@ namespace Unity.Services.Core.Editor
             var formattedUrl = editorGameService.GetFormattedDashboardUrl();
             if (Uri.IsWellFormedUriString(formattedUrl, UriKind.Absolute))
             {
-                EditorGameServiceAnalyticsSender.SendProjectSettingsGoToDashboardEvent(editorGameService.Identifier.GetKey());
+                analyticsSender.SendProjectSettingsGoToDashboardEvent(editorGameService.Identifier.GetKey());
                 Application.OpenURL(formattedUrl);
             }
             else

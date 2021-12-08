@@ -7,33 +7,32 @@ using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Unity.Services.Core.Telemetry.Internal
 {
-    class FileCachePersister
+    class FileCachePersister<TPayload> : ICachePersister<TPayload>
+        where TPayload : ITelemetryPayload
     {
-        const string k_FileNameFormat = "{0}_CachedMetrics";
+        public FileCachePersister(string fileName)
+        {
+            FilePath = Path.Combine(Application.persistentDataPath, fileName);
+        }
 
         public string FilePath { get; }
 
         public bool CanPersist { get; } = IsFilePersistenceAvailable();
 
-        public FileCachePersister([NotNull] string fileId)
-        {
-            FilePath = Path.Combine(Application.persistentDataPath, string.Format(k_FileNameFormat, fileId));
-        }
-
         static bool IsFilePersistenceAvailable()
         {
-            // Consoles are not supported yet.
-            return !Application.isConsolePlatform
+            // Switch requires a specific setup to have write access to the disc so it won't be handled here.
+            return Application.platform != RuntimePlatform.Switch
                 && !string.IsNullOrEmpty(Application.persistentDataPath);
         }
 
-        public void Persist(CachedPayload cache)
+        public void Persist(CachedPayload<TPayload> cache)
         {
             var serializedEvents = JsonConvert.SerializeObject(cache);
             File.WriteAllText(FilePath, serializedEvents);
         }
 
-        public bool TryFetch(out CachedPayload persistedCache)
+        public bool TryFetch(out CachedPayload<TPayload> persistedCache)
         {
             if (!File.Exists(FilePath))
             {
@@ -44,7 +43,7 @@ namespace Unity.Services.Core.Telemetry.Internal
             try
             {
                 var rawPersistedCache = File.ReadAllText(FilePath);
-                persistedCache = JsonConvert.DeserializeObject<CachedPayload>(rawPersistedCache);
+                persistedCache = JsonConvert.DeserializeObject<CachedPayload<TPayload>>(rawPersistedCache);
                 return true;
             }
             catch (Exception e)
@@ -55,6 +54,12 @@ namespace Unity.Services.Core.Telemetry.Internal
             }
         }
 
-        public void Delete() => File.Delete(FilePath);
+        public void Delete()
+        {
+            if (File.Exists(FilePath))
+            {
+                File.Delete(FilePath);
+            }
+        }
     }
 }
