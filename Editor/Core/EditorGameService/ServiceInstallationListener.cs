@@ -29,7 +29,6 @@ namespace Unity.Services.Core.Editor
         [InitializeOnLoadMethod]
         static void RegisterToEvents()
         {
-
             Events.registeredPackages -= OnPackagesRegistered;
             Events.registeredPackages += OnPackagesRegistered;
         }

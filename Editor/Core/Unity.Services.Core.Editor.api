@@ -89,3 +89,16 @@ namespace Unity.Services.Core.Editor
         public static UnityEngine.UIElements.VisualElement GeneratePlatformSupport(System.Collections.Generic.IEnumerable<string> platforms);
     }
 }
+
+namespace Unity.Services.Core.Editor.OrganizationHandler
+{
+    public interface IOrganizationHandler
+    {
+        public abstract string Key { get; }
+    }
+
+    public static class OrganizationProvider
+    {
+        public static Unity.Services.Core.Editor.OrganizationHandler.IOrganizationHandler Organization { get; set; }
+    }
+}

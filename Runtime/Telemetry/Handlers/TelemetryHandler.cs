@@ -1,3 +1,6 @@
+#if UNITY_ANDROID && !UNITY_EDITOR
+using System;
+#endif
 using Newtonsoft.Json;
 using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Environments.Internal;
@@ -7,7 +10,31 @@ using UnityEngine;
 
 namespace Unity.Services.Core.Telemetry.Internal
 {
-    abstract class TelemetryHandler<TPayload, TEvent>
+    /// <remarks>
+    /// A non-generic version of the class to hold non-generic static code in order to
+    /// avoid unnecessary duplication that happens with static members in generic classes.
+    /// </remarks>
+    abstract class TelemetryHandler
+    {
+        internal static string FormatOperatingSystemInfo(string rawOsInfo)
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            //Android's os data is formatted as follow:
+            //"<Device system name> <Device system version> / API-<API level> (<ID>/<Version incremental>)"
+            //eg. "Android OS 10 / API-29 (HONORHRY-LX1T/10.0.0.200C636)"
+            var trimmedOsInfoSize = rawOsInfo.LastIndexOf(" (", StringComparison.Ordinal);
+            if (trimmedOsInfoSize < 0)
+                return rawOsInfo;
+
+            var osTag = rawOsInfo.Substring(0, trimmedOsInfoSize);
+            return osTag;
+#else
+            return rawOsInfo;
+#endif
+        }
+    }
+
+    abstract class TelemetryHandler<TPayload, TEvent> : TelemetryHandler
         where TPayload : ITelemetryPayload
         where TEvent : ITelemetryEvent
     {
@@ -78,7 +105,7 @@ namespace Unity.Services.Core.Telemetry.Internal
             var commonTags = Cache.Payload.CommonTags;
             commonTags.Clear();
             commonTags[TagKeys.ApplicationInstallMode] = Application.installMode.ToString();
-            commonTags[TagKeys.OperatingSystem] = SystemInfo.operatingSystem;
+            commonTags[TagKeys.OperatingSystem] = FormatOperatingSystemInfo(SystemInfo.operatingSystem);
             commonTags[TagKeys.Platform] = Application.platform.ToString();
             commonTags[TagKeys.UnityVersion] = Application.unityVersion;
         }
@@ -118,10 +145,10 @@ namespace Unity.Services.Core.Telemetry.Internal
             m_CachePersister.Persist(Cache);
         }
 
-        public void Register(TEvent metricEvent)
+        public void Register(TEvent telemetryEvent)
         {
-            CoreLogger.LogVerbose($"Cached the metric: {JsonConvert.SerializeObject(metricEvent)}");
-            Cache.Add(metricEvent);
+            CoreLogger.LogVerbose($"Cached the {typeof(TEvent).Name} event: {JsonConvert.SerializeObject(telemetryEvent)}");
+            Cache.Add(telemetryEvent);
 
             if (!IsCacheFull())
                 return;

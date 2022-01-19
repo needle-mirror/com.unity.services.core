@@ -17,7 +17,7 @@ using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Unity.Services.Core.Registration
 {
-    class CorePackageInitializer : IInitializablePackage
+    class CorePackageInitializer : IInitializablePackage, IDiagnosticsComponentProvider
     {
         internal const string CorePackageName = "com.unity.services.core";
 
@@ -26,7 +26,9 @@ namespace Unity.Services.Core.Registration
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Register()
         {
-            CoreRegistry.Instance.RegisterPackage(new CorePackageInitializer())
+            var corePackageInitializer = new CorePackageInitializer();
+            CoreDiagnostics.Instance.DiagnosticsComponentProvider = corePackageInitializer;
+            CoreRegistry.Instance.RegisterPackage(corePackageInitializer)
                 .ProvidesComponent<IInstallationId>()
                 .ProvidesComponent<ICloudProjectId>()
                 .ProvidesComponent<IActionScheduler>()
@@ -35,6 +37,29 @@ namespace Unity.Services.Core.Registration
                 .ProvidesComponent<IMetricsFactory>()
                 .ProvidesComponent<IDiagnosticsFactory>()
                 .ProvidesComponent<IUnityThreadUtils>();
+        }
+
+        public async Task<IDiagnosticsFactory> CreateDiagnosticsComponents()
+        {
+            if (m_ActionScheduler is null)
+            {
+                m_ActionScheduler = new ActionScheduler();
+                m_ActionScheduler.JoinPlayerLoopSystem();
+            }
+
+            try
+            {
+                var projectConfig = await GenerateProjectConfigurationAsync(UnityServices.Instance.Options);
+                var environments = new Environments.Internal.Environments();
+                environments.Current = projectConfig.GetString(EnvironmentsOptionsExtensions.EnvironmentNameKey, "production");
+                var cloudProjectId = new CloudProjectId();
+                return TelemetryUtils.CreateDiagnosticsFactory(m_ActionScheduler, projectConfig, cloudProjectId, environments);
+            }
+            catch (Exception)
+            {
+                m_ActionScheduler.QuitPlayerLoopSystem();
+                throw;
+            }
         }
 
         /// <summary>
@@ -69,16 +94,21 @@ namespace Unity.Services.Core.Registration
                 var environments = RegisterEnvironments(registry, projectConfiguration);
                 var cloudProjectId = RegisterCloudProjectId(registry);
 
+                var diagnosticsFactory = RegisterDiagnostics(registry, m_ActionScheduler, projectConfiguration, cloudProjectId, environments);
+                var coreDiagnostics = diagnosticsFactory.Create(CorePackageName);
+                CoreDiagnostics.Instance.Diagnostics = coreDiagnostics;
+
                 var metricsFactory = RegisterMetrics(
                     registry, m_ActionScheduler, projectConfiguration, cloudProjectId, environments);
                 var coreMetrics = metricsFactory.Create(CorePackageName);
                 CoreMetrics.Instance.Metrics = coreMetrics;
 
-                RegisterDiagnostics(registry, m_ActionScheduler, projectConfiguration, cloudProjectId, environments);
                 RegisterThreadingUtils(registry);
             }
-            catch (Exception)
+            catch (Exception reason)
             {
+                CoreDiagnostics.Instance.SendCorePackageInitDiagnostics(reason);
+
                 // We keep a reference to the scheduler and monitor other components registration
                 // to be able to revert the changes done to external systems in case of failure.
                 m_ActionScheduler.QuitPlayerLoopSystem();
@@ -163,13 +193,14 @@ namespace Unity.Services.Core.Registration
             return metricsFactory;
         }
 
-        internal static void RegisterDiagnostics(
+        internal static IDiagnosticsFactory RegisterDiagnostics(
             CoreRegistry registry, IActionScheduler scheduler, IProjectConfiguration projectConfiguration,
             ICloudProjectId cloudProjectId, IEnvironments environments)
         {
             var diagnosticsFactory = TelemetryUtils.CreateDiagnosticsFactory(
                 scheduler, projectConfiguration, cloudProjectId, environments);
             registry.RegisterServiceComponent<IDiagnosticsFactory>(diagnosticsFactory);
+            return diagnosticsFactory;
         }
 
         internal static void RegisterThreadingUtils(CoreRegistry registry)

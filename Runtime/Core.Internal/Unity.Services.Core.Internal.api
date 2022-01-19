@@ -8,6 +8,11 @@ namespace Unity.Services.Authentication.Internal
         public abstract string AccessToken { get; }
     }
 
+    public interface IEnvironmentId : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public abstract string EnvironmentId { get; }
+    }
+
     public interface IPlayerId : Unity.Services.Core.Internal.IServiceComponent
     {
         public event System.Action<string> PlayerIdChanged;

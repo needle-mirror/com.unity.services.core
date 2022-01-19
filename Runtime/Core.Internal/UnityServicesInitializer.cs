@@ -9,7 +9,8 @@ namespace Unity.Services.Core.Internal
         {
             CoreRegistry.Instance = new CoreRegistry();
             CoreMetrics.Instance = new CoreMetrics();
-            UnityServices.Instance = new UnityServicesInternal(CoreRegistry.Instance, CoreMetrics.Instance);
+            CoreDiagnostics.Instance = new CoreDiagnostics();
+            UnityServices.Instance = new UnityServicesInternal(CoreRegistry.Instance, CoreMetrics.Instance, CoreDiagnostics.Instance);
             UnityServices.InstantiationCompletion?.TrySetResult(null);
         }
 

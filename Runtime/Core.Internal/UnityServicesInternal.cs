@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Unity.Services.Core.Telemetry.Internal;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Unity.Services.Core.Internal
@@ -30,10 +31,14 @@ namespace Unity.Services.Core.Internal
         [NotNull]
         CoreMetrics Metrics { get; }
 
-        public UnityServicesInternal([NotNull] CoreRegistry registry, [NotNull] CoreMetrics metrics)
+        [NotNull]
+        CoreDiagnostics Diagnostics { get; }
+
+        public UnityServicesInternal([NotNull] CoreRegistry registry, [NotNull] CoreMetrics metrics, [NotNull] CoreDiagnostics diagnostics)
         {
             Registry = registry;
             Metrics = metrics;
+            Diagnostics = diagnostics;
         }
 
         /// <summary>
@@ -135,6 +140,16 @@ namespace Unity.Services.Core.Internal
                 {
                     State = ServicesInitializationState.Uninitialized;
                     m_InitStopwatch.Stop();
+
+                    if (initialization.Exception is CircularDependencyException)
+                    {
+                        Diagnostics.SendCircularDependencyDiagnostics(initialization.Exception);
+                    }
+                    else if (initialization.Exception != null)
+                    {
+                        Diagnostics.SendOperateServicesInitDiagnostics(initialization.Exception);
+                    }
+
                     break;
                 }
             }

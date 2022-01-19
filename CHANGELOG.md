@@ -4,6 +4,16 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.0-pre.69] - 2022-01-19
+
+## [1.1.0-pre.49] - 2021-12-17
+### Added
+- Add `IEnvironmentId` component to provide the environment ID from the Access Token to other packages
+
+## [1.1.0-pre.43] - 2021-12-10
+### Added
+- `OrganizationProvider` & `IOrganizationHandler` to enable package developers to access Organization Key.
+
 ## [1.1.0-pre.41] - 2021-12-08
 ### Added
 - `IDiagnosticsFactory` & `IDiagnostics` to enable package developers to send diagnostics for their package.
