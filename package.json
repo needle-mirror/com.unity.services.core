@@ -1,22 +1,26 @@
 {
   "name": "com.unity.services.core",
   "displayName": "Services Core",
-  "version": "1.1.0-pre.69",
+  "version": "1.2.0",
   "unity": "2019.4",
   "description": "This package defines common components used by multiple Game Service packages.\nThese are standardized and aim to unify the overall experience of working with Game Services SDK.",
   "dependencies": {
     "com.unity.modules.unitywebrequest": "1.0.0",
-    "com.unity.nuget.newtonsoft-json": "2.0.0"
+    "com.unity.nuget.newtonsoft-json": "3.0.1",
+    "com.unity.modules.androidjni": "1.0.0"
+  },
+  "upm": {
+    "changelog": "### Added,- Add Wire public interfaces: `IWire`, `IChannel`, `IChannelTokenProvider`, and their dependencies, to enable,  interactions with the Wire service.,- The `IUnityThreadUtils` component to simplify working with the Unity thread.,### Changed,- Newtonsoft dependency to use the latest major Newtonsoft version, 13.0.1."
   },
   "relatedPackages": {
-    "com.unity.services.core.tests": "1.1.0-pre.69"
+    "com.unity.services.core.tests": "1.2.0"
   },
   "upmCi": {
-    "footprint": "a533f7b65291717a1728af9decd816866f8de453"
+    "footprint": "5a99578a668e6d83839839e95478a80edde69285"
   },
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/operate-services-sdk.git",
     "type": "git",
-    "revision": "1641071c8900ac11007eb317035589aeca7f5878"
+    "revision": "a307f7ac233166a6fa892e436c0a48b8915e3fc9"
   }
 }

@@ -120,3 +120,59 @@ namespace Unity.Services.Core.Telemetry.Internal
         public abstract Unity.Services.Core.Telemetry.Internal.IMetrics Create(string packageName);
     }
 }
+
+namespace Unity.Services.Core.Threading.Internal
+{
+    public interface IUnityThreadUtils : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public abstract bool IsRunningOnUnityThread { get; }
+        public abstract System.Threading.Tasks.Task PostAsync([JetBrains.Annotations.NotNull] System.Action action);
+        public abstract System.Threading.Tasks.Task<T> PostAsync<T>([JetBrains.Annotations.NotNull] System.Func<T> action);
+        public abstract System.Threading.Tasks.Task PostAsync([JetBrains.Annotations.NotNull] System.Action<object> action, object state);
+        public abstract System.Threading.Tasks.Task<T> PostAsync<T>([JetBrains.Annotations.NotNull] System.Func<object, T> action, object state);
+        public abstract void Send([JetBrains.Annotations.NotNull] System.Action action);
+        public abstract T Send<T>([JetBrains.Annotations.NotNull] System.Func<T> action);
+        public abstract void Send([JetBrains.Annotations.NotNull] System.Action<object> action, object state);
+        public abstract T Send<T>([JetBrains.Annotations.NotNull] System.Func<object, T> action, object state);
+    }
+}
+
+namespace Unity.Services.Wire.Internal
+{
+    public struct ChannelToken
+    {
+        public string ChannelName;
+        public string Token;
+    }
+
+    public interface IChannel : System.IDisposable
+    {
+        public event System.Action<byte[]> BinaryMessageReceived;
+        public event System.Action<string> ErrorReceived;
+        public event System.Action KickReceived;
+        public event System.Action<string> MessageReceived;
+        public event System.Action<Unity.Services.Wire.Internal.SubscriptionState> NewStateReceived;
+        public abstract System.Threading.Tasks.Task SubscribeAsync();
+        public abstract System.Threading.Tasks.Task UnsubscribeAsync();
+    }
+
+    public interface IChannelTokenProvider
+    {
+        public abstract System.Threading.Tasks.Task<Unity.Services.Wire.Internal.ChannelToken> GetTokenAsync();
+    }
+
+    public interface IWire : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public abstract Unity.Services.Wire.Internal.IChannel CreateChannel(Unity.Services.Wire.Internal.IChannelTokenProvider tokenProvider);
+    }
+
+    public enum SubscriptionState
+    {
+        public const Unity.Services.Wire.Internal.SubscriptionState Error = 3;
+        public const Unity.Services.Wire.Internal.SubscriptionState Subscribing = 4;
+        public const Unity.Services.Wire.Internal.SubscriptionState Synced = 1;
+        public const Unity.Services.Wire.Internal.SubscriptionState Unsubscribed = 0;
+        public const Unity.Services.Wire.Internal.SubscriptionState Unsynced = 2;
+        public int value__;
+    }
+}

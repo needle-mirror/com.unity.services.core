@@ -40,6 +40,7 @@ namespace Unity.Services.Core.Editor
         {
             var allOperatePackagesInProject = TypeCache.GetTypesDerivedFrom<IInitializablePackage>()
                 .Select(GetPackageConfigFrom)
+                .Where(config => !string.IsNullOrEmpty(config.Name))
                 .Distinct()
                 .ToList();
             return allOperatePackagesInProject;

@@ -14,6 +14,7 @@ using Unity.Services.Core.Telemetry.Internal;
 using Unity.Services.Core.Threading.Internal;
 using UnityEngine;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
+using SuppressMessage = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 
 namespace Unity.Services.Core.Registration
 {
@@ -183,6 +184,7 @@ namespace Unity.Services.Core.Registration
             }
         }
 
+        [SuppressMessage("ReSharper", "RedundantTypeArgumentsOfMethod")]
         internal static IMetricsFactory RegisterMetrics(
             CoreRegistry registry, IActionScheduler scheduler, IProjectConfiguration projectConfiguration,
             ICloudProjectId cloudProjectId, IEnvironments environments)
@@ -193,6 +195,7 @@ namespace Unity.Services.Core.Registration
             return metricsFactory;
         }
 
+        [SuppressMessage("ReSharper", "RedundantTypeArgumentsOfMethod")]
         internal static IDiagnosticsFactory RegisterDiagnostics(
             CoreRegistry registry, IActionScheduler scheduler, IProjectConfiguration projectConfiguration,
             ICloudProjectId cloudProjectId, IEnvironments environments)

@@ -96,6 +96,7 @@ namespace Unity.Services.Core.Telemetry.Internal
                 {
                     contentType = UnityWebRequestUtils.JsonContentType,
                 },
+                downloadHandler = new DownloadHandlerBuffer()
             };
             request.SetRequestHeader("Content-Type", UnityWebRequestUtils.JsonContentType);
             return request;

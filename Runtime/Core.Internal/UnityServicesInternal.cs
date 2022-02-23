@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Unity.Services.Core.Telemetry.Internal;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Unity.Services.Core.Internal
@@ -21,9 +20,7 @@ namespace Unity.Services.Core.Internal
 
         internal bool CanInitialize;
 
-        Stopwatch m_InitStopwatch;
-
-        AsyncOperation m_Initialization;
+        TaskCompletionSource<object> m_Initialization;
 
         [NotNull]
         CoreRegistry Registry { get; }
@@ -50,24 +47,30 @@ namespace Unity.Services.Core.Internal
         /// <returns>
         /// Return a handle to the initialization operation.
         /// </returns>
-        public Task InitializeAsync(InitializationOptions options)
+        public async Task InitializeAsync(InitializationOptions options)
         {
             if (!HasRequestedInitialization()
                 || HasInitializationFailed())
             {
                 Options = options;
-                CreateInitialization();
+                m_Initialization = new TaskCompletionSource<object>();
             }
 
             if (!CanInitialize
                 || State != ServicesInitializationState.Uninitialized)
             {
-                return m_Initialization.AsTask();
+                await m_Initialization.Task;
+            }
+            else
+            {
+                await InitializeServicesAsync();
             }
 
-            StartInitialization();
-
-            return m_Initialization.AsTask();
+            bool HasInitializationFailed()
+            {
+                return m_Initialization.Task.IsCompleted
+                    && m_Initialization.Task.Status != TaskStatus.RanToCompletion;
+            }
         }
 
         bool HasRequestedInitialization()
@@ -75,98 +78,87 @@ namespace Unity.Services.Core.Internal
             return !(m_Initialization is null);
         }
 
-        bool HasInitializationFailed()
-        {
-            return m_Initialization.Status == AsyncOperationStatus.Failed;
-        }
-
-        void CreateInitialization()
-        {
-            m_Initialization = new AsyncOperation();
-            m_Initialization.SetInProgress();
-            m_Initialization.Completed += OnInitializationCompleted;
-        }
-
-        void StartInitialization()
+        async Task InitializeServicesAsync()
         {
             State = ServicesInitializationState.Initializing;
-
-            m_InitStopwatch = new Stopwatch();
-            m_InitStopwatch.Start();
-
+            var initStopwatch = new Stopwatch();
+            initStopwatch.Start();
             var sortedPackageTypeHashes = new List<int>(
-                Registry.PackageRegistry.Tree?.PackageTypeHashToInstance.Count ?? 0);
+                Registry.PackageRegistry.Tree?.PackageTypeHashToInstance?.Count ?? 0);
 
             try
+            {
+                SortPackages();
+            }
+            catch (Exception reason)
+            {
+                FailServicesInitialization(reason);
+                throw;
+            }
+
+            try
+            {
+                await InitializePackagesAsync();
+            }
+            catch (Exception reason)
+            {
+                FailServicesInitialization(reason);
+                throw;
+            }
+
+            SucceedServicesInitialization();
+
+            void SortPackages()
             {
                 var sorter = new DependencyTreeInitializeOrderSorter(
                     Registry.PackageRegistry.Tree, sortedPackageTypeHashes);
                 sorter.SortRegisteredPackagesIntoTarget();
             }
-            catch (Exception reason)
-            {
-                m_Initialization.Fail(reason);
 
-                return;
+            async Task InitializePackagesAsync()
+            {
+                var initializer = new CoreRegistryInitializer(Registry, sortedPackageTypeHashes);
+                await initializer.InitializeRegistryAsync();
             }
 
-            try
+            void FailServicesInitialization(Exception e)
             {
-                var initializer = new CoreRegistryInitializer(Registry, m_Initialization, sortedPackageTypeHashes);
-                initializer.InitializeRegistry();
-            }
-            catch (Exception reason)
-            {
-                m_Initialization.Fail(reason);
-            }
-        }
+                State = ServicesInitializationState.Uninitialized;
+                initStopwatch.Stop();
+                m_Initialization.TrySetException(e);
 
-        void OnInitializationCompleted(IAsyncOperation initialization)
-        {
-            switch (initialization.Status)
-            {
-                case AsyncOperationStatus.Succeeded:
+                if (e is CircularDependencyException)
                 {
-                    State = ServicesInitializationState.Initialized;
-                    Registry.LockComponentRegistration();
-
-                    m_InitStopwatch.Stop();
-                    Metrics.SendAllPackagesInitSuccessMetric();
-                    Metrics.SendAllPackagesInitTimeMetric(m_InitStopwatch.Elapsed.TotalSeconds);
-
-                    break;
+                    Diagnostics.SendCircularDependencyDiagnostics(e);
                 }
-                default:
+                else
                 {
-                    State = ServicesInitializationState.Uninitialized;
-                    m_InitStopwatch.Stop();
-
-                    if (initialization.Exception is CircularDependencyException)
-                    {
-                        Diagnostics.SendCircularDependencyDiagnostics(initialization.Exception);
-                    }
-                    else if (initialization.Exception != null)
-                    {
-                        Diagnostics.SendOperateServicesInitDiagnostics(initialization.Exception);
-                    }
-
-                    break;
+                    Diagnostics.SendOperateServicesInitDiagnostics(e);
                 }
             }
 
-            m_InitStopwatch = null;
+            void SucceedServicesInitialization()
+            {
+                State = ServicesInitializationState.Initialized;
+                Registry.LockComponentRegistration();
+                initStopwatch.Stop();
+                m_Initialization.TrySetResult(null);
+
+                Metrics.SendAllPackagesInitSuccessMetric();
+                Metrics.SendAllPackagesInitTimeMetric(initStopwatch.Elapsed.TotalSeconds);
+            }
         }
 
-        internal void EnableInitialization()
+        internal async Task EnableInitializationAsync()
         {
             CanInitialize = true;
 
             Registry.LockPackageRegistration();
 
-            if (HasRequestedInitialization())
-            {
-                StartInitialization();
-            }
+            if (!HasRequestedInitialization())
+                return;
+
+            await InitializeServicesAsync();
         }
     }
 }

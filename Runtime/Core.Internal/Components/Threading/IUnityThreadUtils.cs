@@ -8,7 +8,7 @@ namespace Unity.Services.Core.Threading.Internal
     /// <summary>
     /// This component is an utility to simplify working with the Unity thread.
     /// </summary>
-    interface IUnityThreadUtils : IServiceComponent
+    public interface IUnityThreadUtils : IServiceComponent
     {
         /// <summary>
         /// Check if the calling thread is the Unity thread.

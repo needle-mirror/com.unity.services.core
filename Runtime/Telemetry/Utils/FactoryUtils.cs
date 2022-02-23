@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Internal;
@@ -11,7 +12,7 @@ namespace Unity.Services.Core.Telemetry.Internal
         public static IDictionary<string, string> CreatePackageTags(
             IProjectConfiguration projectConfig, string packageName)
         {
-            var packageVersion = projectConfig.GetString(string.Format(PackageVersionKeyFormat, packageName));
+            var packageVersion = projectConfig.GetString(string.Format(PackageVersionKeyFormat, packageName), String.Empty);
             if (string.IsNullOrEmpty(packageVersion))
             {
                 CoreLogger.LogVerbose($"No package version found for the package \"{packageName}\"");

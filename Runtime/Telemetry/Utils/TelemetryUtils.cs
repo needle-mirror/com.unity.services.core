@@ -7,10 +7,17 @@ namespace Unity.Services.Core.Telemetry.Internal
 {
     static class TelemetryUtils
     {
-        public static MetricsFactory CreateMetricsFactory(
+        internal const string TelemetryDisabledKey = "com.unity.services.core.telemetry-disabled";
+
+        public static IMetricsFactory CreateMetricsFactory(
             IActionScheduler scheduler, IProjectConfiguration projectConfiguration, ICloudProjectId cloudProjectId,
             IEnvironments environments)
         {
+            if (IsTelemetryDisabled(projectConfiguration))
+            {
+                return new DisabledMetricsFactory();
+            }
+
             var config = CreateTelemetryConfig(projectConfiguration);
             var cache = new CachedPayload<MetricsPayload>
             {
@@ -33,10 +40,15 @@ namespace Unity.Services.Core.Telemetry.Internal
         }
 
         //TODO: Reuse components from MetricsFactory (or vice versa)
-        public static DiagnosticsFactory CreateDiagnosticsFactory(
+        public static IDiagnosticsFactory CreateDiagnosticsFactory(
             IActionScheduler scheduler, IProjectConfiguration projectConfiguration, ICloudProjectId cloudProjectId,
             IEnvironments environments)
         {
+            if (IsTelemetryDisabled(projectConfiguration))
+            {
+                return new DisabledDiagnosticsFactory();
+            }
+
             var config = CreateTelemetryConfig(projectConfiguration);
             var cache = new CachedPayload<DiagnosticsPayload>
             {
@@ -58,6 +70,9 @@ namespace Unity.Services.Core.Telemetry.Internal
 
             return new DiagnosticsFactory(handler, projectConfiguration);
         }
+
+        static bool IsTelemetryDisabled(IProjectConfiguration projectConfiguration)
+            => projectConfiguration.GetBool(TelemetryDisabledKey);
 
         internal static TelemetryConfig CreateTelemetryConfig(IProjectConfiguration projectConfiguration)
         {

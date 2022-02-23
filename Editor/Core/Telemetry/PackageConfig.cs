@@ -1,5 +1,6 @@
 using System;
 using UnityEditor.PackageManager;
+using CanBeNull = JetBrains.Annotations.CanBeNullAttribute;
 
 namespace Unity.Services.Core.Editor
 {
@@ -10,10 +11,10 @@ namespace Unity.Services.Core.Editor
 
         public string Version;
 
-        public PackageConfig(PackageInfo packageInfo)
+        public PackageConfig([CanBeNull] PackageInfo packageInfo)
         {
-            Name = packageInfo.name;
-            Version = packageInfo.version;
+            Name = packageInfo?.name;
+            Version = packageInfo?.version;
         }
     }
 }

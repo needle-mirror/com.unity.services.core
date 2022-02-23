@@ -15,10 +15,10 @@ namespace Unity.Services.Core.Internal
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        static void EnableServicesInitialization()
+        static async void EnableServicesInitializationAsync()
         {
             var instance = (UnityServicesInternal)UnityServices.Instance;
-            instance.EnableInitialization();
+            await instance.EnableInitializationAsync();
         }
     }
 }

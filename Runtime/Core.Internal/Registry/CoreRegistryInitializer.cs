@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Unity.Services.Core.Internal
 {
@@ -9,95 +10,68 @@ namespace Unity.Services.Core.Internal
     /// </summary>
     class CoreRegistryInitializer
     {
-        CoreRegistry m_Registry;
+        [NotNull]
+        readonly CoreRegistry m_Registry;
 
-        AsyncOperation m_Operation;
+        [NotNull]
+        readonly List<int> m_SortedPackageTypeHashes;
 
-        List<int> m_SortedPackageTypeHashes;
-
-        List<Exception> m_PackageInitializationFailureReasons;
-
-        public CoreRegistryInitializer(
-            CoreRegistry registry, AsyncOperation operation, List<int> sortedPackageTypeHashes)
+        public CoreRegistryInitializer([NotNull] CoreRegistry registry, [NotNull] List<int> sortedPackageTypeHashes)
         {
             m_Registry = registry;
-            m_Operation = operation;
             m_SortedPackageTypeHashes = sortedPackageTypeHashes;
-            m_PackageInitializationFailureReasons = null;
         }
 
-        public void InitializeRegistry()
+        public async Task InitializeRegistryAsync()
         {
             if (m_SortedPackageTypeHashes.Count <= 0)
             {
-                CompleteInitialization();
+                Succeed();
                 return;
             }
 
-            m_PackageInitializationFailureReasons = new List<Exception>(m_SortedPackageTypeHashes.Count);
-            InitializePackageAt(0);
-        }
-
-        void CompleteInitialization()
-        {
-            if (m_PackageInitializationFailureReasons is null
-                || m_PackageInitializationFailureReasons.Count <= 0)
+            var failureReasons = new List<Exception>(m_SortedPackageTypeHashes.Count);
+            for (var i = 0; i < m_SortedPackageTypeHashes.Count; i++)
             {
-                m_Operation.Succeed();
+                try
+                {
+                    await InitializePackageAtIndexAsync(i);
+                }
+                catch (Exception e)
+                {
+                    failureReasons.Add(e);
+                }
+            }
+
+            if (failureReasons.Count > 0)
+            {
+                Fail();
             }
             else
             {
-                const string errorMessage = "Some component couldn't be initialized. " +
-                    "Look at inner exceptions to get more information ont how to fix services initialization.";
-                var innerException = new AggregateException(m_PackageInitializationFailureReasons);
-                var reason = new ServicesInitializationException(errorMessage, innerException);
-                m_Operation.Fail(reason);
+                Succeed();
             }
 
-            m_Registry.PackageRegistry.Tree = null;
-            m_PackageInitializationFailureReasons = null;
-        }
-
-        void InitializePackageAt(int index)
-        {
-            var package = GetPackageAt(index);
-
-            try
+            void Succeed()
             {
-                var initialization = package.Initialize(m_Registry);
-                initialization.ContinueWith(TrackFailureAndProceedInitialization,
-                    TaskScheduler.FromCurrentSynchronizationContext());
+                m_Registry.PackageRegistry.Tree = null;
+                failureReasons = null;
             }
-            catch (Exception e)
+
+            async Task InitializePackageAtIndexAsync(int index)
             {
-                m_PackageInitializationFailureReasons.Add(e);
-                InitializePackageAt(index + 1);
+                var packageTypeHash = m_SortedPackageTypeHashes[index];
+                var package = m_Registry.PackageRegistry.Tree.PackageTypeHashToInstance[packageTypeHash];
+                await package.Initialize(m_Registry);
             }
 
-            void TrackFailureAndProceedInitialization(Task previousInitialization)
+            void Fail()
             {
-                if (previousInitialization.Status == TaskStatus.Faulted)
-                {
-                    m_PackageInitializationFailureReasons.Add(previousInitialization.Exception);
-                }
-
-                index++;
-
-                if (index >= m_SortedPackageTypeHashes.Count)
-                {
-                    CompleteInitialization();
-                }
-                else
-                {
-                    InitializePackageAt(index);
-                }
+                const string errorMessage = "Some services couldn't be initialized."
+                    + " Look at inner exceptions to get more information.";
+                var innerException = new AggregateException(failureReasons);
+                throw new ServicesInitializationException(errorMessage, innerException);
             }
-        }
-
-        IInitializablePackage GetPackageAt(int index)
-        {
-            var packageTypeHash = m_SortedPackageTypeHashes[index];
-            return m_Registry.PackageRegistry.Tree.PackageTypeHashToInstance[packageTypeHash];
         }
     }
 }
