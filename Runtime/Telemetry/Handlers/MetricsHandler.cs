@@ -1,4 +1,6 @@
 using System;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Utilities;
 using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Environments.Internal;
 using Unity.Services.Core.Scheduler.Internal;
@@ -13,7 +15,11 @@ namespace Unity.Services.Core.Telemetry.Internal
         public MetricsHandler(
             TelemetryConfig config, CachedPayload<MetricsPayload> cache, IActionScheduler scheduler,
             ICachePersister<MetricsPayload> cachePersister, TelemetrySender sender)
-            : base(config, cache, scheduler, cachePersister, sender) {}
+            : base(config, cache, scheduler, cachePersister, sender)
+        {
+            // prevent .ctor of StringEnumConverter from being stripped
+            AotHelper.EnsureType<StringEnumConverter>();
+        }
 
         internal override void SendPersistedCache(CachedPayload<MetricsPayload> persistedCache)
         {

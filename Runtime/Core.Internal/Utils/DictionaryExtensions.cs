@@ -31,5 +31,36 @@ namespace Unity.Services.Core.Internal
 
             return self;
         }
+
+        public static bool ValueEquals<TKey, TValue>(this IDictionary<TKey, TValue> x, IDictionary<TKey, TValue> y)
+            => ValueEquals(x, y, EqualityComparer<TValue>.Default);
+
+        public static bool ValueEquals<TKey, TValue, TComparer>(
+            this IDictionary<TKey, TValue> x, IDictionary<TKey, TValue> y, TComparer valueComparer)
+            where TComparer : IEqualityComparer<TValue>
+        {
+            if (ReferenceEquals(x, y))
+            {
+                return true;
+            }
+
+            if (ReferenceEquals(x, null)
+                || ReferenceEquals(y, null)
+                || x.Count != y.Count)
+            {
+                return false;
+            }
+
+            foreach (var kvp in x)
+            {
+                if (!y.TryGetValue(kvp.Key, out var value2)
+                    || !valueComparer.Equals(kvp.Value, value2))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

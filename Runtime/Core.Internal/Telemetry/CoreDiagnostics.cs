@@ -30,45 +30,33 @@ namespace Unity.Services.Core.Internal
             return Diagnostics;
         }
 
-        public void SendCircularDependencyDiagnostics(Exception e)
+        public void SendCircularDependencyDiagnostics(Exception exception)
         {
-            var sendTask = SendCoreDiagnostics(CircularDependencyDiagnosticName, e);
+            var sendTask = SendCoreDiagnostics(CircularDependencyDiagnosticName, exception);
             sendTask.ContinueWith(OnSendFailed, TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        public void SendCorePackageInitDiagnostics(Exception e)
+        public void SendCorePackageInitDiagnostics(Exception exception)
         {
-            var sendTask = SendCoreDiagnostics(CorePackageInitDiagnosticName, e);
+            var sendTask = SendCoreDiagnostics(CorePackageInitDiagnosticName, exception);
             sendTask.ContinueWith(OnSendFailed, TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        public void SendOperateServicesInitDiagnostics(Exception e)
+        public void SendOperateServicesInitDiagnostics(Exception exception)
         {
-            var sendTask = SendCoreDiagnostics(OperateServicesInitDiagnosticName, e);
+            var sendTask = SendCoreDiagnostics(OperateServicesInitDiagnosticName, exception);
             sendTask.ContinueWith(OnSendFailed, TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        private static void OnSendFailed(Task failedSendTask)
+        static void OnSendFailed(Task failedSendTask)
         {
             CoreLogger.LogException(failedSendTask.Exception);
         }
 
-        async Task SendCoreDiagnostics(string diagnosticName, Exception e)
+        async Task SendCoreDiagnostics(string diagnosticName, Exception exception)
         {
             var diagnostics = await GetOrCreateDiagnostics();
-            diagnostics.SendDiagnostic(diagnosticName, BuildExceptionMessage(e));
-        }
-
-        static string BuildExceptionMessage(Exception e)
-        {
-            var message = e.Message;
-            while (e.InnerException != null)
-            {
-                message += $"\n{e.InnerException.Message}";
-                e = e.InnerException;
-            }
-
-            return message;
+            diagnostics.SendDiagnostic(diagnosticName, exception.ToString());
         }
     }
 }

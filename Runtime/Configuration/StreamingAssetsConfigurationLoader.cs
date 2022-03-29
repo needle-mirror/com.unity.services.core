@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using UnityEngine;
+using Newtonsoft.Json;
 
 namespace Unity.Services.Core.Configuration
 {
@@ -9,7 +9,7 @@ namespace Unity.Services.Core.Configuration
         {
             var jsonConfig = await StreamingAssetsUtils.GetFileTextFromStreamingAssetsAsync(
                 ConfigurationUtils.ConfigFileName);
-            var config = JsonUtility.FromJson<SerializableProjectConfiguration>(jsonConfig);
+            var config = JsonConvert.DeserializeObject<SerializableProjectConfiguration>(jsonConfig);
             return config;
         }
     }

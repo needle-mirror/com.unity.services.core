@@ -60,7 +60,7 @@ namespace Unity.Services.Core.Internal
         public CircularDependencyException(string message) {}
     }
 
-    [System.Runtime.CompilerServices.IsReadOnly] public struct CoreRegistration
+    public struct CoreRegistration
     {
         public Unity.Services.Core.Internal.CoreRegistration DependsOn<T>() where T : Unity.Services.Core.Internal.IServiceComponent;
         public Unity.Services.Core.Internal.CoreRegistration OptionallyDependsOn<T>() where T : Unity.Services.Core.Internal.IServiceComponent;
@@ -134,6 +134,21 @@ namespace Unity.Services.Core.Threading.Internal
         public abstract T Send<T>([JetBrains.Annotations.NotNull] System.Func<T> action);
         public abstract void Send([JetBrains.Annotations.NotNull] System.Action<object> action, object state);
         public abstract T Send<T>([JetBrains.Annotations.NotNull] System.Func<object, T> action, object state);
+    }
+}
+
+namespace Unity.Services.Qos.Internal
+{
+    public interface IQosResults : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.IList<Unity.Services.Qos.Internal.QosResult>> GetSortedQosResultsAsync(string service, System.Collections.Generic.IList<string> regions);
+    }
+
+    public struct QosResult
+    {
+        public int AverageLatencyMs;
+        public float PacketLossPercent;
+        public string Region;
     }
 }
 

@@ -25,7 +25,9 @@ namespace Unity.Services.Core.Internal
         {
             var dependencyTree = new DependencyTree();
             PackageRegistry = new PackageRegistry(dependencyTree);
-            ComponentRegistry = new ComponentRegistry(dependencyTree.ComponentTypeHashToInstance);
+            var componentTypeHashToInstance = new Dictionary<int, IServiceComponent>(
+                dependencyTree.ComponentTypeHashToInstance.Count);
+            ComponentRegistry = new ComponentRegistry(componentTypeHashToInstance);
         }
 
         internal CoreRegistry(

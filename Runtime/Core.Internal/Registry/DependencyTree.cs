@@ -12,20 +12,20 @@ namespace Unity.Services.Core.Internal
         /// Key: Hash code of a <see cref="IInitializablePackage"/> type.
         /// Value: Package instance.
         /// </summary>
-        public Dictionary<int, IInitializablePackage> PackageTypeHashToInstance;
+        public readonly Dictionary<int, IInitializablePackage> PackageTypeHashToInstance;
 
         /// <summary>
         /// Key: Hash code of a <see cref="IServiceComponent"/> type.
         /// Value: Hash code of the <see cref="IInitializablePackage"/> type providing the component type.
         /// </summary>
-        public Dictionary<int, int> ComponentTypeHashToPackageTypeHash;
+        public readonly Dictionary<int, int> ComponentTypeHashToPackageTypeHash;
 
         /// <summary>
         /// Key: Hash code of the <see cref="IInitializablePackage"/> type.
         /// Value: Container of all hash code of <see cref="IServiceComponent"/>
         /// types required to initialize the package.
         /// </summary>
-        public Dictionary<int, List<int>> PackageTypeHashToComponentTypeHashDependencies;
+        public readonly Dictionary<int, List<int>> PackageTypeHashToComponentTypeHashDependencies;
 
         /// <summary>
         /// Key: Hash code of a <see cref="IServiceComponent"/> type.

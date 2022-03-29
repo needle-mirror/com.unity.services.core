@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Unity.Services.Core.Configuration
@@ -9,20 +10,24 @@ namespace Unity.Services.Core.Configuration
     [Serializable]
     class ConfigurationEntry
     {
+        [JsonRequired]
         [SerializeField]
         string m_Value;
 
         /// <summary>
         /// Get the stored configuration value.
         /// </summary>
+        [JsonIgnore]
         public string Value => m_Value;
 
+        [JsonRequired]
         [SerializeField]
         bool m_IsReadOnly;
 
         /// <summary>
         /// If true, <see cref="Value"/> can't be changed.
         /// </summary>
+        [JsonIgnore]
         public bool IsReadOnly
         {
             get => m_IsReadOnly;

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Unity.Services.Core.Internal
@@ -28,5 +29,7 @@ namespace Unity.Services.Core.Internal
         {
             return Registry.GetServiceComponent<TComponent>();
         }
+
+        public void ResetProvidedComponents(IDictionary<int, IServiceComponent> componentTypeHashToInstance) => throw new InvalidOperationException(k_ErrorMessage);
     }
 }

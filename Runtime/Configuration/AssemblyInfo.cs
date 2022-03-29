@@ -1,7 +1,4 @@
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
-
-[assembly: AlwaysLinkAssembly]
 
 [assembly: InternalsVisibleTo("Unity.Services.Core.Registration")]
 [assembly: InternalsVisibleTo("Unity.Services.Core.Configuration.Editor")]

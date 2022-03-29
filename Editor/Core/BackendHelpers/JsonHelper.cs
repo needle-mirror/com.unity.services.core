@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Unity.Services.Core.Editor
@@ -11,7 +12,7 @@ namespace Unity.Services.Core.Editor
             {
                 try
                 {
-                    dest = JsonUtility.FromJson<T>(json);
+                    dest = JsonConvert.DeserializeObject<T>(json);
                     return true;
                 }
                 catch (Exception e)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Unity.Services.Core.Configuration
@@ -10,13 +11,15 @@ namespace Unity.Services.Core.Configuration
         public static SerializableProjectConfiguration Empty
             => new SerializableProjectConfiguration
         {
-            Keys = new string[0],
-            Values = new ConfigurationEntry[0],
+            Keys = Array.Empty<string>(),
+            Values = Array.Empty<ConfigurationEntry>(),
         };
 
+        [JsonRequired]
         [SerializeField]
         internal string[] Keys;
 
+        [JsonRequired]
         [SerializeField]
         internal ConfigurationEntry[] Values;
 

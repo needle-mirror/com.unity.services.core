@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
@@ -72,7 +73,7 @@ namespace Unity.Services.Core.Configuration.Editor
         public void GenerateConfigFileInProject()
         {
             var config = BuildConfiguration();
-            var serializedConfig = EditorJsonUtility.ToJson(config);
+            var serializedConfig = JsonConvert.SerializeObject(config);
             AddConfigToProject(serializedConfig);
         }
 

@@ -8,9 +8,7 @@ namespace Unity.Services.Core
     /// </summary>
     public class InitializationOptions
     {
-        IDictionary<string, object> m_Values;
-
-        internal IEnumerable<KeyValuePair<string, object>> Values => m_Values;
+        internal IDictionary<string, object> Values { get; }
 
         /// <summary>
         /// Create a new instance of the <see cref="InitializationOptions"/> class.
@@ -20,8 +18,11 @@ namespace Unity.Services.Core
 
         internal InitializationOptions(IDictionary<string, object> values)
         {
-            m_Values = values;
+            Values = values;
         }
+
+        internal InitializationOptions(InitializationOptions source)
+            : this(new Dictionary<string, object>(source.Values)) {}
 
         /// <summary>
         /// Get the option for the given <paramref name="key"/> if any.
@@ -99,7 +100,7 @@ namespace Unity.Services.Core
         {
             option = default;
 
-            if (m_Values.TryGetValue(key, out var rawValue)
+            if (Values.TryGetValue(key, out var rawValue)
                 && rawValue is T value)
             {
                 option = value;
@@ -123,7 +124,7 @@ namespace Unity.Services.Core
         /// </returns>
         public InitializationOptions SetOption(string key, bool value)
         {
-            m_Values[key] = value;
+            Values[key] = value;
             return this;
         }
 
@@ -141,7 +142,7 @@ namespace Unity.Services.Core
         /// </returns>
         public InitializationOptions SetOption(string key, int value)
         {
-            m_Values[key] = value;
+            Values[key] = value;
             return this;
         }
 
@@ -159,7 +160,7 @@ namespace Unity.Services.Core
         /// </returns>
         public InitializationOptions SetOption(string key, float value)
         {
-            m_Values[key] = value;
+            Values[key] = value;
             return this;
         }
 
@@ -177,7 +178,7 @@ namespace Unity.Services.Core
         /// </returns>
         public InitializationOptions SetOption(string key, string value)
         {
-            m_Values[key] = value;
+            Values[key] = value;
             return this;
         }
     }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Unity.Services.Core.Internal
@@ -10,5 +11,7 @@ namespace Unity.Services.Core.Internal
 
         TComponent GetServiceComponent<TComponent>()
             where TComponent : IServiceComponent;
+
+        void ResetProvidedComponents(IDictionary<int, IServiceComponent> componentTypeHashToInstance);
     }
 }

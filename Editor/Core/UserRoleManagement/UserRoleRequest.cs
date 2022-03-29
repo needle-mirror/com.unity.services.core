@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Newtonsoft.Json;
 using Unity.Services.Core.Internal;
 using UnityEditor;
 using UnityEngine;
@@ -128,9 +129,11 @@ namespace Unity.Services.Core.Editor
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         class UserList
         {
+            [JsonRequired]
             [SerializeField]
             User[] users;
 
+            [JsonIgnore]
             public User[] Users => users;
         }
 

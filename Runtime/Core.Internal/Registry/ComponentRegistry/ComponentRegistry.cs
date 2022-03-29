@@ -60,5 +60,11 @@ namespace Unity.Services.Core.Internal
                 && !(storedComponent is null)
                 && storedComponent != MissingComponent.Instance;
         }
+
+        public void ResetProvidedComponents(IDictionary<int, IServiceComponent> componentTypeHashToInstance)
+        {
+            ComponentTypeHashToInstance.Clear();
+            ComponentTypeHashToInstance.MergeAllowOverride(componentTypeHashToInstance);
+        }
     }
 }

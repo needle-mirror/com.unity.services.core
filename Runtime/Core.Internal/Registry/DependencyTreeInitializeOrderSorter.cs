@@ -19,12 +19,12 @@ namespace Unity.Services.Core.Internal
             Sorted
         }
 
-        public DependencyTree Tree;
+        public readonly DependencyTree Tree;
 
         /// <summary>
         /// The collection containing the sorted package type hashes.
         /// </summary>
-        public ICollection<int> Target;
+        public readonly ICollection<int> Target;
 
         /// <summary>
         /// History to track packages' exploration state.

@@ -8,72 +8,72 @@ namespace Unity.Services.Core.Device
     {
         const string k_UnityInstallationIdKey = "UnityInstallationId";
 
-        internal string identifier;
+        internal string Identifier;
 
-        internal IUserIdentifierProvider unityAdsIdentifierProvider;
-        internal IUserIdentifierProvider unityAnalyticsIdentifierProvider;
+        internal IUserIdentifierProvider UnityAdsIdentifierProvider;
+        internal IUserIdentifierProvider UnityAnalyticsIdentifierProvider;
 
         public InstallationId()
         {
-            unityAdsIdentifierProvider = new UnityAdsIdentifier();
-            unityAnalyticsIdentifierProvider = new UnityAnalyticsIdentifier();
+            UnityAdsIdentifierProvider = new UnityAdsIdentifier();
+            UnityAnalyticsIdentifierProvider = new UnityAnalyticsIdentifier();
         }
 
         public string GetOrCreateIdentifier()
         {
-            if (string.IsNullOrEmpty(identifier))
+            if (string.IsNullOrEmpty(Identifier))
                 CreateIdentifier();
 
-            return identifier;
+            return Identifier;
         }
 
         public void CreateIdentifier()
         {
-            identifier = ReadIdentifierFromFile();
-            if (!string.IsNullOrEmpty(identifier))
+            Identifier = ReadIdentifierFromFile();
+            if (!string.IsNullOrEmpty(Identifier))
                 return;
 
-            var analyticsId = unityAnalyticsIdentifierProvider.UserId;
-            var adsId = unityAdsIdentifierProvider.UserId;
+            var analyticsId = UnityAnalyticsIdentifierProvider.UserId;
+            var adsId = UnityAdsIdentifierProvider.UserId;
 
             if (!string.IsNullOrEmpty(analyticsId))
             {
-                identifier = analyticsId;
+                Identifier = analyticsId;
             }
             else if (!string.IsNullOrEmpty(adsId))
             {
-                identifier = adsId;
+                Identifier = adsId;
             }
             else
             {
-                identifier = GenerateGuid();
+                Identifier = GenerateGuid();
             }
 
-            WriteIdentifierToFile(identifier);
+            WriteIdentifierToFile(Identifier);
 
             if (string.IsNullOrEmpty(analyticsId))
             {
-                unityAnalyticsIdentifierProvider.UserId = identifier;
+                UnityAnalyticsIdentifierProvider.UserId = Identifier;
             }
 
             if (string.IsNullOrEmpty(adsId))
             {
-                unityAdsIdentifierProvider.UserId = identifier;
+                UnityAdsIdentifierProvider.UserId = Identifier;
             }
         }
 
-        string ReadIdentifierFromFile()
+        static string ReadIdentifierFromFile()
         {
             return PlayerPrefs.GetString(k_UnityInstallationIdKey);
         }
 
-        void WriteIdentifierToFile(string identifier)
+        static void WriteIdentifierToFile(string identifier)
         {
             PlayerPrefs.SetString(k_UnityInstallationIdKey, identifier);
             PlayerPrefs.Save();
         }
 
-        string GenerateGuid()
+        static string GenerateGuid()
         {
             return Guid.NewGuid().ToString();
         }

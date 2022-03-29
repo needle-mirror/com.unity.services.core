@@ -26,10 +26,16 @@ namespace Unity.Services.Core.Internal
         {
             if (m_SortedPackageTypeHashes.Count <= 0)
             {
-                Succeed();
                 return;
             }
 
+            var dependencyTree = m_Registry.PackageRegistry.Tree;
+            if (dependencyTree is null)
+            {
+                throw new NullReferenceException("Registry requires a valid dependency tree to be initialized.");
+            }
+
+            m_Registry.ComponentRegistry.ResetProvidedComponents(dependencyTree.ComponentTypeHashToInstance);
             var failureReasons = new List<Exception>(m_SortedPackageTypeHashes.Count);
             for (var i = 0; i < m_SortedPackageTypeHashes.Count; i++)
             {
@@ -47,21 +53,11 @@ namespace Unity.Services.Core.Internal
             {
                 Fail();
             }
-            else
-            {
-                Succeed();
-            }
-
-            void Succeed()
-            {
-                m_Registry.PackageRegistry.Tree = null;
-                failureReasons = null;
-            }
 
             async Task InitializePackageAtIndexAsync(int index)
             {
                 var packageTypeHash = m_SortedPackageTypeHashes[index];
-                var package = m_Registry.PackageRegistry.Tree.PackageTypeHashToInstance[packageTypeHash];
+                var package = dependencyTree.PackageTypeHashToInstance[packageTypeHash];
                 await package.Initialize(m_Registry);
             }
 

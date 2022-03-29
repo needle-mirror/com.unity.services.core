@@ -18,11 +18,28 @@ using SuppressMessage = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute
 
 namespace Unity.Services.Core.Registration
 {
+    [SuppressMessage("ReSharper", "RedundantTypeArgumentsOfMethod")]
     class CorePackageInitializer : IInitializablePackage, IDiagnosticsComponentProvider
     {
         internal const string CorePackageName = "com.unity.services.core";
 
-        ActionScheduler m_ActionScheduler;
+        internal ActionScheduler ActionScheduler { get; private set; }
+
+        internal InstallationId InstallationId { get; private set; }
+
+        internal ProjectConfiguration ProjectConfig { get; private set; }
+
+        internal Environments.Internal.Environments Environments { get; private set; }
+
+        internal CloudProjectId CloudProjectId { get; private set; }
+
+        internal IDiagnosticsFactory DiagnosticsFactory { get; private set; }
+
+        internal IMetricsFactory MetricsFactory { get; private set; }
+
+        internal UnityThreadUtilsInternal UnityThreadUtils { get; private set; }
+
+        InitializationOptions m_CurrentInitializationOptions;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Register()
@@ -40,29 +57,6 @@ namespace Unity.Services.Core.Registration
                 .ProvidesComponent<IUnityThreadUtils>();
         }
 
-        public async Task<IDiagnosticsFactory> CreateDiagnosticsComponents()
-        {
-            if (m_ActionScheduler is null)
-            {
-                m_ActionScheduler = new ActionScheduler();
-                m_ActionScheduler.JoinPlayerLoopSystem();
-            }
-
-            try
-            {
-                var projectConfig = await GenerateProjectConfigurationAsync(UnityServices.Instance.Options);
-                var environments = new Environments.Internal.Environments();
-                environments.Current = projectConfig.GetString(EnvironmentsOptionsExtensions.EnvironmentNameKey, "production");
-                var cloudProjectId = new CloudProjectId();
-                return TelemetryUtils.CreateDiagnosticsFactory(m_ActionScheduler, projectConfig, cloudProjectId, environments);
-            }
-            catch (Exception)
-            {
-                m_ActionScheduler.QuitPlayerLoopSystem();
-                throw;
-            }
-        }
-
         /// <summary>
         /// This is the Initialize callback that will be triggered by the Core package.
         /// This method will be invoked when the game developer calls UnityServices.InitializeAsync().
@@ -78,89 +72,112 @@ namespace Unity.Services.Core.Registration
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            // There are potential race conditions with other services we're trying to avoid by calling
-            // RegisterInstallationId as the _very first_ thing we do.
-            RegisterInstallationId(registry);
-
-            if (m_ActionScheduler is null)
-            {
-                m_ActionScheduler = new ActionScheduler();
-            }
-
-            RegisterActionScheduler(registry, m_ActionScheduler);
             try
             {
-                var projectConfiguration = await RegisterProjectConfigurationAsync(
-                    registry, UnityServices.Instance.Options);
-                var environments = RegisterEnvironments(registry, projectConfiguration);
-                var cloudProjectId = RegisterCloudProjectId(registry);
+                if (HaveInitOptionsChanged())
+                {
+                    FreeOptionsDependantComponents();
+                }
 
-                var diagnosticsFactory = RegisterDiagnostics(registry, m_ActionScheduler, projectConfiguration, cloudProjectId, environments);
-                var coreDiagnostics = diagnosticsFactory.Create(CorePackageName);
-                CoreDiagnostics.Instance.Diagnostics = coreDiagnostics;
+                // There are potential race conditions with other services we're trying to avoid by calling
+                // RegisterInstallationId as the _very first_ thing we do.
+                InitializeInstallationId();
 
-                var metricsFactory = RegisterMetrics(
-                    registry, m_ActionScheduler, projectConfiguration, cloudProjectId, environments);
-                var coreMetrics = metricsFactory.Create(CorePackageName);
-                CoreMetrics.Instance.Metrics = coreMetrics;
+                InitializeActionScheduler();
 
-                RegisterThreadingUtils(registry);
+                await InitializeProjectConfigAsync(UnityServices.Instance.Options);
+
+                InitializeEnvironments(ProjectConfig);
+                InitializeCloudProjectId();
+
+                InitializeDiagnostics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
+                CoreDiagnostics.Instance.Diagnostics = DiagnosticsFactory.Create(CorePackageName);
+
+                InitializeMetrics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
+                CoreMetrics.Instance.Metrics = MetricsFactory.Create(CorePackageName);
+
+                InitializeUnityThreadUtils();
+
+                // Register components as late as possible to provide them only when initialization succeeded.
+                RegisterProvidedComponents();
             }
             catch (Exception reason)
             {
                 CoreDiagnostics.Instance.SendCorePackageInitDiagnostics(reason);
-
-                // We keep a reference to the scheduler and monitor other components registration
-                // to be able to revert the changes done to external systems in case of failure.
-                m_ActionScheduler.QuitPlayerLoopSystem();
                 throw;
             }
 
             stopwatch.Stop();
             CoreMetrics.Instance.SendCorePackageInitTimeMetric(stopwatch.Elapsed.TotalSeconds);
+
+            void RegisterProvidedComponents()
+            {
+                registry.RegisterServiceComponent<IInstallationId>(InstallationId);
+                registry.RegisterServiceComponent<IActionScheduler>(ActionScheduler);
+                registry.RegisterServiceComponent<IProjectConfiguration>(ProjectConfig);
+                registry.RegisterServiceComponent<IEnvironments>(Environments);
+                registry.RegisterServiceComponent<ICloudProjectId>(CloudProjectId);
+                registry.RegisterServiceComponent<IDiagnosticsFactory>(DiagnosticsFactory);
+                registry.RegisterServiceComponent<IMetricsFactory>(MetricsFactory);
+                registry.RegisterServiceComponent<IUnityThreadUtils>(UnityThreadUtils);
+            }
         }
 
-        internal static void RegisterInstallationId(CoreRegistry registry)
+        bool HaveInitOptionsChanged()
         {
+            return !(m_CurrentInitializationOptions is null)
+                && !m_CurrentInitializationOptions.Values.ValueEquals(UnityServices.Instance.Options.Values);
+        }
+
+        void FreeOptionsDependantComponents()
+        {
+            ProjectConfig = null;
+            Environments = null;
+            DiagnosticsFactory = null;
+            MetricsFactory = null;
+        }
+
+        internal void InitializeInstallationId()
+        {
+            if (!(InstallationId is null))
+                return;
+
             var installationId = new InstallationId();
             installationId.CreateIdentifier();
-            registry.RegisterServiceComponent<IInstallationId>(installationId);
+            InstallationId = installationId;
         }
 
-        internal static void RegisterActionScheduler(CoreRegistry registry, ActionScheduler scheduler)
+        internal void InitializeActionScheduler()
         {
-            scheduler.JoinPlayerLoopSystem();
-            registry.RegisterServiceComponent<IActionScheduler>(scheduler);
+            if (!(ActionScheduler is null))
+                return;
+
+            var actionScheduler = new ActionScheduler();
+            actionScheduler.JoinPlayerLoopSystem();
+            ActionScheduler = actionScheduler;
         }
 
-        internal static ICloudProjectId RegisterCloudProjectId(CoreRegistry registry)
+        internal async Task InitializeProjectConfigAsync([NotNull] InitializationOptions options)
         {
-            var cloudProjectId = new CloudProjectId();
-            registry.RegisterServiceComponent<ICloudProjectId>(cloudProjectId);
-            return cloudProjectId;
-        }
+            if (!(ProjectConfig is null))
+                return;
 
-        internal static IEnvironments RegisterEnvironments(CoreRegistry registry, IProjectConfiguration projectConfiguration)
-        {
-            var environments = new Environments.Internal.Environments();
-            environments.Current = projectConfiguration.GetString(EnvironmentsOptionsExtensions.EnvironmentNameKey, "production");
-            registry.RegisterServiceComponent<IEnvironments>(environments);
-            return environments;
-        }
+            ProjectConfig = await GenerateProjectConfigurationAsync(options);
 
-        internal static async Task<IProjectConfiguration> RegisterProjectConfigurationAsync(
-            [NotNull] CoreRegistry registry,
-            [NotNull] InitializationOptions options)
-        {
-            var projectConfig = await GenerateProjectConfigurationAsync(options);
-            registry.RegisterServiceComponent<IProjectConfiguration>(projectConfig);
-            return projectConfig;
+            // Copy options in case only values are changed without changing the reference.
+            m_CurrentInitializationOptions = new InitializationOptions(options);
         }
 
         internal static async Task<ProjectConfiguration> GenerateProjectConfigurationAsync(
             [NotNull] InitializationOptions options)
         {
             var serializedConfig = await GetSerializedConfigOrEmptyAsync();
+            if (serializedConfig.Keys is null
+                || serializedConfig.Values is null)
+            {
+                serializedConfig = SerializableProjectConfiguration.Empty;
+            }
+
             var configValues = new Dictionary<string, ConfigurationEntry>(serializedConfig.Keys.Length);
             configValues.FillWith(serializedConfig);
             configValues.FillWith(options);
@@ -184,32 +201,70 @@ namespace Unity.Services.Core.Registration
             }
         }
 
-        [SuppressMessage("ReSharper", "RedundantTypeArgumentsOfMethod")]
-        internal static IMetricsFactory RegisterMetrics(
-            CoreRegistry registry, IActionScheduler scheduler, IProjectConfiguration projectConfiguration,
-            ICloudProjectId cloudProjectId, IEnvironments environments)
+        internal void InitializeEnvironments(IProjectConfiguration projectConfiguration)
         {
-            var metricsFactory = TelemetryUtils.CreateMetricsFactory(
-                scheduler, projectConfiguration, cloudProjectId, environments);
-            registry.RegisterServiceComponent<IMetricsFactory>(metricsFactory);
-            return metricsFactory;
+            if (!(Environments is null))
+                return;
+
+            var currentEnvironment = projectConfiguration.GetString(
+                EnvironmentsOptionsExtensions.EnvironmentNameKey, "production");
+            Environments = new Environments.Internal.Environments
+            {
+                Current = currentEnvironment,
+            };
         }
 
-        [SuppressMessage("ReSharper", "RedundantTypeArgumentsOfMethod")]
-        internal static IDiagnosticsFactory RegisterDiagnostics(
-            CoreRegistry registry, IActionScheduler scheduler, IProjectConfiguration projectConfiguration,
-            ICloudProjectId cloudProjectId, IEnvironments environments)
+        internal void InitializeCloudProjectId()
         {
-            var diagnosticsFactory = TelemetryUtils.CreateDiagnosticsFactory(
-                scheduler, projectConfiguration, cloudProjectId, environments);
-            registry.RegisterServiceComponent<IDiagnosticsFactory>(diagnosticsFactory);
-            return diagnosticsFactory;
+            if (!(CloudProjectId is null))
+                return;
+
+            CloudProjectId = new CloudProjectId();
         }
 
-        internal static void RegisterThreadingUtils(CoreRegistry registry)
+        internal void InitializeDiagnostics(
+            IActionScheduler scheduler, IProjectConfiguration projectConfiguration, ICloudProjectId cloudProjectId,
+            IEnvironments environments)
         {
-            var threadingUtils = new UnityThreadUtilsInternal();
-            registry.RegisterServiceComponent<IUnityThreadUtils>(threadingUtils);
+            if (!(DiagnosticsFactory is null))
+                return;
+
+            DiagnosticsFactory = TelemetryUtils.CreateDiagnosticsFactory(
+                scheduler, projectConfiguration, cloudProjectId, environments);
+        }
+
+        internal void InitializeMetrics(
+            IActionScheduler scheduler, IProjectConfiguration projectConfiguration, ICloudProjectId cloudProjectId,
+            IEnvironments environments)
+        {
+            if (!(MetricsFactory is null))
+                return;
+
+            MetricsFactory = TelemetryUtils.CreateMetricsFactory(
+                scheduler, projectConfiguration, cloudProjectId, environments);
+        }
+
+        internal void InitializeUnityThreadUtils()
+        {
+            if (!(UnityThreadUtils is null))
+                return;
+
+            UnityThreadUtils = new UnityThreadUtilsInternal();
+        }
+
+        public async Task<IDiagnosticsFactory> CreateDiagnosticsComponents()
+        {
+            if (HaveInitOptionsChanged())
+            {
+                FreeOptionsDependantComponents();
+            }
+
+            InitializeActionScheduler();
+            await InitializeProjectConfigAsync(UnityServices.Instance.Options);
+            InitializeEnvironments(ProjectConfig);
+            InitializeCloudProjectId();
+            InitializeDiagnostics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
+            return DiagnosticsFactory;
         }
     }
 }

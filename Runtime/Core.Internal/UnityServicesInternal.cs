@@ -16,7 +16,7 @@ namespace Unity.Services.Core.Internal
         /// </summary>
         public ServicesInitializationState State { get; private set; }
 
-        public InitializationOptions Options { get; private set; }
+        public InitializationOptions Options { get; internal set; }
 
         internal bool CanInitialize;
 
@@ -83,21 +83,20 @@ namespace Unity.Services.Core.Internal
             State = ServicesInitializationState.Initializing;
             var initStopwatch = new Stopwatch();
             initStopwatch.Start();
-            var sortedPackageTypeHashes = new List<int>(
-                Registry.PackageRegistry.Tree?.PackageTypeHashToInstance?.Count ?? 0);
+
+            var dependencyTree = Registry.PackageRegistry.Tree;
+            if (dependencyTree is null)
+            {
+                var reason = new NullReferenceException("Services require a valid dependency tree to be initialized.");
+                FailServicesInitialization(reason);
+                throw reason;
+            }
+
+            var sortedPackageTypeHashes = new List<int>(dependencyTree.PackageTypeHashToInstance.Count);
 
             try
             {
                 SortPackages();
-            }
-            catch (Exception reason)
-            {
-                FailServicesInitialization(reason);
-                throw;
-            }
-
-            try
-            {
                 await InitializePackagesAsync();
             }
             catch (Exception reason)
@@ -110,8 +109,7 @@ namespace Unity.Services.Core.Internal
 
             void SortPackages()
             {
-                var sorter = new DependencyTreeInitializeOrderSorter(
-                    Registry.PackageRegistry.Tree, sortedPackageTypeHashes);
+                var sorter = new DependencyTreeInitializeOrderSorter(dependencyTree, sortedPackageTypeHashes);
                 sorter.SortRegisteredPackagesIntoTarget();
             }
 
@@ -121,25 +119,26 @@ namespace Unity.Services.Core.Internal
                 await initializer.InitializeRegistryAsync();
             }
 
-            void FailServicesInitialization(Exception e)
+            void FailServicesInitialization(Exception reason)
             {
                 State = ServicesInitializationState.Uninitialized;
                 initStopwatch.Stop();
-                m_Initialization.TrySetException(e);
+                m_Initialization.TrySetException(reason);
 
-                if (e is CircularDependencyException)
+                if (reason is CircularDependencyException)
                 {
-                    Diagnostics.SendCircularDependencyDiagnostics(e);
+                    Diagnostics.SendCircularDependencyDiagnostics(reason);
                 }
                 else
                 {
-                    Diagnostics.SendOperateServicesInitDiagnostics(e);
+                    Diagnostics.SendOperateServicesInitDiagnostics(reason);
                 }
             }
 
             void SucceedServicesInitialization()
             {
                 State = ServicesInitializationState.Initialized;
+                Registry.PackageRegistry.Tree = null;
                 Registry.LockComponentRegistration();
                 initStopwatch.Stop();
                 m_Initialization.TrySetResult(null);
