@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Environments.Internal;
 using Unity.Services.Core.Scheduler.Internal;
+using UnityEngine;
 
 namespace Unity.Services.Core.Telemetry.Internal
 {
@@ -28,7 +29,7 @@ namespace Unity.Services.Core.Telemetry.Internal
                     MetricsCommonTags = new Dictionary<string, string>(),
                 },
             };
-            var cachePersister = new FileCachePersister<MetricsPayload>("UnityServicesCachedMetrics");
+            var cachePersister = CreateCachePersister<MetricsPayload>("UnityServicesCachedMetrics", Application.platform);
             var retryPolicy = new ExponentialBackOffRetryPolicy();
             var requestSender = new UnityWebRequestSender();
             var metricsSender = new TelemetrySender(
@@ -59,7 +60,7 @@ namespace Unity.Services.Core.Telemetry.Internal
                     DiagnosticsCommonTags = new Dictionary<string, string>(),
                 },
             };
-            var cachePersister = new FileCachePersister<DiagnosticsPayload>("UnityServicesCachedDiagnostics");
+            var cachePersister = CreateCachePersister<DiagnosticsPayload>("UnityServicesCachedDiagnostics", Application.platform);
             var retryPolicy = new ExponentialBackOffRetryPolicy();
             var requestSender = new UnityWebRequestSender();
             var metricsSender = new TelemetrySender(
@@ -73,6 +74,16 @@ namespace Unity.Services.Core.Telemetry.Internal
 
         static bool IsTelemetryDisabled(IProjectConfiguration projectConfiguration)
             => projectConfiguration.GetBool(TelemetryDisabledKey);
+
+        internal static ICachePersister<TPayload> CreateCachePersister<TPayload>(
+            string fileName, RuntimePlatform platform)
+            where TPayload : ITelemetryPayload
+        {
+            if (platform == RuntimePlatform.Switch)
+                return new DisabledCachePersister<TPayload>();
+
+            return new FileCachePersister<TPayload>(fileName);
+        }
 
         internal static TelemetryConfig CreateTelemetryConfig(IProjectConfiguration projectConfiguration)
         {

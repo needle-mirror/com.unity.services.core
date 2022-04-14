@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Unity.Services.Core.Editor
@@ -7,13 +8,10 @@ namespace Unity.Services.Core.Editor
     class DefaultCdnConfiguredEndpoint : CdnConfiguredEndpoint<DefaultCdnEndpointConfiguration> {}
 
     [Serializable]
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     class DefaultCdnEndpointConfiguration
     {
-        [SerializeField]
-        string core;
-
-        public string Core => core;
+        [JsonProperty("core")]
+        public string Core { get; private set; }
 
         internal string BuildApiUrl()
         {

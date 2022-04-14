@@ -1,3 +1,5 @@
+using System;
+
 namespace Unity.Services.Core.Internal
 {
     /// <summary>
@@ -5,9 +7,11 @@ namespace Unity.Services.Core.Internal
     /// </summary>
     class MissingComponent : IServiceComponent
     {
-        public static MissingComponent Instance { get; }
-            = new MissingComponent();
+        public Type IntendedType { get; }
 
-        MissingComponent() {}
+        internal MissingComponent(Type intendedType)
+        {
+            IntendedType = intendedType;
+        }
     }
 }

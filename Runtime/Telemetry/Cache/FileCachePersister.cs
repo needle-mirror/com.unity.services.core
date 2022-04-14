@@ -7,24 +7,34 @@ using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Unity.Services.Core.Telemetry.Internal
 {
-    class FileCachePersister<TPayload> : ICachePersister<TPayload>
+    abstract class FileCachePersister
+    {
+        internal static bool IsAvailableFor(RuntimePlatform platform)
+        {
+            return !string.IsNullOrEmpty(GetPersistentDataPathFor(platform));
+        }
+
+        internal static string GetPersistentDataPathFor(RuntimePlatform platform)
+        {
+            // Application.persistentDataPath has side effects on Switch so it shouldn't be called.
+            if (platform == RuntimePlatform.Switch)
+                return string.Empty;
+
+            return Application.persistentDataPath;
+        }
+    }
+
+    class FileCachePersister<TPayload> : FileCachePersister, ICachePersister<TPayload>
         where TPayload : ITelemetryPayload
     {
         public FileCachePersister(string fileName)
         {
-            FilePath = Path.Combine(Application.persistentDataPath, fileName);
+            FilePath = Path.Combine(GetPersistentDataPathFor(Application.platform), fileName);
         }
 
         public string FilePath { get; }
 
-        public bool CanPersist { get; } = IsFilePersistenceAvailable();
-
-        static bool IsFilePersistenceAvailable()
-        {
-            // Switch requires a specific setup to have write access to the disc so it won't be handled here.
-            return Application.platform != RuntimePlatform.Switch
-                && !string.IsNullOrEmpty(Application.persistentDataPath);
-        }
+        public bool CanPersist { get; } = IsAvailableFor(Application.platform);
 
         public void Persist(CachedPayload<TPayload> cache)
         {

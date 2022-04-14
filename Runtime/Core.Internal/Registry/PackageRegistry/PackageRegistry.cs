@@ -26,8 +26,9 @@ namespace Unity.Services.Core.Internal
         public void RegisterDependency<TComponent>(int packageTypeHash)
             where TComponent : IServiceComponent
         {
-            var componentTypeHash = typeof(TComponent).GetHashCode();
-            Tree.ComponentTypeHashToInstance[componentTypeHash] = MissingComponent.Instance;
+            var intendedType = typeof(TComponent);
+            var componentTypeHash = intendedType.GetHashCode();
+            Tree.ComponentTypeHashToInstance[componentTypeHash] = new MissingComponent(intendedType);
 
             AddComponentDependencyToPackage(componentTypeHash, packageTypeHash);
         }

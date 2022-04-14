@@ -1,7 +1,7 @@
 {
   "name": "com.unity.services.core",
   "displayName": "Services Core",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "unity": "2019.4",
   "description": "This package defines common components used by multiple Game Service packages.\nThese are standardized and aim to unify the overall experience of working with Game Services SDK.",
   "dependencies": {
@@ -10,17 +10,17 @@
     "com.unity.modules.androidjni": "1.0.0"
   },
   "upm": {
-    "changelog": "### Changed\n\n- Newtonsoft package dependency update to 3.0.2."
+    "changelog": "### Fixed\n\n- Crash on Switch when initializing telemetry persistence. Now telemetry won't persist anything on Switch.\n- NullReferenceException while linking the project\n- Issue with user roles and service flags"
   },
   "relatedPackages": {
-    "com.unity.services.core.tests": "1.3.1"
+    "com.unity.services.core.tests": "1.3.2"
   },
   "upmCi": {
-    "footprint": "beebbaba819ff5e22f40a04072f0dfb7a6934eb8"
+    "footprint": "c101c70aa787a6251d976a7718756ff2d01745fb"
   },
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/operate-services-sdk.git",
     "type": "git",
-    "revision": "a1cf55a5ba0e2555d508263fa48837ff56c4654a"
+    "revision": "fc9fa5dd5d65e0504280da22ad8b12894f3c17a1"
   }
 }

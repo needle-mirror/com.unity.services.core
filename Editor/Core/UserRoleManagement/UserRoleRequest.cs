@@ -64,7 +64,7 @@ namespace Unity.Services.Core.Editor
                     throw new RequestNotAuthorizedException();
                 }
 
-                var currentUserRole = UserRole.Unknown;
+                UserRole currentUserRole;
                 var userList = ExtractUserListFromUnityWebRequest(getProjectUsersRequest);
                 if (userList != null)
                 {
@@ -113,7 +113,7 @@ namespace Unity.Services.Core.Editor
         {
             foreach (var user in users)
             {
-                if (user.Id.Equals(currentUserId))
+                if (user.ForeignKey.Equals(currentUserId))
                 {
                     return user;
                 }
@@ -122,63 +122,30 @@ namespace Unity.Services.Core.Editor
             return null;
         }
 
-        /// <remarks>
-        /// Serialized field don't follow naming conventions for interoperability reasons.
-        /// </remarks>
         [Serializable]
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
         class UserList
         {
-            [JsonRequired]
-            [SerializeField]
-            User[] users;
-
-            [JsonIgnore]
-            public User[] Users => users;
+            [JsonProperty("users")]
+            public User[] Users { get; set; }
         }
 
-        /// <remarks>
-        /// Serialized field don't follow naming conventions for interoperability reasons.
-        /// </remarks>
         [Serializable]
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
         class User
         {
-            [SerializeField]
-            string foreign_key;
+            [JsonProperty("foreign_key")]
+            public string ForeignKey  { get; set; }
 
-            public string Id => foreign_key;
+            [JsonProperty("name")]
+            public string Name  { get; set; }
 
-            [SerializeField]
-            string name;
+            [JsonProperty("email")]
+            public string Email  { get; set; }
 
-            public string Name => name;
+            [JsonProperty("access_granted_by")]
+            public string AccessGrantedBy { get; set; }
 
-            [SerializeField]
-            string email;
-
-            public string Email => email;
-
-            [SerializeField]
-            string access_granted_by;
-
-            public string AccessGrantedBy => access_granted_by;
-
-            [SerializeField]
-            string role;
-
-            public UserRole Role
-            {
-                get
-                {
-                    if (Enum.TryParse(role, true, out UserRole userRole))
-                    {
-                        return userRole;
-                    }
-
-                    throw new UnknownUserRoleException();
-                }
-            }
+            [JsonProperty("role")]
+            public UserRole Role { get; set; }
         }
 
         internal class RequestNotAuthorizedException : Exception {}
@@ -186,7 +153,5 @@ namespace Unity.Services.Core.Editor
         class CurrentUserNotFoundException : Exception {}
 
         class UserListNotFoundException : Exception {}
-
-        class UnknownUserRoleException : Exception {}
     }
 }

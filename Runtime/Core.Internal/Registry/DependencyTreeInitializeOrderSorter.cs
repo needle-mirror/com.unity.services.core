@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Unity.Services.Core.Internal
@@ -49,9 +50,16 @@ namespace Unity.Services.Core.Internal
             var registeredPackageTypeHashes = GetPackageTypeHashes();
             m_PackageTypeHashExplorationHistory = new Dictionary<int, ExplorationMark>(registeredPackageTypeHashes.Count);
 
-            foreach (var packageTypeHash in registeredPackageTypeHashes)
+            try
             {
-                SortTreeThrough(packageTypeHash);
+                foreach (var packageTypeHash in registeredPackageTypeHashes)
+                {
+                    SortTreeThrough(packageTypeHash);
+                }
+            }
+            catch (HashException ex)
+            {
+                throw new DependencyTreeSortFailedException(Tree, Target, ex);
             }
 
             m_PackageTypeHashExplorationHistory = null;
@@ -70,8 +78,8 @@ namespace Unity.Services.Core.Internal
             for (var i = dependencyTypeHashes.Count - 1; i >= 0; i--)
             {
                 var dependencyTypeHash = dependencyTypeHashes[i];
-                if (IsOptional(dependencyTypeHash)
-                    && !IsProvided(dependencyTypeHash))
+                if (Tree.IsOptional(dependencyTypeHash)
+                    && !Tree.IsProvided(dependencyTypeHash))
                 {
                     dependencyTypeHashes.RemoveAt(i);
                 }
@@ -93,7 +101,14 @@ namespace Unity.Services.Core.Internal
             MarkPackage(packageTypeHash, ExplorationMark.Viewed);
 
             var dependencyTypeHashes = GetDependencyTypeHashesFor(packageTypeHash);
-            SortTreeThrough(dependencyTypeHashes);
+            try
+            {
+                SortTreeThrough(dependencyTypeHashes);
+            }
+            catch (DependencyTreeComponentHashException ex)
+            {
+                throw new DependencyTreePackageHashException(packageTypeHash, $"Component with hash[{ex.Hash}] threw exception when sorting package[{packageTypeHash}][{Tree.PackageTypeHashToInstance[packageTypeHash].GetType().FullName}]", ex);
+            }
 
             Target.Add(packageTypeHash);
 
@@ -118,20 +133,9 @@ namespace Unity.Services.Core.Internal
             => Tree.PackageTypeHashToInstance.Keys;
 
         int GetPackageTypeHashFor(int componentTypeHash)
-            => Tree.ComponentTypeHashToPackageTypeHash[componentTypeHash];
+            => Tree.ComponentTypeHashToPackageTypeHash.TryGetValue(componentTypeHash, out var packageHash) ? packageHash : throw new DependencyTreeComponentHashException(componentTypeHash, $"Component with hash[{componentTypeHash}] does not exist!");
 
         IEnumerable<int> GetDependencyTypeHashesFor(int packageTypeHash)
-            => Tree.PackageTypeHashToComponentTypeHashDependencies[packageTypeHash];
-
-        bool IsOptional(int componentTypeHash)
-        {
-            return Tree.ComponentTypeHashToInstance.TryGetValue(componentTypeHash, out var component)
-                && component is null;
-        }
-
-        bool IsProvided(int componentTypeHash)
-        {
-            return Tree.ComponentTypeHashToPackageTypeHash.ContainsKey(componentTypeHash);
-        }
+            => Tree.PackageTypeHashToComponentTypeHashDependencies.TryGetValue(packageTypeHash, out var dependencyHashes) ? dependencyHashes : throw new DependencyTreePackageHashException(packageTypeHash, $"Package with hash[{packageTypeHash}] does not exist!");
     }
 }

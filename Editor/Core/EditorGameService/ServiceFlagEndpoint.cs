@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Unity.Services.Core.Editor
@@ -8,15 +9,12 @@ namespace Unity.Services.Core.Editor
     class ServiceFlagEndpoint : CdnConfiguredEndpoint<ServiceFlagEndpointConfiguration> {}
 
     [Serializable]
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     class ServiceFlagEndpointConfiguration
     {
         const string k_ServiceFlagFormat = "/projects/{0}/service_flags";
 
-        [SerializeField]
-        string core;
-
-        public string Core => core;
+        [JsonProperty("core")]
+        public string Core { get; private set; }
 
         string BuildApiUrl()
         {
@@ -44,7 +42,7 @@ namespace Unity.Services.Core.Editor
                 [payloadFieldName] = serviceFlags,
             };
 
-            return MiniJson.Serialize(payload);
+            return JsonConvert.SerializeObject(payload);
         }
     }
 }

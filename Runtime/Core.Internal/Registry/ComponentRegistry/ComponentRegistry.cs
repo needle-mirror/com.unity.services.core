@@ -45,7 +45,8 @@ namespace Unity.Services.Core.Internal
         {
             var componentType = typeof(TComponent);
             if (!ComponentTypeHashToInstance.TryGetValue(componentType.GetHashCode(), out var component)
-                || component == MissingComponent.Instance)
+                || component is MissingComponent)
+
             {
                 throw new KeyNotFoundException($"There is no component `{componentType.Name}` registered. " +
                     "Are you missing a package?");
@@ -58,7 +59,7 @@ namespace Unity.Services.Core.Internal
         {
             return ComponentTypeHashToInstance.TryGetValue(componentTypeHash, out var storedComponent)
                 && !(storedComponent is null)
-                && storedComponent != MissingComponent.Instance;
+                && !(storedComponent is MissingComponent);
         }
 
         public void ResetProvidedComponents(IDictionary<int, IServiceComponent> componentTypeHashToInstance)

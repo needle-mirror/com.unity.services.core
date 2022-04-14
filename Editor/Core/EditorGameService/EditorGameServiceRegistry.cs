@@ -126,7 +126,7 @@ namespace Unity.Services.Core.Editor
             }
         }
 
-        void UpdateServiceActivation(IAsyncOperation<IServiceFlags> flagsAsyncOperation)
+        void UpdateServiceActivation(IAsyncOperation<IDictionary<string, bool>> flagsAsyncOperation)
         {
             foreach (var service in Services)
             {
@@ -134,9 +134,10 @@ namespace Unity.Services.Core.Editor
                 if (serviceFlagEnabler != null)
                 {
                     var serviceFlags = flagsAsyncOperation.Result;
-                    if (serviceFlags.DoesFlagExist(serviceFlagEnabler.GetFlagName()))
+                    var flagName = serviceFlagEnabler.GetFlagName();
+                    if (serviceFlags?.ContainsKey(flagName) ?? false)
                     {
-                        if (serviceFlags.IsFlagActive(serviceFlagEnabler.GetFlagName()))
+                        if (serviceFlags[flagName])
                         {
                             serviceFlagEnabler.Enable();
                         }

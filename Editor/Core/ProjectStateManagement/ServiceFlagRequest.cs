@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine.Networking;
 using Unity.Services.Core.Internal;
@@ -12,9 +14,9 @@ namespace Unity.Services.Core.Editor
 
         DefaultCdnEndpointConfiguration m_DefaultCdnEndpointConfiguration;
 
-        public IAsyncOperation<IServiceFlags> FetchServiceFlags()
+        public IAsyncOperation<IDictionary<string, bool>> FetchServiceFlags()
         {
-            var resultAsyncOp = new AsyncOperation<IServiceFlags>();
+            var resultAsyncOp = new AsyncOperation<IDictionary<string, bool>>();
             try
             {
                 resultAsyncOp.SetInProgress();
@@ -30,7 +32,7 @@ namespace Unity.Services.Core.Editor
             return resultAsyncOp;
         }
 
-        static void QueryProjectFlags(IAsyncOperation<DefaultCdnEndpointConfiguration> configurationRequestTask, AsyncOperation<IServiceFlags> resultAsyncOp)
+        static void QueryProjectFlags(IAsyncOperation<DefaultCdnEndpointConfiguration> configurationRequestTask, AsyncOperation<IDictionary<string, bool>> resultAsyncOp)
         {
             try
             {
@@ -55,7 +57,7 @@ namespace Unity.Services.Core.Editor
             }
         }
 
-        static void OnFetchServiceFlagsCompleted(UnityWebRequest getServiceFlagsRequest, AsyncOperation<IServiceFlags> resultAsyncOp)
+        static void OnFetchServiceFlagsCompleted(UnityWebRequest getServiceFlagsRequest, AsyncOperation<IDictionary<string, bool>> resultAsyncOp)
         {
             try
             {
@@ -71,24 +73,24 @@ namespace Unity.Services.Core.Editor
             }
         }
 
-        static IServiceFlags ExtractServiceFlagsFromUnityWebRequest(UnityWebRequest unityWebRequest)
+        static IDictionary<string, bool> ExtractServiceFlagsFromUnityWebRequest(UnityWebRequest unityWebRequest)
         {
-            IDictionary<string, object> flags = null;
+            IDictionary<string, bool> flags = null;
             if (UnityWebRequestHelper.IsUnityWebRequestReadyForTextExtract(unityWebRequest, out var jsonContent))
             {
                 try
                 {
-                    var jsonEntries = (IDictionary<string, object>)MiniJson.Deserialize(jsonContent);
-                    flags = (IDictionary<string, object>)jsonEntries[k_ServiceFlagsKey];
+                    var jsonEntries = JsonConvert.DeserializeObject<JObject>(jsonContent);
+                    flags = ((JObject)jsonEntries?[k_ServiceFlagsKey])?.ToObject<IDictionary<string, bool>>();
                 }
                 catch (Exception ex)
                 {
-                    CoreLogger.LogError($"Exception occurred when fetching service flags:\n{ex.Message}");
-                    flags = new Dictionary<string, object>();
+                    CoreLogger.LogError($"Exception occurred when fetching service flags:\n{ex}");
+                    flags = new Dictionary<string, bool>();
                 }
             }
 
-            return new ServiceFlags(flags);
+            return flags;
         }
     }
 }

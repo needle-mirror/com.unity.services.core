@@ -5,6 +5,14 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2022-04-14
+
+### Fixed
+
+- Crash on Switch when initializing telemetry persistence. Now telemetry won't persist anything on Switch.
+- NullReferenceException while linking the project
+- Issue with user roles and service flags
+
 ## [1.3.1] - 2022-03-29
 
 ### Changed
