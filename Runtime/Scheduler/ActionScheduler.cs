@@ -29,8 +29,13 @@ namespace Unity.Services.Core.Scheduler.Internal
 
     class ActionScheduler : IActionScheduler
     {
-        MinimumBinaryHeap<ScheduledInvocation> m_ScheduledActions = new MinimumBinaryHeap<ScheduledInvocation>();
-        Dictionary<long, ScheduledInvocation> m_IdScheduledInvocationMap = new Dictionary<long, ScheduledInvocation>();
+        readonly ITimeProvider m_TimeProvider;
+
+        readonly MinimumBinaryHeap<ScheduledInvocation> m_ScheduledActions
+            = new MinimumBinaryHeap<ScheduledInvocation>();
+
+        readonly Dictionary<long, ScheduledInvocation> m_IdScheduledInvocationMap
+            = new Dictionary<long, ScheduledInvocation>();
 
         const long k_MinimumIdValue = 1;
 
@@ -39,7 +44,11 @@ namespace Unity.Services.Core.Scheduler.Internal
         long m_NextId = k_MinimumIdValue;
 
         public ActionScheduler()
+            : this(new UtcTimeProvider()) {}
+
+        public ActionScheduler(ITimeProvider timeProvider)
         {
+            m_TimeProvider = timeProvider;
             SchedulerLoopSystem = new PlayerLoopSystem
             {
                 type = typeof(ActionScheduler),
@@ -64,7 +73,7 @@ namespace Unity.Services.Core.Scheduler.Internal
             var scheduledInvocation = new ScheduledInvocation
             {
                 Action = action,
-                InvocationTime = DateTime.UtcNow.AddSeconds(delaySeconds),
+                InvocationTime = m_TimeProvider.Now.AddSeconds(delaySeconds),
                 ActionId = m_NextId++
             };
 
@@ -91,9 +100,10 @@ namespace Unity.Services.Core.Scheduler.Internal
             m_IdScheduledInvocationMap.Remove(scheduledInvocation.ActionId);
         }
 
-        void ExecuteExpiredActions()
+        internal void ExecuteExpiredActions()
         {
-            while (m_ScheduledActions.Count > 0 && m_ScheduledActions.Min.InvocationTime <= DateTime.UtcNow)
+            while (m_ScheduledActions.Count > 0
+                   && m_ScheduledActions.Min.InvocationTime <= m_TimeProvider.Now)
             {
                 var scheduledInvocation = m_ScheduledActions.ExtractMin();
                 m_IdScheduledInvocationMap.Remove(scheduledInvocation.ActionId);
@@ -114,7 +124,7 @@ namespace Unity.Services.Core.Scheduler.Internal
         {
             var currentPlayerLoop = PlayerLoop.GetCurrentPlayerLoop();
             var currentSubSystems = new List<PlayerLoopSystem>(currentPlayerLoop.subSystemList);
-            for (int i = currentSubSystems.Count - 1; i >= 0; i--)
+            for (var i = currentSubSystems.Count - 1; i >= 0; i--)
             {
                 if (currentSubSystems[i].type == typeof(ActionScheduler))
                 {

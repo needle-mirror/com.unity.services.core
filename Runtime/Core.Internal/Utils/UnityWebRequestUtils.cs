@@ -20,7 +20,6 @@ namespace Unity.Services.Core.Internal
         public static Task<string> GetTextAsync(string uri)
         {
             var completionSource = new TaskCompletionSource<string>();
-
             var request = UnityWebRequest.Get(uri);
             request.SendWebRequest()
                 .completed += CompleteFetchTaskOnRequestCompleted;
@@ -29,20 +28,27 @@ namespace Unity.Services.Core.Internal
 
             void CompleteFetchTaskOnRequestCompleted(UnityEngine.AsyncOperation rawOperation)
             {
-                var operation = (UnityWebRequestAsyncOperation)rawOperation;
-                using (operation.webRequest)
+                try
                 {
-                    if (operation.webRequest.HasSucceeded())
+                    var operation = (UnityWebRequestAsyncOperation)rawOperation;
+                    using (var operationRequest = operation.webRequest)
                     {
-                        completionSource.SetResult(operation.webRequest.downloadHandler.text);
+                        if (operationRequest.HasSucceeded())
+                        {
+                            completionSource.TrySetResult(operationRequest.downloadHandler.text);
+                        }
+                        else
+                        {
+                            var errorMessage = "Couldn't fetch config file." +
+                                $"\nURL: {operationRequest.url}" +
+                                $"\nReason: {operationRequest.error}";
+                            completionSource.TrySetException(new Exception(errorMessage));
+                        }
                     }
-                    else
-                    {
-                        var errorMessage = "Couldn't fetch config file." +
-                            $"\nURL: {operation.webRequest.url}" +
-                            $"\nReason: {operation.webRequest.error}";
-                        completionSource.SetException(new Exception(errorMessage));
-                    }
+                }
+                catch (Exception e)
+                {
+                    completionSource.TrySetException(e);
                 }
             }
         }

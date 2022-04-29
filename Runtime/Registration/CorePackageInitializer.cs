@@ -92,6 +92,7 @@ namespace Unity.Services.Core.Registration
 
                 InitializeDiagnostics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
                 CoreDiagnostics.Instance.Diagnostics = DiagnosticsFactory.Create(CorePackageName);
+                CoreDiagnostics.Instance.SetProjectConfiguration(ProjectConfig.ToJson());
 
                 InitializeMetrics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
                 CoreMetrics.Instance.Metrics = MetricsFactory.Create(CorePackageName);
@@ -265,6 +266,12 @@ namespace Unity.Services.Core.Registration
             InitializeCloudProjectId();
             InitializeDiagnostics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
             return DiagnosticsFactory;
+        }
+
+        public async Task<string> GetSerializedProjectConfigurationAsync()
+        {
+            await InitializeProjectConfigAsync(UnityServices.Instance.Options);
+            return ProjectConfig.ToJson();
         }
     }
 }

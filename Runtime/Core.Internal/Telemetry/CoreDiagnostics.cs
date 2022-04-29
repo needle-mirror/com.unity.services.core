@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Services.Core.Telemetry.Internal;
 
@@ -14,6 +15,10 @@ namespace Unity.Services.Core.Internal
 
         internal const string OperateServicesInitDiagnosticName = "operate_services_init";
 
+        internal const string ProjectConfigTagName = "project_config";
+
+        public IDictionary<string, string> CoreTags { get; internal set; }
+
         public static CoreDiagnostics Instance { get; internal set; }
 
         internal IDiagnosticsComponentProvider DiagnosticsComponentProvider { get; set; }
@@ -26,8 +31,15 @@ namespace Unity.Services.Core.Internal
             {
                 var diagnosticFactory = await DiagnosticsComponentProvider.CreateDiagnosticsComponents();
                 Diagnostics = diagnosticFactory.Create(CorePackageName);
+                SetProjectConfiguration(await DiagnosticsComponentProvider.GetSerializedProjectConfigurationAsync());
             }
             return Diagnostics;
+        }
+
+        public void SetProjectConfiguration(string serializedProjectConfig)
+        {
+            CoreTags = new Dictionary<string, string>();
+            CoreTags[ProjectConfigTagName] = serializedProjectConfig;
         }
 
         public void SendCircularDependencyDiagnostics(Exception exception)
@@ -56,7 +68,7 @@ namespace Unity.Services.Core.Internal
         async Task SendCoreDiagnostics(string diagnosticName, Exception exception)
         {
             var diagnostics = await GetOrCreateDiagnostics();
-            diagnostics.SendDiagnostic(diagnosticName, exception.ToString());
+            diagnostics.SendDiagnostic(diagnosticName, exception.ToString(), CoreTags);
         }
     }
 }

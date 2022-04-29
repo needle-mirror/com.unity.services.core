@@ -1,7 +1,7 @@
 {
   "name": "com.unity.services.core",
   "displayName": "Services Core",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "unity": "2019.4",
   "description": "This package defines common components used by multiple Game Service packages.\nThese are standardized and aim to unify the overall experience of working with Game Services SDK.",
   "dependencies": {
@@ -9,18 +9,18 @@
     "com.unity.nuget.newtonsoft-json": "3.0.2",
     "com.unity.modules.androidjni": "1.0.0"
   },
-  "upm": {
-    "changelog": "### Fixed\n\n- Crash on Switch when initializing telemetry persistence. Now telemetry won't persist anything on Switch.\n- NullReferenceException while linking the project\n- Issue with user roles and service flags"
+  "_upm": {
+    "changelog": "### Added\n\n- Add Vivox public interfaces: `IVivox`, `IVivoxTokenProviderInternal`, to enable interactions with the Vivox service."
   },
   "relatedPackages": {
-    "com.unity.services.core.tests": "1.3.2"
+    "com.unity.services.core.tests": "1.4.0"
   },
   "upmCi": {
-    "footprint": "c101c70aa787a6251d976a7718756ff2d01745fb"
+    "footprint": "687d23ff1d7d05657a5014040b101e76c4142e81"
   },
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/operate-services-sdk.git",
     "type": "git",
-    "revision": "fc9fa5dd5d65e0504280da22ad8b12894f3c17a1"
+    "revision": "92e281deb97a96f7b32464b6874de73a17c140ff"
   }
 }

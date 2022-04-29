@@ -152,6 +152,19 @@ namespace Unity.Services.Qos.Internal
     }
 }
 
+namespace Unity.Services.Vivox.Internal
+{
+    public interface IVivox : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public abstract void RegisterTokenProvider(Unity.Services.Vivox.Internal.IVivoxTokenProviderInternal tokenProvider);
+    }
+
+    public interface IVivoxTokenProviderInternal
+    {
+        public abstract System.Threading.Tasks.Task<string> GetTokenAsync(string issuer = default(string), System.Nullable<System.TimeSpan> expiration = default(System.Nullable<System.TimeSpan>), string userUri = default(string), string action = default(string), string conferenceUri = default(string), string fromUserUri = default(string), string realm = default(string));
+    }
+}
+
 namespace Unity.Services.Wire.Internal
 {
     public struct ChannelToken

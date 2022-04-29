@@ -1,14 +1,17 @@
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using Newtonsoft.Json;
 using Unity.Services.Core.Configuration.Internal;
 
 namespace Unity.Services.Core.Configuration
 {
     class ProjectConfiguration : IProjectConfiguration
     {
-        readonly IDictionary<string, ConfigurationEntry> m_ConfigValues;
+        string m_JsonCache;
+        readonly IReadOnlyDictionary<string, ConfigurationEntry> m_ConfigValues;
 
-        public ProjectConfiguration(IDictionary<string, ConfigurationEntry> configValues)
+        public ProjectConfiguration(IReadOnlyDictionary<string, ConfigurationEntry> configValues)
         {
             m_ConfigValues = configValues;
         }
@@ -54,6 +57,16 @@ namespace Unity.Services.Core.Configuration
             }
 
             return defaultValue;
+        }
+
+        public string ToJson()
+        {
+            if (m_JsonCache == null)
+            {
+                var dict = m_ConfigValues.ToDictionary(pair => pair.Key, pair => pair.Value.Value);
+                m_JsonCache = JsonConvert.SerializeObject(dict);
+            }
+            return m_JsonCache;
         }
     }
 }
