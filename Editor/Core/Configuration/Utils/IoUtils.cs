@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using Unity.Services.Core.Internal;
 
@@ -57,6 +58,22 @@ namespace Unity.Services.Core.Configuration.Editor
             }
 
             return false;
+        }
+
+        public static void TryDeleteStreamAssetsFolder()
+        {
+            var streamingAssetsPath = Application.streamingAssetsPath;
+
+            if(Directory.Exists(streamingAssetsPath) &&
+                IsDirectoryEmpty(streamingAssetsPath))
+            {
+                TryDeleteAssetFolder(streamingAssetsPath);
+            }
+        }
+
+        static bool IsDirectoryEmpty(string path)
+        {
+            return !Directory.EnumerateFileSystemEntries(path).Any();
         }
     }
 }

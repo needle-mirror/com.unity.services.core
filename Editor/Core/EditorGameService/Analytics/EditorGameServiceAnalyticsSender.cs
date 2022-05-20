@@ -18,6 +18,7 @@ namespace Unity.Services.Core.Editor
             public const string OpenProjectSettings = "Open Project Settings";
             public const string CloseProjectBindPopup = "Close Project Bind Popup";
             public const string ProjectBindPopupDisplayed = "Project Bind Popup Displayed";
+            public const string ClickedSignUpLink = "Clicked Signup Link";
         }
 
         const int k_Version = 1;
@@ -31,6 +32,11 @@ namespace Unity.Services.Core.Editor
         public void SendProjectBindPopupCloseActionEvent(string package)
         {
             SendEvent(AnalyticsComponent.ProjectBindPopup, AnalyticsAction.CloseProjectBindPopup, package);
+        }
+
+        public void SendClickedSignUpLinkActionEvent(string package)
+        {
+            SendEvent(AnalyticsComponent.ProjectBindPopup, AnalyticsAction.ClickedSignUpLink, package);
         }
 
         public void SendProjectBindPopupOpenProjectSettingsEvent(string package)

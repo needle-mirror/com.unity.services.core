@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 
@@ -9,6 +10,9 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
     class ProjectBindRedirectPopupUI
     {
         const string k_ProjectSettingsPath = "Project/Services";
+        const string k_SignUpClassName = "signup-link-button";
+        const string k_SignupLink = "https://dashboard.unity3d.com";
+
 
         Action m_OnCloseButtonFired;
         [NotNull]
@@ -22,6 +26,7 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
             SetupUxmlAndUss(parentElement);
             SetupButtons(parentElement);
             AddProjectBindRedirectContentUI(parentElement);
+            SetSignupLink(parentElement);
 
             EditorGameServiceSettingsProvider.TranslateStringsInTree(parentElement);
 
@@ -70,6 +75,22 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
             }
         }
 
+        void SetSignupLink(VisualElement parentElement)
+        {
+            var contentContainer = parentElement.Q(className: ProjectBindRedirectUiConstants.UxmlClassNames.ContentContainer) ?? parentElement;
+            var dashboardHyperlink = contentContainer.Q<TextElement>(className: k_SignUpClassName);
+
+            dashboardHyperlink.text = k_SignupLink;
+            if (dashboardHyperlink != null)
+            {
+                var clickable = new Clickable(() =>
+                {
+                    ClickSignUpLinkAction();
+                });
+                dashboardHyperlink.AddManipulator(clickable);
+            }
+        }
+
         internal void CloseButtonAction()
         {
             foreach (var package in m_InstalledPackages)
@@ -87,6 +108,15 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
             }
             SettingsService.OpenProjectSettings(k_ProjectSettingsPath);
             m_OnCloseButtonFired?.Invoke();
+        }
+
+        internal void ClickSignUpLinkAction()
+        {
+            foreach (var package in m_InstalledPackages)
+            {
+                m_EditorGameServiceAnalyticsSender.SendClickedSignUpLinkActionEvent(package);
+            }
+            Application.OpenURL(k_SignupLink);
         }
     }
 }

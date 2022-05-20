@@ -5,6 +5,7 @@ namespace Unity.Services.Core.Editor
         void SendProjectSettingsGoToDashboardEvent(string package);
 
         void SendProjectBindPopupCloseActionEvent(string package);
+        void SendClickedSignUpLinkActionEvent(string package);
 
         void SendProjectBindPopupOpenProjectSettingsEvent(string package);
 

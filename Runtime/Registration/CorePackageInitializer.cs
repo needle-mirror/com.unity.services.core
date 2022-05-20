@@ -89,6 +89,13 @@ namespace Unity.Services.Core.Registration
 
                 InitializeEnvironments(ProjectConfig);
                 InitializeCloudProjectId();
+                if (string.IsNullOrEmpty(CloudProjectId.GetCloudProjectId()))
+                {
+                    //TODO: actually throw the exception when we make a major version release
+                    var exception = new UnityProjectNotLinkedException("To use Unity's dashboard services, you need to link your Unity project to a project ID. To do this, go to Project Settings to select your organization, select your project and then link a project ID. You also need to make sure your organization has access to the required products. Visit https://dashboard.unity3d.com to sign up.");
+                    CoreDiagnostics.Instance.SendCorePackageInitDiagnostics(exception);
+                    CoreLogger.LogWarning(exception.Message);
+                }
 
                 InitializeDiagnostics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
                 CoreDiagnostics.Instance.Diagnostics = DiagnosticsFactory.Create(CorePackageName);

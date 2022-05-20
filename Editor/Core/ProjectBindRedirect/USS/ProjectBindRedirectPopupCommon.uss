@@ -41,3 +41,10 @@
 .cancel-button{
     width: auto;
 }
+
+.signup-link-button {
+    color: #4C7EFF;
+    align-self:flex-start;
+    padding:5px 0 5px 0;
+    cursor:link;
+}

@@ -91,6 +91,7 @@ namespace Unity.Services.Core.Configuration.Editor
         public static void RemoveConfigFromProject()
         {
             IoUtils.TryDeleteAssetFile(ConfigurationUtils.RuntimeConfigFullPath);
+            IoUtils.TryDeleteStreamAssetsFolder();
         }
 
         int IOrderedCallback.callbackOrder { get; }
