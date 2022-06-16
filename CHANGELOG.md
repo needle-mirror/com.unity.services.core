@@ -5,6 +5,29 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2022-06-16
+
+### Changed
+
+- Log error instead of warning when core initialize with no cloud project id
+
+### Added
+
+- Log a JSON containing the common configuration shared among all services for debugging purposes when using ENABLE_UNITY_SERVICES_VERBOSE_LOGGING as a scripting define
+
+### Fixed
+
+- NullReferenceException while telemetry was provided an empty file, fixed by introducing a null check
+- DirectoryNotFoundException happened inconsistently on Switch, fixed by resolving racing condition issue
+
+## [1.4.2-pre.4] - 2022-05-31
+
+## [1.4.2-pre.2] - 2022-05-27
+
+### Fixed
+
+- NSUserDefaults handling null values
+
 ## [1.4.1] - 2022-05-20
 
 ### Added

@@ -38,6 +38,11 @@ namespace Unity.Services.Core.Telemetry.Internal
 
         public void Persist(CachedPayload<TPayload> cache)
         {
+            if (cache.IsEmpty())
+            {
+                return;
+            }
+
             var serializedEvents = JsonConvert.SerializeObject(cache);
             File.WriteAllText(FilePath, serializedEvents);
         }
@@ -54,7 +59,7 @@ namespace Unity.Services.Core.Telemetry.Internal
             {
                 var rawPersistedCache = File.ReadAllText(FilePath);
                 persistedCache = JsonConvert.DeserializeObject<CachedPayload<TPayload>>(rawPersistedCache);
-                return true;
+                return persistedCache != null;
             }
             catch (Exception e)
             {

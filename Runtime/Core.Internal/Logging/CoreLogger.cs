@@ -8,7 +8,7 @@ namespace Unity.Services.Core.Internal
     static class CoreLogger
     {
         const string k_Tag = "[ServicesCore]";
-        const string k_VerboseLoggingDefine = "ENABLE_UNITY_SERVICES_CORE_VERBOSE_LOGGING";
+        internal const string VerboseLoggingDefine = "ENABLE_UNITY_SERVICES_CORE_VERBOSE_LOGGING";
 
         public static void Log(object message) => Debug.unityLogger.Log(k_Tag, message);
         public static void LogWarning(object message) => Debug.unityLogger.LogWarning(k_Tag, message);
@@ -21,7 +21,7 @@ namespace Unity.Services.Core.Internal
         public static void LogAssertion(object message) => Debug.unityLogger.Log(LogType.Assert, k_Tag, message);
 
 #if !ENABLE_UNITY_SERVICES_VERBOSE_LOGGING
-        [Conditional(k_VerboseLoggingDefine)]
+        [Conditional(VerboseLoggingDefine)]
 #endif
         public static void LogVerbose(object message) => Debug.unityLogger.Log(k_Tag, message);
     }

@@ -21,8 +21,8 @@ namespace Unity.Services.Core
             {
                 if (!UnityThreadUtils.IsRunningOnUnityThread)
                 {
-                    throw new ServicesInitializationException("You are attempting to access UnityServices.State in a non-Unity Thread." +
-                        " UnityServices.State can only be accessed in Unity Thread");
+                    throw new ServicesInitializationException("You are attempting to access UnityServices.State from a non-Unity Thread." +
+                        " UnityServices.State can only be accessed from Unity Thread");
                 }
 
                 if (Instance != null)
@@ -67,8 +67,8 @@ namespace Unity.Services.Core
         {
             if (!UnityThreadUtils.IsRunningOnUnityThread)
             {
-                throw new ServicesInitializationException("You are attempting to initialize Unity Services in a non-Unity Thread." +
-                    " Unity Services can only be initialized in Unity Thread");
+                throw new ServicesInitializationException("You are attempting to initialize Unity Services from a non-Unity Thread." +
+                    " Unity Services can only be initialized from Unity Thread");
             }
 
             if (!Application.isPlaying)

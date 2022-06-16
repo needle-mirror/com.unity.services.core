@@ -15,6 +15,8 @@ using Unity.Services.Core.Threading.Internal;
 using UnityEngine;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 using SuppressMessage = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Unity.Services.Core.Registration
 {
@@ -92,9 +94,9 @@ namespace Unity.Services.Core.Registration
                 if (string.IsNullOrEmpty(CloudProjectId.GetCloudProjectId()))
                 {
                     //TODO: actually throw the exception when we make a major version release
-                    var exception = new UnityProjectNotLinkedException("To use Unity's dashboard services, you need to link your Unity project to a project ID. To do this, go to Project Settings to select your organization, select your project and then link a project ID. You also need to make sure your organization has access to the required products. Visit https://dashboard.unity3d.com to sign up.");
+                    var exception = new UnityProjectNotLinkedException("To use Unity's dashboard services, you need to link your Unity project to a project ID. To do this, go to Project Settings to select your organization, select your project and then link a project ID. You also need to make sure your organization has access to the required products. Visit https://dashboard.unity3d.com to sign up. This will throw an exception in future release.");
                     CoreDiagnostics.Instance.SendCorePackageInitDiagnostics(exception);
-                    CoreLogger.LogWarning(exception.Message);
+                    CoreLogger.LogError(exception.Message);
                 }
 
                 InitializeDiagnostics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
@@ -129,6 +131,8 @@ namespace Unity.Services.Core.Registration
                 registry.RegisterServiceComponent<IMetricsFactory>(MetricsFactory);
                 registry.RegisterServiceComponent<IUnityThreadUtils>(UnityThreadUtils);
             }
+
+            LogInitializationInfoJson();
         }
 
         bool HaveInitOptionsChanged()
@@ -273,6 +277,29 @@ namespace Unity.Services.Core.Registration
             InitializeCloudProjectId();
             InitializeDiagnostics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
             return DiagnosticsFactory;
+        }
+
+        /// <summary>
+        /// Provides a way for developers to debug their ugs configuration by logging a public string in json format
+        /// containing information relative to service initialization, project configuration and system.
+        /// </summary>
+#if !ENABLE_UNITY_SERVICES_VERBOSE_LOGGING
+        [Conditional(CoreLogger.VerboseLoggingDefine)]
+#endif
+        void LogInitializationInfoJson()
+        {
+            JObject result = new JObject();
+            JObject diagnostics = JObject.Parse(JsonConvert.SerializeObject(DiagnosticsFactory.CommonTags));
+            JObject projectConfig = JObject.Parse(ProjectConfig.ToJson());
+            JObject installationId = JObject.Parse($@"{{""installation_id"": ""{InstallationId.Identifier}""}}");
+
+            diagnostics.Merge(installationId);
+
+            // Encapsulate diagnostics and project config data under a parent
+            result.Add("CommonSettings", diagnostics);
+            result.Add("ServicesRuntimeSettings", projectConfig);
+
+            CoreLogger.LogVerbose(result.ToString());
         }
 
         public async Task<string> GetSerializedProjectConfigurationAsync()

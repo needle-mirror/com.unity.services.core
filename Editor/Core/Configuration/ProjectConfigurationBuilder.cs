@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
+using UnityEngine;
 
 namespace Unity.Services.Core.Configuration.Editor
 {
@@ -79,9 +80,9 @@ namespace Unity.Services.Core.Configuration.Editor
 
         public static void AddConfigToProject(string config)
         {
-            if (!AssetDatabase.IsValidFolder(ConfigurationUtils.StreamingAssetsPath))
+            if (!Directory.Exists(Application.streamingAssetsPath))
             {
-                AssetDatabase.CreateFolder("Assets", ConfigurationUtils.StreamingAssetsFolder);
+                Directory.CreateDirectory(Application.streamingAssetsPath);
             }
 
             File.WriteAllText(ConfigurationUtils.RuntimeConfigFullPath, config);

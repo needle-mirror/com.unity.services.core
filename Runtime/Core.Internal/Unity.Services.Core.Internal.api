@@ -60,7 +60,7 @@ namespace Unity.Services.Core.Internal
         public CircularDependencyException(string message) {}
     }
 
-    public struct CoreRegistration
+    [System.Runtime.CompilerServices.IsReadOnly] public struct CoreRegistration
     {
         public Unity.Services.Core.Internal.CoreRegistration DependsOn<T>() where T : Unity.Services.Core.Internal.IServiceComponent;
         public Unity.Services.Core.Internal.CoreRegistration OptionallyDependsOn<T>() where T : Unity.Services.Core.Internal.IServiceComponent;
