@@ -5,6 +5,8 @@ namespace Unity.Services.Core.Telemetry.Internal
     [Serializable]
     class TelemetryConfig
     {
+        public const int MaxMetricCountPerPayloadLimit = 295;
+
         public string TargetUrl;
 
         public string ServicePath;

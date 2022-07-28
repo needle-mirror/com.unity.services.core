@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Environments.Internal;
@@ -92,7 +93,6 @@ namespace Unity.Services.Core.Telemetry.Internal
             const int defaultPayloadExpirationSeconds = 3600;
             const int defaultPayloadSendingMaxIntervalSeconds = 600;
             const int defaultSafetyPersistenceIntervalSeconds = 300;
-            const int defaultMaxMetricCountPerPayload = 2000;
 
             var config = new TelemetryConfig
             {
@@ -101,7 +101,7 @@ namespace Unity.Services.Core.Telemetry.Internal
                 PayloadExpirationSeconds = projectConfiguration.GetInt(TelemetryConfigKeys.PayloadExpirationSeconds, defaultPayloadExpirationSeconds),
                 PayloadSendingMaxIntervalSeconds = projectConfiguration.GetInt(TelemetryConfigKeys.PayloadSendingMaxIntervalSeconds, defaultPayloadSendingMaxIntervalSeconds),
                 SafetyPersistenceIntervalSeconds = projectConfiguration.GetInt(TelemetryConfigKeys.SafetyPersistenceIntervalSeconds, defaultSafetyPersistenceIntervalSeconds),
-                MaxMetricCountPerPayload = projectConfiguration.GetInt(TelemetryConfigKeys.MaxMetricCountPerPayload, defaultMaxMetricCountPerPayload),
+                MaxMetricCountPerPayload = Math.Min(TelemetryConfig.MaxMetricCountPerPayloadLimit, projectConfiguration.GetInt(TelemetryConfigKeys.MaxMetricCountPerPayload, TelemetryConfig.MaxMetricCountPerPayloadLimit)),
             };
             return config;
         }

@@ -25,6 +25,8 @@ namespace Unity.Services.Core.Registration
     {
         internal const string CorePackageName = "com.unity.services.core";
 
+        internal const string ProjectUnlinkMessage =
+            "To use Unity's dashboard services, you need to link your Unity project to a project ID. To do this, go to Project Settings to select your organization, select your project and then link a project ID. You also need to make sure your organization has access to the required products. Visit https://dashboard.unity3d.com to sign up.";
         internal ActionScheduler ActionScheduler { get; private set; }
 
         internal InstallationId InstallationId { get; private set; }
@@ -33,7 +35,7 @@ namespace Unity.Services.Core.Registration
 
         internal Environments.Internal.Environments Environments { get; private set; }
 
-        internal CloudProjectId CloudProjectId { get; private set; }
+        internal ICloudProjectId CloudProjectId { get; private set; }
 
         internal IDiagnosticsFactory DiagnosticsFactory { get; private set; }
 
@@ -94,7 +96,7 @@ namespace Unity.Services.Core.Registration
                 if (string.IsNullOrEmpty(CloudProjectId.GetCloudProjectId()))
                 {
                     //TODO: actually throw the exception when we make a major version release
-                    var exception = new UnityProjectNotLinkedException("To use Unity's dashboard services, you need to link your Unity project to a project ID. To do this, go to Project Settings to select your organization, select your project and then link a project ID. You also need to make sure your organization has access to the required products. Visit https://dashboard.unity3d.com to sign up. This will throw an exception in future release.");
+                    var exception = new UnityProjectNotLinkedException(ProjectUnlinkMessage);
                     CoreDiagnostics.Instance.SendCorePackageInitDiagnostics(exception);
                     CoreLogger.LogError(exception.Message);
                 }
@@ -226,12 +228,12 @@ namespace Unity.Services.Core.Registration
             };
         }
 
-        internal void InitializeCloudProjectId()
+        internal void InitializeCloudProjectId(ICloudProjectId cloudProjectId = null)
         {
             if (!(CloudProjectId is null))
                 return;
 
-            CloudProjectId = new CloudProjectId();
+            CloudProjectId = cloudProjectId ?? new CloudProjectId();
         }
 
         internal void InitializeDiagnostics(

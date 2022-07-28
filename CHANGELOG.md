@@ -5,6 +5,17 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.4.3] - 2022-07-28
+
+### Fixed
+
+- Added diagnostic message length limit and telemetry count limit, so telemetry payload will not be rejected by telemetry service.
+
+### Changed
+
+- Telemetry logs now use the `ENABLE_UNITY_SERVICES_CORE_TELEMETRY_LOGGING` define instead
+  of `ENABLE_UNITY_SERVICES_CORE_VERBOSE_LOGGING`.
+
 ## [1.4.2] - 2022-06-16
 
 ### Changed
@@ -13,14 +24,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- Log a JSON containing the common configuration shared among all services for debugging purposes when using ENABLE_UNITY_SERVICES_VERBOSE_LOGGING as a scripting define
+- Log a JSON containing the common configuration shared among all services for debugging purposes when
+  using `ENABLE_UNITY_SERVICES_CORE_VERBOSE_LOGGING` as a scripting define.
+- Log warning when building a project with core package included and without linking the project in project settings.
 
 ### Fixed
 
 - NullReferenceException while telemetry was provided an empty file, fixed by introducing a null check
 - DirectoryNotFoundException happened inconsistently on Switch, fixed by resolving racing condition issue
-
-## [1.4.2-pre.4] - 2022-05-31
 
 ## [1.4.2-pre.2] - 2022-05-27
 
@@ -53,15 +64,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Newtonsoft package dependency update to 3.0.2. 
-
+- Newtonsoft package dependency update to 3.0.2.
 
 ## [1.3.0] - 2022-03-21
 
 ### Added
 
-- Add QoS public interface: `IQosResults` and return type `QosResult`, to provide QoS functionality to other
-  packages
+- Add QoS public interface: `IQosResults` and return type `QosResult`, to provide QoS functionality to other packages
 
 ### Fixed
 

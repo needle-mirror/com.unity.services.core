@@ -39,12 +39,7 @@ namespace Unity.Services.Core
             }
         }
 
-        /// <summary>
-        /// Single entry point to initialize all used services.
-        /// </summary>
-        /// <returns>
-        /// Return a handle to the initialization operation.
-        /// </returns>
+        /// <inheritdoc cref="InitializeAsync(InitializationOptions)"/>
         public static Task InitializeAsync()
         {
             return InitializeAsync(new InitializationOptions());
@@ -56,6 +51,15 @@ namespace Unity.Services.Core
         /// <param name="options">
         /// The options to customize services initialization.
         /// </param>
+        /// <exception cref="ServicesInitializationException">
+        /// Exception when there's an error during services initialization
+        /// </exception>
+        /// <exception cref="UnityProjectNotLinkedException">
+        /// Exception when the project is not linked to a cloud project id
+        /// </exception>
+        /// <exception cref="CircularDependencyException">
+        /// Exception when two registered <see cref="IInitializablePackage"/> depend on the other.
+        /// </exception>
         /// <returns>
         /// Return a handle to the initialization operation.
         /// </returns>

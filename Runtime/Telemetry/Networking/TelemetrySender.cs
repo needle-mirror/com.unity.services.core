@@ -54,7 +54,7 @@ namespace Unity.Services.Core.Telemetry.Internal
                 var request = CreateRequest(serializedPayload);
 
                 sendCount++;
-                CoreLogger.LogVerbose($"Attempt #{sendCount.ToString()} to send {typeof(TPayload).Name}.");
+                CoreLogger.LogTelemetry($"Attempt #{sendCount.ToString()} to send {typeof(TPayload).Name}.");
 
                 m_RequestSender.SendRequest(request, OnRequestCompleted);
             }
@@ -63,7 +63,7 @@ namespace Unity.Services.Core.Telemetry.Internal
             {
                 if (webRequest.IsSuccess)
                 {
-                    CoreLogger.LogVerbose($"{typeof(TPayload).Name} sent successfully");
+                    CoreLogger.LogTelemetry($"{typeof(TPayload).Name} sent successfully");
                     completionSource.SetResult(null);
                 }
                 else if (m_RetryPolicy.CanRetry(webRequest, sendCount))
@@ -75,7 +75,9 @@ namespace Unity.Services.Core.Telemetry.Internal
                 {
                     var errorMessage = $"Error: {webRequest.ErrorMessage}\nBody: {webRequest.ErrorBody}";
                     completionSource.TrySetException(new Exception(errorMessage));
-                    CoreLogger.LogVerbose($"{typeof(TPayload).Name} couldn't be sent after {sendCount.ToString()} tries.\n{errorMessage}");
+                    CoreLogger.LogTelemetry(
+                        $"{typeof(TPayload).Name} couldn't be sent after {sendCount.ToString()} tries."
+                        + $"\n{errorMessage}");
                 }
             }
         }

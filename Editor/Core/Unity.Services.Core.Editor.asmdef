@@ -5,7 +5,8 @@
         "Unity.Services.Core.Networking",
         "Unity.Services.Core.Internal",
         "Unity.Services.Core.Configuration.Editor",
-        "Unity.Services.Core.Telemetry"
+        "Unity.Services.Core.Telemetry",
+        "Unity.Services.Core.Registration"
     ],
     "includePlatforms": [
         "Editor"

@@ -8,6 +8,8 @@ namespace Unity.Services.Core.Telemetry.Internal
 
         public const string Platform = "platform";
 
+        public const string Engine = "engine";
+
         public const string UnityVersion = "unity_version";
 
         public const string PackageName = "package_name";

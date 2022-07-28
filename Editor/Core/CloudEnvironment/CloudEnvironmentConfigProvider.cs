@@ -40,7 +40,7 @@ namespace Unity.Services.Core.Editor
         {
             if (cloudEnvironment != null)
             {
-                builder?.SetString(k_CloudEnvironmentKey, cloudEnvironment, true);
+                builder?.SetString(k_CloudEnvironmentKey, cloudEnvironment, false);
             }
         }
     }

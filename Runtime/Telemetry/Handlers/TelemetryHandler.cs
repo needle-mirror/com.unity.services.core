@@ -107,6 +107,7 @@ namespace Unity.Services.Core.Telemetry.Internal
             commonTags[TagKeys.ApplicationInstallMode] = Application.installMode.ToString();
             commonTags[TagKeys.OperatingSystem] = FormatOperatingSystemInfo(SystemInfo.operatingSystem);
             commonTags[TagKeys.Platform] = Application.platform.ToString();
+            commonTags[TagKeys.Engine] = "Unity";
             commonTags[TagKeys.UnityVersion] = Application.unityVersion;
         }
 
@@ -147,7 +148,8 @@ namespace Unity.Services.Core.Telemetry.Internal
 
         public void Register(TEvent telemetryEvent)
         {
-            CoreLogger.LogVerbose($"Cached the {typeof(TEvent).Name} event: {JsonConvert.SerializeObject(telemetryEvent)}");
+            CoreLogger.LogTelemetry(
+                $"Cached the {typeof(TEvent).Name} event: {JsonConvert.SerializeObject(telemetryEvent)}");
             Cache.Add(telemetryEvent);
 
             if (!IsCacheFull())

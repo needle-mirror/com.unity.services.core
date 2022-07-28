@@ -1,5 +1,8 @@
 using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("Unity.Services.Core.Editor")]
+[assembly: InternalsVisibleTo("Unity.Services.Core.TestUtils")]
+
 #if UNITY_INCLUDE_TESTS
 [assembly: InternalsVisibleTo("Unity.Services.Core.Tests")]
 [assembly: InternalsVisibleTo("Unity.Services.Core.EditorTests")]
