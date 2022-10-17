@@ -19,6 +19,7 @@ namespace Unity.Services.Core.Analytics
         /// Return <paramref name="self"/>.
         /// Fluent interface pattern to make it easier to chain set options operations.
         /// </returns>
+        [Obsolete("SetAnalyticsUserId is deprecated. Please use UnityServices.ExternalUserId instead.", false)]
         public static InitializationOptions SetAnalyticsUserId(this InitializationOptions self, string id)
         {
             if (string.IsNullOrEmpty(id))

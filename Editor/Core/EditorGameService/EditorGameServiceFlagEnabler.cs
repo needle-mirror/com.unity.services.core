@@ -61,7 +61,17 @@ namespace Unity.Services.Core.Editor
         /// <summary>
         /// The event fired when the web request that handles setting the service flag is complete
         /// </summary>
+        /// <remarks>
+        /// This event is only raised when the constant <code>ENABLE_EDITOR_GAME_SERVICES</code> is defined.
+        /// Kept outside of this define to avoid an API breaking change.
+        /// </remarks>
+#if !ENABLE_EDITOR_GAME_SERVICES
+#pragma warning disable CS0067
+#endif
         public event Action ServiceFlagRequestComplete;
+#if !ENABLE_EDITOR_GAME_SERVICES
+#pragma warning restore CS0067
+#endif
 
         void SetFlagStatus(bool status)
         {
@@ -71,40 +81,44 @@ namespace Unity.Services.Core.Editor
                 throw new InvalidEnumArgumentException("FlagName is null or empty. Set a proper value to properly manage the service flags.");
             }
 
-            if (CloudProjectSettings.projectBound)
-            {
-                if (m_ServiceFlagEndpoint == null)
-                {
-                    m_ServiceFlagEndpoint = new ServiceFlagEndpoint();
-                }
-
-                var configAsyncOp = m_ServiceFlagEndpoint.GetConfiguration();
-                configAsyncOp.Completed += asyncEndpointResponse => OnEndpointConfigurationReceived(asyncEndpointResponse, status);
-            }
-#endif
-        }
-
-        void OnEndpointConfigurationReceived(IAsyncOperation<ServiceFlagEndpointConfiguration> endpointResponse, bool status)
-        {
-            if (endpointResponse?.Result == null)
+            if (!CloudProjectSettings.projectBound)
             {
                 return;
             }
 
-            var uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(endpointResponse.Result.BuildPayload(FlagName, status)));
-            var serviceFlagRequest = new UnityWebRequest(url: endpointResponse.Result.BuildServiceFlagUrl(CloudProjectSettings.projectId),
-                UnityWebRequest.kHttpVerbPUT,
-                null,
-                uploadHandler);
-            serviceFlagRequest.SetRequestHeader("AUTHORIZATION", $"Bearer {CloudProjectSettings.accessToken}");
-            serviceFlagRequest.SetRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            serviceFlagRequest.SendWebRequest().completed += async => { OnServiceFlagRequestCompleted(serviceFlagRequest); };
-        }
+            if (m_ServiceFlagEndpoint == null)
+            {
+                m_ServiceFlagEndpoint = new ServiceFlagEndpoint();
+            }
 
-        void OnServiceFlagRequestCompleted(UnityWebRequest webRequest)
-        {
-            webRequest?.Dispose();
-            ServiceFlagRequestComplete?.Invoke();
+            var configAsyncOp = m_ServiceFlagEndpoint.GetConfiguration();
+            configAsyncOp.Completed += OnEndpointConfigurationReceived;
+
+            void OnEndpointConfigurationReceived(IAsyncOperation<ServiceFlagEndpointConfiguration> endpointResponse)
+            {
+                if (endpointResponse?.Result == null)
+                {
+                    return;
+                }
+
+                var uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(endpointResponse.Result.BuildPayload(FlagName, status)));
+                var serviceFlagRequest = new UnityWebRequest(
+                    url: endpointResponse.Result.BuildServiceFlagUrl(CloudProjectSettings.projectId),
+                    UnityWebRequest.kHttpVerbPUT,
+                    null,
+                    uploadHandler);
+                serviceFlagRequest.SetRequestHeader("AUTHORIZATION", $"Bearer {CloudProjectSettings.accessToken}");
+                serviceFlagRequest.SetRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                serviceFlagRequest.SendWebRequest().completed += OnServiceFlagRequestCompleted;
+            }
+
+            void OnServiceFlagRequestCompleted(UnityEngine.AsyncOperation operation)
+            {
+                ((UnityWebRequestAsyncOperation)operation).webRequest.Dispose();
+                ServiceFlagRequestComplete?.Invoke();
+            }
+
+#endif
         }
     }
 }

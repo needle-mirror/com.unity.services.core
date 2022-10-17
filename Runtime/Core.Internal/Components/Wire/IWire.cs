@@ -1,12 +1,17 @@
 using System;
-using System.Threading.Tasks;
 using Unity.Services.Core.Internal;
+#if UNITY_2020_2_OR_NEWER
+using UnityEngine.Scripting;
+#endif
 
 namespace Unity.Services.Wire.Internal
 {
     /// <summary>
     /// IWire allows the creation of disposable <see cref="IChannel"/> objects.
     /// </summary>
+#if UNITY_2020_2_OR_NEWER
+    [RequireImplementors]
+#endif
     public interface IWire : IServiceComponent
     {
         /// <summary>

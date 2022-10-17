@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.PackageManager;
 using CanBeNull = JetBrains.Annotations.CanBeNullAttribute;
 
@@ -11,10 +13,13 @@ namespace Unity.Services.Core.Editor
 
         public string Version;
 
-        public PackageConfig([CanBeNull] PackageInfo packageInfo)
+        public List<string> InitializerNames;
+
+        public PackageConfig([CanBeNull] PackageInfo packageInfo, IEnumerable<Type> initializerTypes)
         {
             Name = packageInfo?.name;
             Version = packageInfo?.version;
+            InitializerNames = initializerTypes.Select(x => x.AssemblyQualifiedName).ToList();
         }
     }
 }

@@ -11,12 +11,14 @@ namespace Unity.Services.Core.Editor
         public ProjectState GetProjectState()
         {
 #if ENABLE_EDITOR_GAME_SERVICES
-            return new ProjectState(CloudProjectSettings.userId, CloudProjectSettings.userName, CloudProjectSettings.accessToken,
+            return new ProjectState(
+                CloudProjectSettings.userId, CloudProjectSettings.userName, CloudProjectSettings.accessToken,
                 CloudProjectSettings.projectId, CloudProjectSettings.projectName, CloudProjectSettings.organizationId,
-                CloudProjectSettings.organizationName, CloudProjectSettings.coppaCompliance, CloudProjectSettings.projectBound,
-                IsInternetReachable(), IsLoggedIn());
+                CloudProjectSettings.organizationName, CloudProjectSettings.coppaCompliance,
+                CloudProjectSettings.projectBound, IsInternetReachable(), IsLoggedIn());
 #else
-            return new ProjectState(CloudProjectSettings.userId, CloudProjectSettings.userName, CloudProjectSettings.accessToken,
+            return new ProjectState(
+                CloudProjectSettings.userId, CloudProjectSettings.userName, CloudProjectSettings.accessToken,
                 CloudProjectSettings.projectId, CloudProjectSettings.projectName, CloudProjectSettings.organizationId,
                 CloudProjectSettings.organizationName, IsProjectBound(), IsInternetReachable(), IsLoggedIn());
 #endif
@@ -28,17 +30,15 @@ namespace Unity.Services.Core.Editor
                 !CloudProjectSettings.userName.Equals(k_UserNameAnonymous, StringComparison.InvariantCultureIgnoreCase);
         }
 
+#if !ENABLE_EDITOR_GAME_SERVICES
         static bool IsProjectBound()
         {
-#if ENABLE_EDITOR_GAME_SERVICES
-            return CloudProjectSettings.projectBound;
-#else
             return !(string.IsNullOrEmpty(CloudProjectSettings.organizationId) ||
                 string.IsNullOrEmpty(CloudProjectSettings.organizationName) ||
                 string.IsNullOrEmpty(CloudProjectSettings.projectId) ||
                 string.IsNullOrEmpty(CloudProjectSettings.projectName));
-#endif
         }
+#endif
 
         static bool IsInternetReachable()
         {

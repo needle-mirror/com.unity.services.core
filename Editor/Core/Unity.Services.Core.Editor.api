@@ -7,7 +7,7 @@ namespace Unity.Services.Core.Editor
     {
         public AccessTokens() {}
         public static string GetGenesisToken();
-        [System.Diagnostics.DebuggerStepThrough] [System.Runtime.CompilerServices.AsyncStateMachine(typeof(Unity.Services.Core.Editor.AccessTokens.<GetServicesGatewayTokenAsync>d__4))] public System.Threading.Tasks.Task<string> GetServicesGatewayTokenAsync();
+        public System.Threading.Tasks.Task<string> GetServicesGatewayTokenAsync();
     }
 
     public class CdnConfiguredEndpoint<T> : Unity.Services.Core.Editor.EditorGameServiceRemoteConfiguration<T> where T : new()
@@ -15,28 +15,28 @@ namespace Unity.Services.Core.Editor
         public CdnConfiguredEndpoint() {}
     }
 
-    [System.Runtime.CompilerServices.Extension] public static class EditorGameServiceDashboardHelper
+    public static class EditorGameServiceDashboardHelper
     {
-        [System.Runtime.CompilerServices.Extension] public static void OpenDashboard(Unity.Services.Core.Editor.IEditorGameService editorGameService);
+        public static void OpenDashboard(this IEditorGameService editorGameService);
     }
 
-    public abstract class EditorGameServiceFlagEnabler : Unity.Services.Core.Editor.IEditorGameServiceEnabler
+    public abstract class EditorGameServiceFlagEnabler : IEditorGameServiceEnabler
     {
         public event System.Action ServiceFlagRequestComplete;
         protected abstract string FlagName { get; }
         protected EditorGameServiceFlagEnabler() {}
-        public virtual void Disable();
+        public void Disable();
         protected abstract void DisableLocalSettings();
-        public virtual void Enable();
+        public void Enable();
         protected abstract void EnableLocalSettings();
         public abstract bool IsEnabled();
     }
 
-    public sealed class EditorGameServiceRegistry : Unity.Services.Core.Editor.IEditorGameServiceRegistry
+    public sealed class EditorGameServiceRegistry : IEditorGameServiceRegistry
     {
-        public static Unity.Services.Core.Editor.EditorGameServiceRegistry Instance { get; }
-        protected virtual void Finalize();
-        public virtual Unity.Services.Core.Editor.IEditorGameService GetEditorGameService<TIdentifier>() where TIdentifier : System.ValueType, Unity.Services.Core.Editor.IEditorGameServiceIdentifier, new();
+        public static EditorGameServiceRegistry Instance { get; }
+        protected override void Finalize();
+        public IEditorGameService GetEditorGameService<TIdentifier>() where TIdentifier : struct, IEditorGameServiceIdentifier, new();
     }
 
     public class EditorGameServiceRemoteConfiguration<T> where T : new()
@@ -49,7 +49,7 @@ namespace Unity.Services.Core.Editor
     public abstract class EditorGameServiceSettingsProvider : UnityEditor.SettingsProvider
     {
         protected abstract string Description { get; }
-        protected abstract Unity.Services.Core.Editor.IEditorGameService EditorGameService { get; }
+        protected abstract IEditorGameService EditorGameService { get; }
         protected abstract string Title { get; }
         protected EditorGameServiceSettingsProvider(string path, UnityEditor.SettingsScope scopes, System.Collections.Generic.IEnumerable<string> keywords = default(System.Collections.Generic.IEnumerable<string>)) {}
         protected static string GenerateProjectSettingsPath(string serviceName);
@@ -59,29 +59,29 @@ namespace Unity.Services.Core.Editor
 
     public interface IEditorGameService
     {
-        public abstract Unity.Services.Core.Editor.IEditorGameServiceEnabler Enabler { get; }
-        public abstract bool HasDashboard { get; }
-        public abstract Unity.Services.Core.Editor.IEditorGameServiceIdentifier Identifier { get; }
-        public abstract string Name { get; }
-        public abstract bool RequiresCoppaCompliance { get; }
-        public abstract string GetFormattedDashboardUrl();
+        public IEditorGameServiceEnabler Enabler { get; }
+        public bool HasDashboard { get; }
+        public IEditorGameServiceIdentifier Identifier { get; }
+        public string Name { get; }
+        public bool RequiresCoppaCompliance { get; }
+        public string GetFormattedDashboardUrl();
     }
 
     public interface IEditorGameServiceEnabler
     {
-        public abstract void Disable();
-        public abstract void Enable();
-        public abstract bool IsEnabled();
+        public void Disable();
+        public void Enable();
+        public bool IsEnabled();
     }
 
     public interface IEditorGameServiceIdentifier
     {
-        public abstract string GetKey();
+        public string GetKey();
     }
 
     public interface IEditorGameServiceRegistry
     {
-        public abstract Unity.Services.Core.Editor.IEditorGameService GetEditorGameService<T>() where T : System.ValueType, Unity.Services.Core.Editor.IEditorGameServiceIdentifier, new();
+        public IEditorGameService GetEditorGameService<T>() where T : struct, IEditorGameServiceIdentifier, new();
     }
 
     public static class PlatformSupportUiHelper
@@ -94,11 +94,11 @@ namespace Unity.Services.Core.Editor.OrganizationHandler
 {
     public interface IOrganizationHandler
     {
-        public abstract string Key { get; }
+        public string Key { get; }
     }
 
     public static class OrganizationProvider
     {
-        public static Unity.Services.Core.Editor.OrganizationHandler.IOrganizationHandler Organization { get; set; }
+        public static IOrganizationHandler Organization { get; set; }
     }
 }

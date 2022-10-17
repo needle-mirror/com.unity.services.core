@@ -2,8 +2,12 @@ namespace Unity.Services.Core.Device
 {
     class UnityAdsIdentifier : IUserIdentifierProvider
     {
+#if UNITY_ANDROID
         const string k_AndroidSettingsFile = "unityads-installinfo";
+#endif
+#if UNITY_ANDROID || UNITY_IOS
         const string k_IdfiKey = "unityads-idfi";
+#endif
 
         public string UserId
         {

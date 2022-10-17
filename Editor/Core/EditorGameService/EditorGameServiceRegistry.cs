@@ -4,7 +4,6 @@ using System.Data;
 using System.Linq;
 using UnityEditor;
 using Unity.Services.Core.Internal;
-using UnityEngine;
 
 namespace Unity.Services.Core.Editor
 {
@@ -13,29 +12,27 @@ namespace Unity.Services.Core.Editor
     /// </summary>
     public sealed class EditorGameServiceRegistry : IEditorGameServiceRegistry
     {
-        internal Dictionary<string, IEditorGameService> Services;
-        IProjectStateRequest m_ProjectStateRequest;
-        IProjectStateHelper m_ProjectStateHelper;
-        IServiceFlagRequest m_ServiceFlagRequest;
+        internal readonly Dictionary<string, IEditorGameService> Services;
+        readonly IProjectStateRequest m_ProjectStateRequest;
+        readonly IProjectStateHelper m_ProjectStateHelper;
+        readonly IServiceFlagRequest m_ServiceFlagRequest;
         ProjectState? m_CachedProjectState;
-        UserRoleHandler m_UserRoleHandler;
 
-        internal UserRoleHandler UserRoleHandler => m_UserRoleHandler;
+        internal UserRoleHandler UserRoleHandler { get; }
 
         /// <summary>
         /// Default constructor for the registry.
         /// </summary>
-        internal EditorGameServiceRegistry(IProjectStateRequest projectStateRequest = null,
-                                           IProjectStateHelper projectStateHelper = null,
-                                           IServiceFlagRequest serviceFlagRequest = null,
-                                           UserRoleHandler userRoleHandler = null)
+        internal EditorGameServiceRegistry(
+            IProjectStateRequest projectStateRequest = null, IProjectStateHelper projectStateHelper = null,
+            IServiceFlagRequest serviceFlagRequest = null, UserRoleHandler userRoleHandler = null)
         {
             Services = new Dictionary<string, IEditorGameService>();
             m_ProjectStateRequest = projectStateRequest;
             m_CachedProjectState = m_ProjectStateRequest?.GetProjectState();
             m_ProjectStateHelper = projectStateHelper;
             m_ServiceFlagRequest = serviceFlagRequest;
-            m_UserRoleHandler = userRoleHandler;
+            UserRoleHandler = userRoleHandler;
         }
 
         /// <summary>
@@ -85,7 +82,7 @@ namespace Unity.Services.Core.Editor
         ~EditorGameServiceRegistry()
         {
             StopListeningToProjectStateChanges();
-            m_UserRoleHandler?.Dispose();
+            UserRoleHandler?.Dispose();
         }
 
         void StopListeningToProjectStateChanges()
@@ -98,80 +95,88 @@ namespace Unity.Services.Core.Editor
 
         void VerifyIfProjectBindChanges()
         {
-            if (m_ProjectStateRequest != null && m_ProjectStateHelper != null)
+            if (m_ProjectStateRequest == null || m_ProjectStateHelper == null)
             {
-                var currentProjectState = m_ProjectStateRequest.GetProjectState();
-                if (m_ProjectStateHelper.IsProjectOnlyPartiallyBound(currentProjectState))
-                {
-                    return;
-                }
-                if (m_ProjectStateHelper.IsProjectBeingUnbound(m_CachedProjectState, currentProjectState))
-                {
-                    UpdateServicesForProjectUnbinding();
-                }
-                else if (m_ProjectStateHelper.IsProjectBeingBound(m_CachedProjectState, currentProjectState))
-                {
-                    UpdateServicesForProjectBinding();
-                }
-                m_CachedProjectState = currentProjectState;
+                return;
             }
+
+            var currentProjectState = m_ProjectStateRequest.GetProjectState();
+            if (m_ProjectStateHelper.IsProjectOnlyPartiallyBound(currentProjectState))
+            {
+                return;
+            }
+
+            if (m_ProjectStateHelper.IsProjectBeingUnbound(m_CachedProjectState, currentProjectState))
+            {
+                UpdateServicesForProjectUnbinding();
+            }
+            else if (m_ProjectStateHelper.IsProjectBeingBound(m_CachedProjectState, currentProjectState))
+            {
+                UpdateServicesForProjectBinding();
+            }
+
+            m_CachedProjectState = currentProjectState;
         }
 
         void UpdateServicesForProjectBinding()
         {
-            if (m_ServiceFlagRequest != null)
+            if (m_ServiceFlagRequest == null)
             {
-                var asyncOperation = m_ServiceFlagRequest.FetchServiceFlags();
-                asyncOperation.Completed += UpdateServiceActivation;
+                return;
             }
+
+            var asyncOperation = m_ServiceFlagRequest.FetchServiceFlags();
+            asyncOperation.Completed += UpdateServiceActivation;
         }
 
         void UpdateServiceActivation(IAsyncOperation<IDictionary<string, bool>> flagsAsyncOperation)
         {
-            foreach (var service in Services)
+            foreach (var service in Services.Values)
             {
-                var serviceFlagEnabler = service.Value.Enabler as EditorGameServiceFlagEnabler;
-                if (serviceFlagEnabler != null)
+                if (!(service.Enabler is EditorGameServiceFlagEnabler serviceFlagEnabler))
                 {
-                    var serviceFlags = flagsAsyncOperation.Result;
-                    var flagName = serviceFlagEnabler.GetFlagName();
-                    if (serviceFlags?.ContainsKey(flagName) ?? false)
-                    {
-                        if (serviceFlags[flagName])
-                        {
-                            serviceFlagEnabler.Enable();
-                        }
-                        else
-                        {
-                            serviceFlagEnabler.Disable();
-                        }
-                    }
+                    continue;
+                }
+
+                var serviceFlags = flagsAsyncOperation.Result;
+                var flagName = serviceFlagEnabler.GetFlagName();
+                if (!(serviceFlags?.ContainsKey(flagName) ?? false))
+                {
+                    continue;
+                }
+
+                if (serviceFlags[flagName])
+                {
+                    serviceFlagEnabler.Enable();
+                }
+                else
+                {
+                    serviceFlagEnabler.Disable();
                 }
             }
         }
 
         void UpdateServicesForProjectUnbinding()
         {
-            foreach (var service in Services)
+            var serviceEnablers = Services.Values
+                .Where(service => service.Enabler != null)
+                .Select(service => service.Enabler);
+            foreach (var serviceEnabler in serviceEnablers)
             {
-                if (service.Value.Enabler != null)
+                if (serviceEnabler is EditorGameServiceFlagEnabler serviceFlagEnabler)
                 {
-                    var serviceFlagEnabler = service.Value.Enabler as EditorGameServiceFlagEnabler;
-                    if (serviceFlagEnabler != null)
-                    {
-                        serviceFlagEnabler.InternalDisableLocalSettings();
-                    }
-                    else
-                    {
-                        service.Value.Enabler.Disable();
-                    }
+                    serviceFlagEnabler.InternalDisableLocalSettings();
+                }
+                else
+                {
+                    serviceEnabler.Disable();
                 }
             }
         }
 
         internal static bool TryGetServiceFromType(Type type, out IEditorGameService service)
         {
-            var output = false;
+            bool output;
             service = null;
 
             try
@@ -209,17 +214,17 @@ namespace Unity.Services.Core.Editor
 
         internal void RegisterService(IEditorGameService editorGameService)
         {
-            if (IsIdentifierValid(editorGameService))
+            if (!IsIdentifierValid(editorGameService))
             {
-                if (Services.ContainsKey(editorGameService.Identifier.GetKey()))
-                {
-                    throw new DuplicateNameException($"The Identifier key {editorGameService.Identifier.GetKey()} already exists in the registry. Cannot register the service.");
-                }
-                else
-                {
-                    Services.Add(editorGameService.Identifier.GetKey(), editorGameService);
-                }
+                return;
             }
+
+            if (Services.ContainsKey(editorGameService.Identifier.GetKey()))
+            {
+                throw new DuplicateNameException($"The Identifier key {editorGameService.Identifier.GetKey()} already exists in the registry. Cannot register the service.");
+            }
+
+            Services.Add(editorGameService.Identifier.GetKey(), editorGameService);
         }
 
         /// <summary>

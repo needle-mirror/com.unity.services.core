@@ -7,32 +7,14 @@ using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Unity.Services.Core.Scheduler.Internal
 {
-    class ScheduledInvocation : IComparable<ScheduledInvocation>
-    {
-        public Action Action;
-        public DateTime InvocationTime;
-        public long ActionId;
-
-        public int CompareTo(ScheduledInvocation that)
-        {
-            var compareResult = InvocationTime.CompareTo(that.InvocationTime);
-
-            //Actions with same invocation time will execute in id order (schedule order).
-            if (compareResult == 0)
-            {
-                compareResult = ActionId.CompareTo(that.ActionId);
-            }
-
-            return compareResult;
-        }
-    }
-
     class ActionScheduler : IActionScheduler
     {
         readonly ITimeProvider m_TimeProvider;
 
+        readonly object m_Lock = new object();
+
         readonly MinimumBinaryHeap<ScheduledInvocation> m_ScheduledActions
-            = new MinimumBinaryHeap<ScheduledInvocation>();
+            = new MinimumBinaryHeap<ScheduledInvocation>(new ScheduledInvocationComparer());
 
         readonly Dictionary<long, ScheduledInvocation> m_IdScheduledInvocationMap
             = new Dictionary<long, ScheduledInvocation>();
@@ -82,34 +64,51 @@ namespace Unity.Services.Core.Scheduler.Internal
                 m_NextId = k_MinimumIdValue;
             }
 
-            m_ScheduledActions.Insert(scheduledInvocation);
-            m_IdScheduledInvocationMap.Add(scheduledInvocation.ActionId, scheduledInvocation);
+            lock (m_Lock)
+            {
+                m_ScheduledActions.Insert(scheduledInvocation);
+                m_IdScheduledInvocationMap.Add(scheduledInvocation.ActionId, scheduledInvocation);
+            }
 
             return scheduledInvocation.ActionId;
         }
 
         public void CancelAction(long actionId)
         {
-            if (!m_IdScheduledInvocationMap.ContainsKey(actionId))
+            lock (m_Lock)
             {
-                return;
-            }
+                if (!m_IdScheduledInvocationMap.ContainsKey(actionId))
+                {
+                    return;
+                }
 
-            var scheduledInvocation = m_IdScheduledInvocationMap[actionId];
-            m_ScheduledActions.Remove(scheduledInvocation);
-            m_IdScheduledInvocationMap.Remove(scheduledInvocation.ActionId);
+                var scheduledInvocation = m_IdScheduledInvocationMap[actionId];
+
+                m_ScheduledActions.Remove(scheduledInvocation);
+                m_IdScheduledInvocationMap.Remove(scheduledInvocation.ActionId);
+            }
         }
 
         internal void ExecuteExpiredActions()
         {
-            while (m_ScheduledActions.Count > 0
-                   && m_ScheduledActions.Min.InvocationTime <= m_TimeProvider.Now)
+            List<ScheduledInvocation> scheduledInvocationList = new List<ScheduledInvocation>();
+            lock (m_Lock)
             {
-                var scheduledInvocation = m_ScheduledActions.ExtractMin();
-                m_IdScheduledInvocationMap.Remove(scheduledInvocation.ActionId);
+                while (m_ScheduledActions.Count > 0
+                       && m_ScheduledActions.Min?.InvocationTime <= m_TimeProvider.Now)
+                {
+                    var scheduledInvocation = m_ScheduledActions.ExtractMin();
+                    scheduledInvocationList.Add(scheduledInvocation);
+                    m_ScheduledActions.Remove(scheduledInvocation);
+                    m_IdScheduledInvocationMap.Remove(scheduledInvocation.ActionId);
+                }
+            }
+
+            foreach (var scheduledInv in scheduledInvocationList)
+            {
                 try
                 {
-                    scheduledInvocation.Action();
+                    scheduledInv.Action();
                 }
                 catch (Exception e)
                 {

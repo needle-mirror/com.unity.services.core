@@ -38,7 +38,10 @@ namespace Unity.Services.Core.Configuration.Editor
         /// </returns>
         public ConfigurationBuilder SetBool(string key, bool value, bool isReadOnly = false)
         {
-            Values[key] = new ConfigurationEntry(value.ToString(CultureInfo.InvariantCulture), isReadOnly);
+            if (!string.IsNullOrEmpty(key))
+            {
+                Values[key] = new ConfigurationEntry(value.ToString(CultureInfo.InvariantCulture), isReadOnly);
+            }
             return this;
         }
 
@@ -76,7 +79,10 @@ namespace Unity.Services.Core.Configuration.Editor
         /// </returns>
         public ConfigurationBuilder SetInt(string key, int value, bool isReadOnly = false)
         {
-            Values[key] = new ConfigurationEntry(value.ToString(), isReadOnly);
+            if (!string.IsNullOrEmpty(key))
+            {
+                Values[key] = new ConfigurationEntry(value.ToString(), isReadOnly);
+            }
             return this;
         }
 
@@ -114,7 +120,10 @@ namespace Unity.Services.Core.Configuration.Editor
         /// </returns>
         public ConfigurationBuilder SetFloat(string key, float value, bool isReadOnly = false)
         {
-            Values[key] = new ConfigurationEntry(value.ToString(CultureInfo.InvariantCulture), isReadOnly);
+            if (!string.IsNullOrEmpty(key))
+            {
+                Values[key] = new ConfigurationEntry(value.ToString(CultureInfo.InvariantCulture), isReadOnly);
+            }
             return this;
         }
 
@@ -151,7 +160,10 @@ namespace Unity.Services.Core.Configuration.Editor
         /// </returns>
         public ConfigurationBuilder SetString(string key, string value, bool isReadOnly = false)
         {
-            Values[key] = new ConfigurationEntry(value, isReadOnly);
+            if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
+            {
+                Values[key] = new ConfigurationEntry(value, isReadOnly);
+            }
             return this;
         }
 

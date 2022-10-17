@@ -11,6 +11,7 @@ namespace Unity.Services.Core
     {
         internal static IUnityServices Instance { get; set; }
         internal static TaskCompletionSource<object> InstantiationCompletion { get; set; }
+        internal static ExternalUserIdProperty ExternalUserIdProperty = new ExternalUserIdProperty();
 
         /// <summary>
         /// Initialization state.
@@ -37,6 +38,16 @@ namespace Unity.Services.Core
 
                 return ServicesInitializationState.Uninitialized;
             }
+        }
+
+        /// <summary>
+        /// ExternalUserId.
+        /// Use this property to pass a user ID from a 3rd party identity provider to Unity Gaming Services
+        /// </summary>
+        public static string ExternalUserId
+        {
+            get => ExternalUserIdProperty.UserId;
+            set => ExternalUserIdProperty.UserId = value;
         }
 
         /// <inheritdoc cref="InitializeAsync(InitializationOptions)"/>

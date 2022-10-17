@@ -13,7 +13,7 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
         const string k_ProjectRedirectButtonText = "Go to Services window";
 #endif
 
-        public ProjectBindRedirectProjectSettingsUi(VisualElement parentElement)
+        public static void Load(VisualElement parentElement)
         {
             SetupUxmlAndUss(parentElement);
             SetupRedirectButton(parentElement);
@@ -36,7 +36,7 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
         static void AddProjectBindRedirectContentUI(VisualElement parentElement)
         {
             var contentContainer = parentElement.Q(className: ProjectBindRedirectUiConstants.UxmlClassNames.ContentContainer) ?? parentElement;
-            var contentUi = new ProjectBindRedirectContentUI(contentContainer);
+            ProjectBindRedirectContentUI.Load(contentContainer);
         }
 
         static void SetupRedirectButton(VisualElement containerElement)

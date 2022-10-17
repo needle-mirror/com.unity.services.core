@@ -5,6 +5,38 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.5.2] - 2022-10-17
+
+### Fixed
+
+- Core will no longer fail initialization when it fails to find a stripped service package.
+
+## [1.5.1] - 2022-10-06
+
+### Added
+
+- `UnityServices.ExternalUserId` which can be used to pass a user identifier from a third party provider to Unity Gaming Services
+
+### Fixed
+
+- Services Core failing to find all `IInitializablePackage` if an unity package implements it multiple times.
+
+## [1.5.0] - 2022-10-03
+
+### Added
+
+- All `IInitializablePackage` initialization time is now measured by Services Core.
+
+### Changed
+
+- `CoreRegistryInitializer` now throws a `ServicesInitializationException` instead of an explicit `NullReferenceException` when the dependency tree is null.
+- ActionScheduler updated to be thread safe
+
+### Fixed
+
+- A case where null configuration values were causing serialization issues
+- Issue with stripping when authentication APIs are not used.
+
 ## [1.4.3] - 2022-07-28
 
 ### Fixed

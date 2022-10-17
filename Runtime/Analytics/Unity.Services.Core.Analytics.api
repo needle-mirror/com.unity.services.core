@@ -3,8 +3,8 @@
 // make sure the XML doc file is present and located next to the scraped dll
 namespace Unity.Services.Core.Analytics
 {
-    [System.Runtime.CompilerServices.Extension] public static class AnalyticsOptionsExtensions
+    public static class AnalyticsOptionsExtensions
     {
-        [System.Runtime.CompilerServices.Extension] public static Unity.Services.Core.InitializationOptions SetAnalyticsUserId(Unity.Services.Core.InitializationOptions self, string id);
+        [System.Obsolete(@"SetAnalyticsUserId is deprecated. Please use UnityServices.ExternalUserId instead.", false)] public static InitializationOptions SetAnalyticsUserId(this InitializationOptions self, string id);
     }
 }

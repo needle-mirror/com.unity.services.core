@@ -94,16 +94,19 @@ namespace Unity.Services.Core.Internal
 
             var sortedPackageTypeHashes = new List<int>(dependencyTree.PackageTypeHashToInstance.Count);
 
+            List<PackageInitializationInfo> packageInitInfos;
             try
             {
                 SortPackages();
-                await InitializePackagesAsync();
+                packageInitInfos = await InitializePackagesAsync();
             }
             catch (Exception reason)
             {
                 FailServicesInitialization(reason);
                 throw;
             }
+
+            SendInitializationMetrics(packageInitInfos);
 
             SucceedServicesInitialization();
 
@@ -113,10 +116,10 @@ namespace Unity.Services.Core.Internal
                 sorter.SortRegisteredPackagesIntoTarget();
             }
 
-            async Task InitializePackagesAsync()
+            async Task<List<PackageInitializationInfo>> InitializePackagesAsync()
             {
                 var initializer = new CoreRegistryInitializer(Registry, sortedPackageTypeHashes);
-                await initializer.InitializeRegistryAsync();
+                return await initializer.InitializeRegistryAsync();
             }
 
             void FailServicesInitialization(Exception reason)
@@ -145,6 +148,14 @@ namespace Unity.Services.Core.Internal
 
                 Metrics.SendAllPackagesInitSuccessMetric();
                 Metrics.SendAllPackagesInitTimeMetric(initStopwatch.Elapsed.TotalSeconds);
+            }
+        }
+
+        internal void SendInitializationMetrics(List<PackageInitializationInfo> packageInitInfos)
+        {
+            foreach (var initInfo in packageInitInfos)
+            {
+                Metrics.SendInitTimeMetricForPackage(initInfo.PackageType, initInfo.InitializationTimeInSeconds);
             }
         }
 

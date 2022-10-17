@@ -5,8 +5,6 @@ using System.Linq;
 using Unity.Services.Core.Editor.ProjectBindRedirect;
 using UnityEditor;
 using UnityEditor.PackageManager;
-using UnityEngine;
-
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace Unity.Services.Core.Editor
@@ -14,6 +12,7 @@ namespace Unity.Services.Core.Editor
     static class ServiceInstallationListener
     {
         static IEditorGameServiceAnalyticsSender s_EditorGameServiceAnalyticsSender;
+
         static IEditorGameServiceAnalyticsSender EditorGameServiceAnalyticsSender
         {
             get
@@ -22,6 +21,7 @@ namespace Unity.Services.Core.Editor
                 {
                     s_EditorGameServiceAnalyticsSender = new EditorGameServiceAnalyticsSender();
                 }
+
                 return s_EditorGameServiceAnalyticsSender;
             }
         }
@@ -44,20 +44,21 @@ namespace Unity.Services.Core.Editor
         static void OnPackagesAdded(IEnumerable<PackageInfo> packageInfos)
         {
             var newServices = GetNewServices(packageInfos);
-            if (newServices.Any())
+            var gameServices = newServices.ToList();
+            if (!gameServices.Any())
             {
-                var request = new ProjectStateRequest();
-                var projectState = request.GetProjectState();
-                if (ShouldShowRedirect(projectState))
-                {
-                    List<string> installedPackages = new List<string>();
-                    foreach (var service in newServices)
-                    {
-                        installedPackages.Add(service.Name);
-                    }
-                    ProjectBindRedirectPopupWindow.CreateAndShowPopup(installedPackages, EditorGameServiceAnalyticsSender);
-                }
+                return;
             }
+
+            var request = new ProjectStateRequest();
+            var projectState = request.GetProjectState();
+            if (!ShouldShowRedirect(projectState))
+            {
+                return;
+            }
+
+            var installedPackages = gameServices.Select(service => service.Name).ToList();
+            ProjectBindRedirectPopupWindow.CreateAndShowPopup(installedPackages, EditorGameServiceAnalyticsSender);
         }
 
         internal static bool ShouldShowRedirect(ProjectState projectState)
@@ -67,44 +68,24 @@ namespace Unity.Services.Core.Editor
 
         static IEnumerable<IEditorGameService> GetNewServices(IEnumerable<PackageInfo> packageInfos)
         {
-            var output = new HashSet<IEditorGameService>();
             var serviceTypes = TypeCache.GetTypesDerivedFrom<IEditorGameService>();
-            foreach (var serviceType in serviceTypes)
-            {
-                if (IsTypeDefinedInPackages(serviceType, packageInfos))
-                {
-                    foreach (var kvp in EditorGameServiceRegistry.Instance.Services)
-                    {
-                        if (kvp.Value.GetType() == serviceType)
-                        {
-                            output.Add(kvp.Value);
-                        }
-                    }
-                }
-            }
+            var packages = packageInfos.ToList();
+            var editorGameServices = EditorGameServiceRegistry.Instance.Services.Values;
+            var newServices = serviceTypes.Where(serviceType => IsTypeDefinedInPackages(serviceType, packages))
+                .Select(serviceType => editorGameServices.Where(editorGameService => editorGameService.GetType() == serviceType))
+                .SelectMany(services => services);
 
-            return output;
+            return new HashSet<IEditorGameService>(newServices);
         }
 
         static bool IsTypeDefinedInPackages(Type type, IEnumerable<PackageInfo> packageInfos)
         {
-            var output = false;
-            foreach (var packageInfo in packageInfos)
-            {
-                if (IsTypeDefinedInPackage(type, packageInfo))
-                {
-                    output = true;
-                    break;
-                }
-            }
-
-            return output;
+            return packageInfos.Any(packageInfo => IsTypeDefinedInPackage(type, packageInfo));
         }
 
         static bool IsTypeDefinedInPackage(Type type, PackageInfo packageInfo)
         {
             var packageInfoFromAssembly = PackageInfo.FindForAssembly(type.Assembly);
-
             return ArePackageInfosEqual(packageInfoFromAssembly, packageInfo);
         }
 

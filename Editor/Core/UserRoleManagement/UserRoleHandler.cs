@@ -22,6 +22,8 @@ namespace Unity.Services.Core.Editor
 #endif
         }
 
+        ~UserRoleHandler() => Dispose();
+
         void OnProjectStateChanged()
         {
             var projectState = new ProjectStateRequest().GetProjectState();

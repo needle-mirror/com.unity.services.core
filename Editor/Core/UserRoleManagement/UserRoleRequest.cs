@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using Unity.Services.Core.Internal;
 using UnityEditor;
-using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Unity.Services.Core.Editor

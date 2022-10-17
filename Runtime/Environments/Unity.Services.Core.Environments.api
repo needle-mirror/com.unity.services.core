@@ -3,8 +3,8 @@
 // make sure the XML doc file is present and located next to the scraped dll
 namespace Unity.Services.Core.Environments
 {
-    [System.Runtime.CompilerServices.Extension] public static class EnvironmentsOptionsExtensions
+    public static class EnvironmentsOptionsExtensions
     {
-        [System.Runtime.CompilerServices.Extension] public static Unity.Services.Core.InitializationOptions SetEnvironmentName(Unity.Services.Core.InitializationOptions self, string environmentName);
+        public static InitializationOptions SetEnvironmentName(this InitializationOptions self, string environmentName);
     }
 }

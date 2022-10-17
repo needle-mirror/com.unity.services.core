@@ -35,6 +35,8 @@ namespace Unity.Services.Core.Registration
 
         internal Environments.Internal.Environments Environments { get; private set; }
 
+        internal ExternalUserId ExternalUserId { get; private set; }
+
         internal ICloudProjectId CloudProjectId { get; private set; }
 
         internal IDiagnosticsFactory DiagnosticsFactory { get; private set; }
@@ -58,7 +60,8 @@ namespace Unity.Services.Core.Registration
                 .ProvidesComponent<IProjectConfiguration>()
                 .ProvidesComponent<IMetricsFactory>()
                 .ProvidesComponent<IDiagnosticsFactory>()
-                .ProvidesComponent<IUnityThreadUtils>();
+                .ProvidesComponent<IUnityThreadUtils>()
+                .ProvidesComponent<IExternalUserId>();
         }
 
         /// <summary>
@@ -73,9 +76,6 @@ namespace Unity.Services.Core.Registration
         /// </returns>
         public async Task Initialize(CoreRegistry registry)
         {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
             try
             {
                 if (HaveInitOptionsChanged())
@@ -90,6 +90,8 @@ namespace Unity.Services.Core.Registration
                 InitializeActionScheduler();
 
                 await InitializeProjectConfigAsync(UnityServices.Instance.Options);
+
+                InitializeExternalUserId(ProjectConfig);
 
                 InitializeEnvironments(ProjectConfig);
                 InitializeCloudProjectId();
@@ -106,21 +108,19 @@ namespace Unity.Services.Core.Registration
                 CoreDiagnostics.Instance.SetProjectConfiguration(ProjectConfig.ToJson());
 
                 InitializeMetrics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
-                CoreMetrics.Instance.Metrics = MetricsFactory.Create(CorePackageName);
+                CoreMetrics.Instance.Initialize(ProjectConfig, MetricsFactory, GetType());
 
                 InitializeUnityThreadUtils();
 
                 // Register components as late as possible to provide them only when initialization succeeded.
                 RegisterProvidedComponents();
             }
-            catch (Exception reason)
+            catch (Exception reason) when (SendFailedInitDiagnostic(reason))
             {
-                CoreDiagnostics.Instance.SendCorePackageInitDiagnostics(reason);
-                throw;
+                // Shouldn't be actually called since predicate always return false.
             }
 
-            stopwatch.Stop();
-            CoreMetrics.Instance.SendCorePackageInitTimeMetric(stopwatch.Elapsed.TotalSeconds);
+            LogInitializationInfoJson();
 
             void RegisterProvidedComponents()
             {
@@ -132,9 +132,15 @@ namespace Unity.Services.Core.Registration
                 registry.RegisterServiceComponent<IDiagnosticsFactory>(DiagnosticsFactory);
                 registry.RegisterServiceComponent<IMetricsFactory>(MetricsFactory);
                 registry.RegisterServiceComponent<IUnityThreadUtils>(UnityThreadUtils);
+                registry.RegisterServiceComponent<IExternalUserId>(ExternalUserId);
             }
 
-            LogInitializationInfoJson();
+            // Fake predicate to avoid stack unwinding on rethrow.
+            bool SendFailedInitDiagnostic(Exception reason)
+            {
+                CoreDiagnostics.Instance.SendCorePackageInitDiagnostics(reason);
+                return false;
+            }
         }
 
         bool HaveInitOptionsChanged()
@@ -215,6 +221,26 @@ namespace Unity.Services.Core.Registration
             }
         }
 
+        internal void InitializeExternalUserId(IProjectConfiguration projectConfiguration)
+        {
+            // For backward compatibility, carry the analytics user id to external user id
+            // Only do that if the external user id is not set already.
+            // This should be removed once InitializationOptions.SetAnalyticsUserId is removed.
+            if (UnityServices.ExternalUserId == null)
+            {
+                var analyticsUserId = projectConfiguration.GetString("com.unity.services.core.analytics-user-id");
+                if (!string.IsNullOrEmpty(analyticsUserId))
+                {
+                    UnityServices.ExternalUserId = analyticsUserId;
+                }
+            }
+
+            if (!(ExternalUserId is null))
+                return;
+
+            ExternalUserId = new ExternalUserId();
+        }
+
         internal void InitializeEnvironments(IProjectConfiguration projectConfiguration)
         {
             if (!(Environments is null))
@@ -290,10 +316,10 @@ namespace Unity.Services.Core.Registration
 #endif
         void LogInitializationInfoJson()
         {
-            JObject result = new JObject();
-            JObject diagnostics = JObject.Parse(JsonConvert.SerializeObject(DiagnosticsFactory.CommonTags));
-            JObject projectConfig = JObject.Parse(ProjectConfig.ToJson());
-            JObject installationId = JObject.Parse($@"{{""installation_id"": ""{InstallationId.Identifier}""}}");
+            var result = new JObject();
+            var diagnostics = JObject.Parse(JsonConvert.SerializeObject(DiagnosticsFactory.CommonTags));
+            var projectConfig = JObject.Parse(ProjectConfig.ToJson());
+            var installationId = JObject.Parse($@"{{""installation_id"": ""{InstallationId.Identifier}""}}");
 
             diagnostics.Merge(installationId);
 

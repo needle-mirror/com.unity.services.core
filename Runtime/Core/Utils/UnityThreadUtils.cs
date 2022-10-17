@@ -8,7 +8,7 @@ namespace Unity.Services.Core
     {
         static int s_UnityThreadId;
 
-        internal static TaskScheduler UnityThreadScheduler;
+        internal static TaskScheduler UnityThreadScheduler { get; private set; }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void CaptureUnityThreadInfo()

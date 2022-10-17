@@ -16,10 +16,11 @@ namespace Unity.Services.Core.Editor
     /// If the config is successfully loaded it will be cached in SessionState
     /// </summary>
     /// <typeparam name="T">The type of object to deserialize</typeparam>
-    public class EditorGameServiceRemoteConfiguration<T> where T : new()
+    public class EditorGameServiceRemoteConfiguration<T>
+        where T : new()
     {
-        string m_ConfigUrl;
-        string m_SessionStateKey;
+        readonly string m_ConfigUrl;
+        readonly string m_SessionStateKey;
         T m_CachedConfiguration;
         bool m_IsConfigurationLoaded;
         IAsyncOperation<string> m_FetchOperation;
@@ -140,6 +141,7 @@ namespace Unity.Services.Core.Editor
                 {
                     config = LoadDefaultConfigurations();
                 }
+
                 operation.Succeed(config);
             }
         }
@@ -147,7 +149,7 @@ namespace Unity.Services.Core.Editor
         static string LoadDefaultConfigurations()
         {
             var productionFilePath = "Configuration/productionUrls.json";
-            var targetFile =  Path.Combine(IoUtils.packageDefaultPath, productionFilePath);
+            var targetFile = Path.Combine(IoUtils.packageDefaultPath, productionFilePath);
             string productionUrls = null;
             if (File.Exists(targetFile))
             {
@@ -180,7 +182,8 @@ namespace Unity.Services.Core.Editor
     /// Helper class for managing CDN based endpoint configurations
     /// </summary>
     /// <typeparam name="T">The object to populate with fields from the CDN JSON file</typeparam>
-    public class CdnConfiguredEndpoint<T> : EditorGameServiceRemoteConfiguration<T> where T : new()
+    public class CdnConfiguredEndpoint<T> : EditorGameServiceRemoteConfiguration<T>
+        where T : new()
     {
         const string k_CdnUrl = "https://public-cdn.cloud.unity3d.com/config/production";
 
@@ -188,6 +191,6 @@ namespace Unity.Services.Core.Editor
         /// Initializes a new instance of the <see cref="CdnConfiguredEndpoint{T}" /> class.
         /// </summary>
         public CdnConfiguredEndpoint()
-            : base(k_CdnUrl) {}
+            : base(k_CdnUrl) { }
     }
 }

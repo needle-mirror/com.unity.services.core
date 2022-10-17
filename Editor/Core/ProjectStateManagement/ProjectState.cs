@@ -22,7 +22,7 @@ namespace Unity.Services.Core.Editor
         /// <inheritdoc cref="CloudProjectSettings.organizationName"/>
         public string OrganizationName;
 #if ENABLE_EDITOR_GAME_SERVICES
-        /// <inheritdoc cref="CloudProjectSettings.CoppaCompliance"/>
+        /// <inheritdoc cref="CloudProjectSettings.coppaCompliance"/>
         public CoppaCompliance CoppaCompliance;
 #endif
         /// <inheritdoc cref="CloudProjectSettings.projectBound"/>
@@ -39,9 +39,10 @@ namespace Unity.Services.Core.Editor
         public bool IsLoggedIn;
 
 #if ENABLE_EDITOR_GAME_SERVICES
-        public ProjectState(string userId, string userName, string accessToken, string projectId, string projectName,
-                            string organizationId, string organizationName, CoppaCompliance coppaCompliance, bool projectBound,
-                            bool isOnline, bool isLoggedIn)
+        public ProjectState(
+            string userId, string userName, string accessToken, string projectId, string projectName,
+            string organizationId, string organizationName, CoppaCompliance coppaCompliance, bool projectBound,
+            bool isOnline, bool isLoggedIn)
         {
             UserId = userId;
             UserName = userName;
@@ -57,8 +58,9 @@ namespace Unity.Services.Core.Editor
         }
 
 #else
-        public ProjectState(string userId, string userName, string accessToken, string projectId, string projectName,
-                            string organizationId, string organizationName, bool projectBound, bool isOnline, bool isLoggedIn)
+        public ProjectState(
+            string userId, string userName, string accessToken, string projectId, string projectName,
+            string organizationId, string organizationName, bool projectBound, bool isOnline, bool isLoggedIn)
         {
             UserId = userId;
             UserName = userName;
@@ -74,22 +76,21 @@ namespace Unity.Services.Core.Editor
 
 #endif
 
-
         public bool HasDiff(ProjectState projectStateObj)
         {
-            return !(this.UserId.Equals(projectStateObj.UserId) &&
-                this.UserName.Equals(projectStateObj.UserName) &&
-                this.AccessToken.Equals(projectStateObj.AccessToken) &&
-                this.ProjectId.Equals(projectStateObj.ProjectId) &&
-                this.ProjectName.Equals(projectStateObj.ProjectName) &&
-                this.OrganizationId.Equals(projectStateObj.OrganizationId) &&
-                this.OrganizationName.Equals(projectStateObj.OrganizationName) &&
-                this.ProjectBound.Equals(projectStateObj.ProjectBound) &&
+            return !(UserId.Equals(projectStateObj.UserId) &&
+                UserName.Equals(projectStateObj.UserName) &&
+                AccessToken.Equals(projectStateObj.AccessToken) &&
+                ProjectId.Equals(projectStateObj.ProjectId) &&
+                ProjectName.Equals(projectStateObj.ProjectName) &&
+                OrganizationId.Equals(projectStateObj.OrganizationId) &&
+                OrganizationName.Equals(projectStateObj.OrganizationName) &&
+                ProjectBound.Equals(projectStateObj.ProjectBound) &&
 #if ENABLE_EDITOR_GAME_SERVICES
-                this.CoppaCompliance.Equals(projectStateObj.CoppaCompliance) &&
+                CoppaCompliance.Equals(projectStateObj.CoppaCompliance) &&
 #endif
-                this.IsOnline.Equals(projectStateObj.IsOnline) &&
-                this.IsLoggedIn.Equals(projectStateObj.IsLoggedIn));
+                IsOnline.Equals(projectStateObj.IsOnline) &&
+                IsLoggedIn.Equals(projectStateObj.IsLoggedIn));
         }
     }
 }

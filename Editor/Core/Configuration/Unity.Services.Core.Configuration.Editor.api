@@ -5,10 +5,10 @@ namespace Unity.Services.Core.Configuration.Editor
 {
     public class ConfigurationBuilder
     {
-        public Unity.Services.Core.Configuration.Editor.ConfigurationBuilder SetBool(string key, bool value, bool isReadOnly = False);
-        public Unity.Services.Core.Configuration.Editor.ConfigurationBuilder SetFloat(string key, float value, bool isReadOnly = False);
-        public Unity.Services.Core.Configuration.Editor.ConfigurationBuilder SetInt(string key, int value, bool isReadOnly = False);
-        public Unity.Services.Core.Configuration.Editor.ConfigurationBuilder SetString(string key, string value, bool isReadOnly = False);
+        public ConfigurationBuilder SetBool(string key, bool value, bool isReadOnly = false);
+        public ConfigurationBuilder SetFloat(string key, float value, bool isReadOnly = false);
+        public ConfigurationBuilder SetInt(string key, int value, bool isReadOnly = false);
+        public ConfigurationBuilder SetString(string key, string value, bool isReadOnly = false);
         public bool TryGetBool(string key, out bool value);
         public bool TryGetFloat(string key, out float value);
         public bool TryGetInt(string key, out int value);
@@ -17,6 +17,6 @@ namespace Unity.Services.Core.Configuration.Editor
 
     public interface IConfigurationProvider : UnityEditor.Build.IOrderedCallback
     {
-        public abstract void OnBuildingConfiguration(Unity.Services.Core.Configuration.Editor.ConfigurationBuilder builder);
+        public void OnBuildingConfiguration(ConfigurationBuilder builder);
     }
 }

@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Services.Core.Internal;
+#if UNITY_2020_2_OR_NEWER
+using UnityEngine.Scripting;
+#endif
 
 namespace Unity.Services.Qos.Internal
 {
@@ -8,6 +11,9 @@ namespace Unity.Services.Qos.Internal
     /// An interface that allows access to QoS measurements. For use by other Operate packages through the Core
     /// Services SDK.
     /// </summary>
+#if UNITY_2020_2_OR_NEWER
+    [RequireImplementors]
+#endif
     public interface IQosResults : IServiceComponent
     {
         /// <summary>

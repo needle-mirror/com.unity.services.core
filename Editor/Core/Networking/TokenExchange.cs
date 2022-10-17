@@ -2,10 +2,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Unity.Services.Core;
-using Unity.Services.Core.Internal;
 using UnityEngine.Networking;
-using UnityEngine;
 
 namespace Unity.Services.Core.Editor
 {
@@ -17,9 +14,7 @@ namespace Unity.Services.Core.Editor
             Token = token;
         }
 
-        public TokenExchangeRequest()
-        {
-        }
+        public TokenExchangeRequest() { }
 
         [JsonProperty("token")]
         public string Token;
@@ -48,10 +43,11 @@ namespace Unity.Services.Core.Editor
         public string Detail;
     }
 
-    internal class TokenExchange
+    class TokenExchange
     {
         const string k_RequestContentType = "application/json";
-        ITokenExchangeUrls m_TokenExchangeUrls;
+
+        readonly ITokenExchangeUrls m_TokenExchangeUrls;
 
         internal TokenExchange(ITokenExchangeUrls tokenExchangeUrls)
         {
@@ -63,21 +59,25 @@ namespace Unity.Services.Core.Editor
             var taskCompletionSource = new TaskCompletionSource<UnityWebRequest>();
             var jsonPayload = JsonConvert.SerializeObject(tokenExchangeRequest);
             var postBytes = Encoding.UTF8.GetBytes(jsonPayload);
-            var unityWebRequest = new UnityWebRequest(m_TokenExchangeUrls.ServicesGatewayTokenExchangeUrl, UnityWebRequest.kHttpVerbPOST);
-
+            var unityWebRequest = new UnityWebRequest(
+                m_TokenExchangeUrls.ServicesGatewayTokenExchangeUrl, UnityWebRequest.kHttpVerbPOST);
             unityWebRequest.uploadHandler = new UploadHandlerRaw(postBytes)
             {
                 contentType = k_RequestContentType
             };
-
             unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
-
-            unityWebRequest.SendWebRequest().completed += operation =>
-            {
-                taskCompletionSource.TrySetResult(unityWebRequest);
-            };
+            unityWebRequest.SendWebRequest().completed += OnRequestCompleted;
 
             return taskCompletionSource.Task;
+
+            void OnRequestCompleted(UnityEngine.AsyncOperation operation)
+            {
+                var request = ((UnityWebRequestAsyncOperation)operation).webRequest;
+                using (request)
+                {
+                    taskCompletionSource.TrySetResult(unityWebRequest);
+                }
+            }
         }
 
         internal async Task<string> ExchangeServicesGatewayTokenAsync(string genesisToken)
@@ -86,7 +86,7 @@ namespace Unity.Services.Core.Editor
             var responseJson = await SendUnityWebRequestAndGetResponseAsync(tokenExchangeRequest);
             var tokenExchangeResponse = JsonConvert.DeserializeObject<TokenExchangeResponse>(responseJson);
 
-            if (tokenExchangeResponse.Token == null)
+            if (tokenExchangeResponse?.Token == null)
             {
                 var tokenExchangeError = JsonConvert.DeserializeObject<TokenExchangeRequestError>(responseJson);
                 throw new RequestFailedException(tokenExchangeError.Status, tokenExchangeError.Detail);
@@ -95,16 +95,17 @@ namespace Unity.Services.Core.Editor
             return tokenExchangeResponse.Token;
         }
 
-        internal virtual async Task<string> SendUnityWebRequestAndGetResponseAsync(TokenExchangeRequest tokenExchangeRequest)
+        /// <remarks>
+        /// Made virtual to allow mocking in tests.
+        /// </remarks>
+        internal virtual async Task<string> SendUnityWebRequestAndGetResponseAsync(
+            TokenExchangeRequest tokenExchangeRequest)
         {
-            var responseJson = string.Empty;
-
             using (var exchangeRequest = await SendTokenExchangeUnityWebRequestAsync(tokenExchangeRequest))
             {
-                responseJson = exchangeRequest.downloadHandler.text;
+                var responseJson = exchangeRequest.downloadHandler.text;
+                return responseJson;
             }
-
-            return responseJson;
         }
     }
 }

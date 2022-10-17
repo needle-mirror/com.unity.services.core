@@ -12,8 +12,6 @@ namespace Unity.Services.Core.Editor
     {
         const string k_ServiceFlagsKey = "service_flags";
 
-        DefaultCdnEndpointConfiguration m_DefaultCdnEndpointConfiguration;
-
         public IAsyncOperation<IDictionary<string, bool>> FetchServiceFlags()
         {
             var resultAsyncOp = new AsyncOperation<IDictionary<string, bool>>();

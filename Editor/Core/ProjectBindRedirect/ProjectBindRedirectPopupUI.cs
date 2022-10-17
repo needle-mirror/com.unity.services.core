@@ -13,13 +13,14 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
         const string k_SignUpClassName = "signup-link-button";
         const string k_SignupLink = "https://dashboard.unity3d.com";
 
-
-        Action m_OnCloseButtonFired;
+        readonly Action m_OnCloseButtonFired;
         [NotNull]
-        List<string> m_InstalledPackages;
-        IEditorGameServiceAnalyticsSender m_EditorGameServiceAnalyticsSender;
+        readonly List<string> m_InstalledPackages;
+        readonly IEditorGameServiceAnalyticsSender m_EditorGameServiceAnalyticsSender;
 
-        public ProjectBindRedirectPopupUI(VisualElement parentElement, Action closeAction, [NotNull] List<string> installedPackages, [NotNull] IEditorGameServiceAnalyticsSender editorGameServiceAnalyticsSender)
+        public ProjectBindRedirectPopupUI(
+            VisualElement parentElement, Action closeAction, [NotNull] List<string> installedPackages,
+            [NotNull] IEditorGameServiceAnalyticsSender editorGameServiceAnalyticsSender)
         {
             m_EditorGameServiceAnalyticsSender = editorGameServiceAnalyticsSender;
 
@@ -57,7 +58,7 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
         static void AddProjectBindRedirectContentUI(VisualElement parentElement)
         {
             var contentContainer = parentElement.Q(className: ProjectBindRedirectUiConstants.UxmlClassNames.ContentContainer) ?? parentElement;
-            var contentUi = new ProjectBindRedirectContentUI(contentContainer);
+            ProjectBindRedirectContentUI.Load(contentContainer);
         }
 
         void SetupButtons(VisualElement containerElement)
@@ -79,16 +80,14 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
         {
             var contentContainer = parentElement.Q(className: ProjectBindRedirectUiConstants.UxmlClassNames.ContentContainer) ?? parentElement;
             var dashboardHyperlink = contentContainer.Q<TextElement>(className: k_SignUpClassName);
+            if (dashboardHyperlink is null)
+            {
+                return;
+            }
 
             dashboardHyperlink.text = k_SignupLink;
-            if (dashboardHyperlink != null)
-            {
-                var clickable = new Clickable(() =>
-                {
-                    ClickSignUpLinkAction();
-                });
-                dashboardHyperlink.AddManipulator(clickable);
-            }
+            var clickable = new Clickable(ClickSignUpLinkAction);
+            dashboardHyperlink.AddManipulator(clickable);
         }
 
         internal void CloseButtonAction()
@@ -97,6 +96,7 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
             {
                 m_EditorGameServiceAnalyticsSender.SendProjectBindPopupCloseActionEvent(package);
             }
+
             m_OnCloseButtonFired?.Invoke();
         }
 
@@ -106,6 +106,7 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
             {
                 m_EditorGameServiceAnalyticsSender.SendProjectBindPopupOpenProjectSettingsEvent(package);
             }
+
             SettingsService.OpenProjectSettings(k_ProjectSettingsPath);
             m_OnCloseButtonFired?.Invoke();
         }
@@ -116,6 +117,7 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
             {
                 m_EditorGameServiceAnalyticsSender.SendClickedSignUpLinkActionEvent(package);
             }
+
             Application.OpenURL(k_SignupLink);
         }
     }

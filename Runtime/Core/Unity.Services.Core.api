@@ -22,10 +22,10 @@ namespace Unity.Services.Core
     public class InitializationOptions
     {
         public InitializationOptions() {}
-        public Unity.Services.Core.InitializationOptions SetOption(string key, bool value);
-        public Unity.Services.Core.InitializationOptions SetOption(string key, int value);
-        public Unity.Services.Core.InitializationOptions SetOption(string key, float value);
-        public Unity.Services.Core.InitializationOptions SetOption(string key, string value);
+        public InitializationOptions SetOption(string key, bool value);
+        public InitializationOptions SetOption(string key, int value);
+        public InitializationOptions SetOption(string key, float value);
+        public InitializationOptions SetOption(string key, string value);
         public bool TryGetOption(string key, out bool option);
         public bool TryGetOption(string key, out int option);
         public bool TryGetOption(string key, out float option);
@@ -48,16 +48,16 @@ namespace Unity.Services.Core
 
     public enum ServicesInitializationState
     {
-        public const Unity.Services.Core.ServicesInitializationState Initialized = 2;
-        public const Unity.Services.Core.ServicesInitializationState Initializing = 1;
-        public const Unity.Services.Core.ServicesInitializationState Uninitialized = 0;
-        public int value__;
+        Initialized = 2,
+        Initializing = 1,
+        Uninitialized = 0,
     }
 
     public static class UnityServices
     {
-        public static Unity.Services.Core.ServicesInitializationState State { get; }
+        public static string ExternalUserId { get; set; }
+        public static ServicesInitializationState State { get; }
         public static System.Threading.Tasks.Task InitializeAsync();
-        [System.Diagnostics.DebuggerStepThrough] [System.Runtime.CompilerServices.AsyncStateMachine(typeof(Unity.Services.Core.UnityServices.<InitializeAsync>d__11))] public static System.Threading.Tasks.Task InitializeAsync(Unity.Services.Core.InitializationOptions options);
+        public static System.Threading.Tasks.Task InitializeAsync(InitializationOptions options);
     }
 }

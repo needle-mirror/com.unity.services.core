@@ -1,9 +1,11 @@
+#if ENABLE_EDITOR_GAME_SERVICES
 using System;
-using System.Collections.Generic;
-using Unity.Services.Core.Editor.ProjectBindRedirect;
-using UnityEditor;
 using UnityEditor.Connect;
-using UnityEngine;
+#else
+using Unity.Services.Core.Editor.ProjectBindRedirect;
+#endif
+using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine.UIElements;
 using Unity.Services.Core.Internal;
 
@@ -19,15 +21,15 @@ namespace Unity.Services.Core.Editor
         const string k_AuthenticationErrorMessage = "An authentication error has occurred while trying to get access" +
             " to the service, if the error persists please try restarting the editor.";
 
+        readonly IProjectStateRequest m_ProjectStateRequest;
+        readonly IEditorGameServiceAnalyticsSender m_EditorGameServiceAnalyticsSender;
         VisualElement m_ParentVisualElement;
-        IProjectStateRequest m_ProjectStateRequest;
         ProjectState m_CurrentProjectState;
-        IEditorGameServiceAnalyticsSender m_EditorGameServiceAnalyticsSender;
 
 #if ENABLE_EDITOR_GAME_SERVICES
-        IProjectEditorDrawerFactory m_ProjectBindDrawerFactory;
-        IProjectEditorDrawerFactory m_CoppaDrawerFactory;
-        IUserRoleHandler m_UserRoleHandler;
+        readonly IProjectEditorDrawerFactory m_ProjectBindDrawerFactory;
+        readonly IProjectEditorDrawerFactory m_CoppaDrawerFactory;
+        readonly IUserRoleHandler m_UserRoleHandler;
 #endif
 
         /// <summary>
@@ -54,10 +56,12 @@ namespace Unity.Services.Core.Editor
         protected abstract VisualElement GenerateServiceDetailUI();
 
 #if ENABLE_EDITOR_GAME_SERVICES
-        internal EditorGameServiceSettingsProvider(string path, SettingsScope scopes, IProjectEditorDrawerFactory projectBindDrawer,
-                                                   IProjectEditorDrawerFactory projectCoppaDrawer, IProjectStateRequest projectStateRequest = null,
-                                                   IUserRoleHandler userRoleHandler = null, IEditorGameServiceAnalyticsSender editorGameServiceAnalyticsSender = null,
-                                                   IEnumerable<string> keywords = null)
+        private protected EditorGameServiceSettingsProvider(
+            string path, SettingsScope scopes, IProjectEditorDrawerFactory projectBindDrawer,
+            IProjectEditorDrawerFactory projectCoppaDrawer, IProjectStateRequest projectStateRequest = null,
+            IUserRoleHandler userRoleHandler = null,
+            IEditorGameServiceAnalyticsSender editorGameServiceAnalyticsSender = null,
+            IEnumerable<string> keywords = null)
             : base(path, scopes, keywords)
         {
             m_ProjectStateRequest = projectStateRequest ?? new ProjectStateRequest();
@@ -76,27 +80,21 @@ namespace Unity.Services.Core.Editor
             rootElement.Add(m_ParentVisualElement);
             RefreshUI();
 
-#if ENABLE_EDITOR_GAME_SERVICES
             CloudProjectSettingsEventManager.instance.projectStateChanged += OnProjectStateChanged;
             m_UserRoleHandler.UserRoleChanged += OnUserRoleChanged;
             m_UserRoleHandler.TrySendUserRoleRequest();
-#endif
         }
 
         void DeactivateSettingsProvider()
         {
-#if ENABLE_EDITOR_GAME_SERVICES
             CloudProjectSettingsEventManager.instance.projectStateChanged -= OnProjectStateChanged;
             m_UserRoleHandler.UserRoleChanged -= OnUserRoleChanged;
-#endif
         }
 
         void OnProjectStateChanged()
         {
-#if ENABLE_EDITOR_GAME_SERVICES
             if (m_UserRoleHandler.IsBusy())
                 return;
-#endif
 
             var projectState = m_ProjectStateRequest.GetProjectState();
             if (m_CurrentProjectState.HasDiff(projectState))
@@ -123,8 +121,9 @@ namespace Unity.Services.Core.Editor
         /// <param name="keywords">
         /// Set of keywords for search purposes.
         /// </param>
-        protected EditorGameServiceSettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null)
-            : this(path, scopes, null, null, keywords : keywords) {}
+        protected EditorGameServiceSettingsProvider(
+            string path, SettingsScope scopes, IEnumerable<string> keywords = null)
+            : this(path, scopes, null, null, keywords: keywords) { }
 #else
         /// <summary>
         /// Initializes a new instance of the <see cref="EditorGameServiceSettingsProvider"/> class.
@@ -198,6 +197,7 @@ namespace Unity.Services.Core.Editor
             {
                 uiBody.Add(GenerateServiceDetailUI());
             }
+
             return uiBody;
 #else
             return projectState.ProjectBound ? GenerateUnsupportedDetailUI() : GenerateProjectBindRedirectUI(uiBody);
@@ -214,7 +214,7 @@ namespace Unity.Services.Core.Editor
             OfflineUiHelper.AddOfflineUI(parentVisualElement, RefreshUI);
         }
 
-        void DrawAccessTokenErrorUI(VisualElement parentVisualElement)
+        static void DrawAccessTokenErrorUI(VisualElement parentVisualElement)
         {
             AccessTokenErrorUiHelper.AddAccessTokenErrorUI(parentVisualElement);
             CoreLogger.LogWarning(k_AuthenticationErrorMessage);
@@ -246,16 +246,13 @@ namespace Unity.Services.Core.Editor
             return m_UserRoleHandler.HasAuthorizationError;
         }
 
-        void DrawUserRoleUI(VisualElement parentVisualElement)
+        static void DrawUserRoleUI(VisualElement parentVisualElement)
         {
             UserRoleRequestUiHelper.AddUserRoleRequestUI(parentVisualElement);
         }
 
-#endif
-
         void DrawProjectBindingUI(VisualElement parentVisualElement)
         {
-#if ENABLE_EDITOR_GAME_SERVICES
             var projectBindDrawer = m_ProjectBindDrawerFactory == null ? new ProjectBindDrawer() : m_ProjectBindDrawerFactory.InstantiateDrawer();
             projectBindDrawer.stateChangeButtonFired += RefreshUI;
 
@@ -265,10 +262,8 @@ namespace Unity.Services.Core.Editor
             }
 
             parentVisualElement.Add(projectBindDrawer.GetVisualElement());
-#endif
         }
 
-#if ENABLE_EDITOR_GAME_SERVICES
         static void ShowExceptionVisual(VisualElement exceptionContainer, string contextMessage, Exception exception)
         {
             exceptionContainer.Clear();
@@ -281,11 +276,8 @@ namespace Unity.Services.Core.Editor
                 currentCoppaStatus != CoppaCompliance.CoppaUndefined;
         }
 
-#endif
-
         void DrawCoppaComplianceUI(VisualElement parentVisualElement)
         {
-#if ENABLE_EDITOR_GAME_SERVICES
             var coppaDrawer = m_CoppaDrawerFactory == null ? new CoppaDrawer() : m_CoppaDrawerFactory.InstantiateDrawer();
             coppaDrawer.stateChangeButtonFired += RefreshUI;
 
@@ -299,29 +291,28 @@ namespace Unity.Services.Core.Editor
             {
                 parentVisualElement.Q<VisualElement>(NodeName.CoppaContainer)?.Q<VisualElement>(className: ClassName.EditMode)?.SetEnabled(false);
             }
-#endif
         }
 
-        internal static bool IsUserAllowedToEditServiceToggle(IEditorGameService editorGameService, ProjectState projectState, UserRole userRole)
+        internal static bool IsUserAllowedToEditServiceToggle(
+            IEditorGameService editorGameService, ProjectState projectState, UserRole userRole)
         {
-#if ENABLE_EDITOR_GAME_SERVICES
             return IsCoppaComplianceMet(editorGameService, projectState.CoppaCompliance) &&
                 (userRole == UserRole.Manager || userRole == UserRole.Owner);
-#else
-            return false;
-#endif
         }
+#endif
 
         internal static bool IsUserAllowedToEditCoppaCompliance(UserRole userRole)
         {
             return userRole == UserRole.Manager || userRole == UserRole.Owner;
         }
 
+#if !ENABLE_EDITOR_GAME_SERVICES
         static VisualElement GenerateProjectBindRedirectUI(VisualElement parentElement)
         {
-            var projectBindRedirectContentUI = new ProjectBindRedirectProjectSettingsUi(parentElement);
+            ProjectBindRedirectProjectSettingsUi.Load(parentElement);
             return parentElement;
         }
+#endif
 
         /// <summary>
         /// The UI to show when the editor API does not support the Services SDK Core package
@@ -351,9 +342,7 @@ namespace Unity.Services.Core.Editor
         {
             parentElement.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>(UssPath.ServicesProjectSettingsCommon));
             parentElement.styleSheets.Add(
-                EditorGUIUtility.isProSkin ?
-                AssetDatabase.LoadAssetAtPath<StyleSheet>(UssPath.ServicesProjectSettingsDark) :
-                AssetDatabase.LoadAssetAtPath<StyleSheet>(UssPath.ServicesProjectSettingsLight));
+                EditorGUIUtility.isProSkin ? AssetDatabase.LoadAssetAtPath<StyleSheet>(UssPath.ServicesProjectSettingsDark) : AssetDatabase.LoadAssetAtPath<StyleSheet>(UssPath.ServicesProjectSettingsLight));
         }
 
         VisualElement GenerateCommonHeader(ProjectState projectState)
@@ -379,7 +368,8 @@ namespace Unity.Services.Core.Editor
                         tooltip = L10n.Tr(k_InsufficientPermissionMsg);
                     }
 
-                    toggleConfiguration = new SettingsCommonHeaderUiHelper.ToggleConfiguration(toggleValue,
+                    toggleConfiguration = new SettingsCommonHeaderUiHelper.ToggleConfiguration(
+                        toggleValue,
                         true, toggleEnabled, ToggleValueChangedActionAndRefreshUI, tooltip);
                 }
             }
@@ -396,9 +386,9 @@ namespace Unity.Services.Core.Editor
         }
 
 #if ENABLE_EDITOR_GAME_SERVICES
-        void ToggleValueChangedActionAndRefreshUI(ChangeEvent<bool> evt)
+        void ToggleValueChangedActionAndRefreshUI(ChangeEvent<bool> uiEvent)
         {
-            if (evt.newValue)
+            if (uiEvent.newValue)
             {
                 EditorGameService.Enabler.Enable();
             }
@@ -409,17 +399,7 @@ namespace Unity.Services.Core.Editor
 
             RefreshUI();
         }
-
 #endif
-
-        static bool CoppaComplianceMet(IEditorGameService editorGameService, ProjectState projectState)
-        {
-#if ENABLE_EDITOR_GAME_SERVICES
-            return editorGameService == null || !editorGameService.RequiresCoppaCompliance || projectState.CoppaCompliance != CoppaCompliance.CoppaUndefined;
-#else
-            return false;
-#endif
-        }
 
         internal static void TranslateStringsInTree(VisualElement rootElement)
         {

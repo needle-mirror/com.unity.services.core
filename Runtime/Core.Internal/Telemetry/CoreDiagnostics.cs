@@ -17,47 +17,42 @@ namespace Unity.Services.Core.Internal
 
         internal const string ProjectConfigTagName = "project_config";
 
-        public IDictionary<string, string> CoreTags { get; internal set; }
-
         public static CoreDiagnostics Instance { get; internal set; }
+
+        public IDictionary<string, string> CoreTags { get; }
+            = new Dictionary<string, string>();
 
         internal IDiagnosticsComponentProvider DiagnosticsComponentProvider { get; set; }
 
         internal IDiagnostics Diagnostics { get; set; }
 
-        async Task<IDiagnostics> GetOrCreateDiagnostics()
-        {
-            if (Diagnostics is null)
-            {
-                var diagnosticFactory = await DiagnosticsComponentProvider.CreateDiagnosticsComponents();
-                Diagnostics = diagnosticFactory.Create(CorePackageName);
-                SetProjectConfiguration(await DiagnosticsComponentProvider.GetSerializedProjectConfigurationAsync());
-            }
-            return Diagnostics;
-        }
-
         public void SetProjectConfiguration(string serializedProjectConfig)
         {
-            CoreTags = new Dictionary<string, string>();
             CoreTags[ProjectConfigTagName] = serializedProjectConfig;
         }
 
         public void SendCircularDependencyDiagnostics(Exception exception)
         {
-            var sendTask = SendCoreDiagnostics(CircularDependencyDiagnosticName, exception);
+            var sendTask = SendCoreDiagnosticsAsync(CircularDependencyDiagnosticName, exception);
             sendTask.ContinueWith(OnSendFailed, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         public void SendCorePackageInitDiagnostics(Exception exception)
         {
-            var sendTask = SendCoreDiagnostics(CorePackageInitDiagnosticName, exception);
+            var sendTask = SendCoreDiagnosticsAsync(CorePackageInitDiagnosticName, exception);
             sendTask.ContinueWith(OnSendFailed, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         public void SendOperateServicesInitDiagnostics(Exception exception)
         {
-            var sendTask = SendCoreDiagnostics(OperateServicesInitDiagnosticName, exception);
+            var sendTask = SendCoreDiagnosticsAsync(OperateServicesInitDiagnosticName, exception);
             sendTask.ContinueWith(OnSendFailed, TaskContinuationOptions.OnlyOnFaulted);
+        }
+
+        internal async Task SendCoreDiagnosticsAsync(string diagnosticName, Exception exception)
+        {
+            var diagnostics = await GetOrCreateDiagnosticsAsync();
+            diagnostics?.SendDiagnostic(diagnosticName, exception?.ToString(), CoreTags);
         }
 
         static void OnSendFailed(Task failedSendTask)
@@ -65,10 +60,25 @@ namespace Unity.Services.Core.Internal
             CoreLogger.LogException(failedSendTask.Exception);
         }
 
-        async Task SendCoreDiagnostics(string diagnosticName, Exception exception)
+        internal async Task<IDiagnostics> GetOrCreateDiagnosticsAsync()
         {
-            var diagnostics = await GetOrCreateDiagnostics();
-            diagnostics.SendDiagnostic(diagnosticName, exception.ToString(), CoreTags);
+            if (!(Diagnostics is null))
+            {
+                return Diagnostics;
+            }
+
+            if (DiagnosticsComponentProvider is null)
+            {
+                CoreLogger.LogVerbose(
+                    $"There is no {nameof(DiagnosticsComponentProvider)} set for {nameof(CoreDiagnostics)}.");
+                return null;
+            }
+
+            var diagnosticFactory = await DiagnosticsComponentProvider.CreateDiagnosticsComponents();
+            Diagnostics = diagnosticFactory.Create(CorePackageName);
+            SetProjectConfiguration(await DiagnosticsComponentProvider.GetSerializedProjectConfigurationAsync());
+
+            return Diagnostics;
         }
     }
 }
