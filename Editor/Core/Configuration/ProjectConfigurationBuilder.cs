@@ -1,62 +1,43 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using Newtonsoft.Json;
 using UnityEditor;
-using UnityEditor.Build;
-using UnityEditor.Build.Reporting;
-using UnityEngine;
 
 namespace Unity.Services.Core.Configuration.Editor
 {
-    class ProjectConfigurationBuilder : IPreprocessBuildWithReport,
-        IPostprocessBuildWithReport
+    class ProjectConfigurationBuilder
     {
-        static ProjectConfigurationBuilder s_EditorInstance;
+        readonly IEnumerable<IConfigurationProvider> m_OrderedConfigProviders;
 
-        IEnumerable<IConfigurationProvider> m_OrderedConfigProviders;
-
-        /// <remarks>
-        /// Necessary for <see cref="IPreprocessBuildWithReport"/> and
-        /// <see cref="IPostprocessBuildWithReport"/> compatibility.
-        /// </remarks>
-        public ProjectConfigurationBuilder()
-            : this(null) {}
+        public static ProjectConfigurationBuilder CreateBuilderWithAllProvidersInProject()
+        {
+            var allConfigProviderTypes = TypeCache.GetTypesDerivedFrom<IConfigurationProvider>();
+            var orderedConfigProviders = CreateSortedConfigurationProviders(allConfigProviderTypes);
+            return new ProjectConfigurationBuilder(orderedConfigProviders);
+        }
 
         public ProjectConfigurationBuilder(IEnumerable<IConfigurationProvider> orderedConfigProviders)
         {
             m_OrderedConfigProviders = orderedConfigProviders;
         }
 
-        [InitializeOnLoadMethod]
-        static void CreateEditorInstanceIfNone()
+        internal static IEnumerable<IConfigurationProvider> CreateSortedConfigurationProviders(
+            IEnumerable<Type> providerTypes)
         {
-            if (!(s_EditorInstance is null))
-            {
-                return;
-            }
-
-            var orderedConfigProviders = GenerateOrderedConfigurationProviders();
-            s_EditorInstance = new ProjectConfigurationBuilder(orderedConfigProviders);
-        }
-
-        static IEnumerable<IConfigurationProvider> GenerateOrderedConfigurationProviders()
-        {
-            return TypeCache.GetTypesDerivedFrom<IConfigurationProvider>()
-                .Where(type => !type.IsAbstract)
+            return providerTypes.Where(
+                    type => !type.IsAbstract && typeof(IConfigurationProvider).IsAssignableFrom(type))
                 .Select(type => (IConfigurationProvider)Activator.CreateInstance(type))
                 .OrderBy(prefs => prefs.callbackOrder)
                 .ToArray();
         }
 
         [InitializeOnEnterPlayMode]
-        static void SetUpPlayModeConfigOnEnteringPlayMode(EnterPlayModeOptions _)
+        internal static void SetUpPlayModeConfigOnEnteringPlayMode(EnterPlayModeOptions _)
         {
-            CreateEditorInstanceIfNone();
+            var builderWithAllProviders = CreateBuilderWithAllProvidersInProject();
             ConfigurationUtils.ConfigurationLoader = new MemoryConfigurationLoader
             {
-                Config = s_EditorInstance.BuildConfiguration()
+                Config = builderWithAllProviders.BuildConfiguration()
             };
         }
 
@@ -69,60 +50,6 @@ namespace Unity.Services.Core.Configuration.Editor
             }
 
             return new SerializableProjectConfiguration(builder.Values);
-        }
-
-        public void GenerateConfigFileInProject()
-        {
-            var config = BuildConfiguration();
-            var serializedConfig = JsonConvert.SerializeObject(config);
-            AddConfigToProject(serializedConfig);
-        }
-
-        public static void AddConfigToProject(string config)
-        {
-            if (!Directory.Exists(Application.streamingAssetsPath))
-            {
-                Directory.CreateDirectory(Application.streamingAssetsPath);
-            }
-
-            File.WriteAllText(ConfigurationUtils.RuntimeConfigFullPath, config);
-            AssetDatabase.Refresh();
-        }
-
-        public static void RemoveConfigFromProject()
-        {
-            IoUtils.TryDeleteAssetFile(ConfigurationUtils.RuntimeConfigFullPath);
-            IoUtils.TryDeleteStreamAssetsFolder();
-        }
-
-        int IOrderedCallback.callbackOrder { get; }
-
-        void IPreprocessBuildWithReport.OnPreprocessBuild(BuildReport report)
-        {
-            if (m_OrderedConfigProviders is null)
-            {
-                m_OrderedConfigProviders = GenerateOrderedConfigurationProviders();
-            }
-
-            GenerateConfigFileInProject();
-
-            EditorApplication.update += RemoveConfigFromProjectWhenBuildEnds;
-
-            void RemoveConfigFromProjectWhenBuildEnds()
-            {
-                if (BuildPipeline.isBuildingPlayer)
-                {
-                    return;
-                }
-
-                EditorApplication.update -= RemoveConfigFromProjectWhenBuildEnds;
-                RemoveConfigFromProject();
-            }
-        }
-
-        void IPostprocessBuildWithReport.OnPostprocessBuild(BuildReport report)
-        {
-            RemoveConfigFromProject();
         }
     }
 }

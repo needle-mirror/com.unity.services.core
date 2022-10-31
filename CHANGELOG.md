@@ -5,6 +5,17 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2022-10-31
+
+### Changed
+
+- Services configuration file isn't temporarily added to the StreamingAssets folder during builds on Unity 2021.3 and up.
+- Services initialization without a linked project id will fail (throw `UnityProjectNotLinkedException`).
+
+### Fixed
+
+- Persisting telemetry no longer logs errors, unless `ENABLE_UNITY_SERVICES_CORE_TELEMETRY_LOGGING` is enabled as scripting define. Diagnostics are sent when persisting telemetry produces an error.
+
 ## [1.5.2] - 2022-10-17
 
 ### Fixed

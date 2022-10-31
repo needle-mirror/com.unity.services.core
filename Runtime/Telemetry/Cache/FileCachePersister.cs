@@ -36,6 +36,11 @@ namespace Unity.Services.Core.Telemetry.Internal
 
         public bool CanPersist { get; } = IsAvailableFor(Application.platform);
 
+        readonly string k_MultipleInstanceDiagnosticsName = "telemetry_cache_file_multiple_instances_exception";
+        readonly string k_CacheFileException = "telemetry_cache_file_exception";
+        readonly string k_MultipleInstanceError =
+            "This exception is most likely caused by a multiple instance file sharing violation.";
+
         public void Persist(CachedPayload<TPayload> cache)
         {
             if (cache.IsEmpty())
@@ -44,14 +49,30 @@ namespace Unity.Services.Core.Telemetry.Internal
             }
 
             var serializedEvents = JsonConvert.SerializeObject(cache);
-            File.WriteAllText(FilePath, serializedEvents);
+
+            try
+            {
+                File.WriteAllText(FilePath, serializedEvents);
+            }
+            catch (IOException e)
+            {
+                var exception = new IOException(k_MultipleInstanceError, e);
+                CoreLogger.LogTelemetry(exception);
+                CoreDiagnostics.Instance.SendCoreDiagnosticsAsync(k_MultipleInstanceDiagnosticsName, exception);
+            }
+            catch (Exception e)
+            {
+                CoreLogger.LogTelemetry(e);
+                CoreDiagnostics.Instance.SendCoreDiagnosticsAsync(k_CacheFileException, e);
+            }
         }
 
         public bool TryFetch(out CachedPayload<TPayload> persistedCache)
         {
+            persistedCache = default;
+
             if (!File.Exists(FilePath))
             {
-                persistedCache = default;
                 return false;
             }
 
@@ -61,10 +82,17 @@ namespace Unity.Services.Core.Telemetry.Internal
                 persistedCache = JsonConvert.DeserializeObject<CachedPayload<TPayload>>(rawPersistedCache);
                 return persistedCache != null;
             }
+            catch (IOException e)
+            {
+                var exception = new IOException(k_MultipleInstanceError, e);
+                CoreLogger.LogTelemetry(exception);
+                CoreDiagnostics.Instance.SendCoreDiagnosticsAsync(k_MultipleInstanceDiagnosticsName, exception);
+                return false;
+            }
             catch (Exception e)
             {
-                CoreLogger.LogException(e);
-                persistedCache = default;
+                CoreLogger.LogTelemetry(e);
+                CoreDiagnostics.Instance.SendCoreDiagnosticsAsync(k_CacheFileException, e);
                 return false;
             }
         }
@@ -73,7 +101,21 @@ namespace Unity.Services.Core.Telemetry.Internal
         {
             if (File.Exists(FilePath))
             {
-                File.Delete(FilePath);
+                try
+                {
+                    File.Delete(FilePath);
+                }
+                catch (IOException e)
+                {
+                    var exception = new IOException(k_MultipleInstanceError, e);
+                    CoreLogger.LogTelemetry(exception);
+                    CoreDiagnostics.Instance.SendCoreDiagnosticsAsync(k_MultipleInstanceDiagnosticsName, exception);
+                }
+                catch (Exception e)
+                {
+                    CoreLogger.LogTelemetry(e);
+                    CoreDiagnostics.Instance.SendCoreDiagnosticsAsync(k_CacheFileException, e);
+                }
             }
         }
     }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Unity.Services.Core.Configuration;
 using Unity.Services.Core.Configuration.Internal;
@@ -17,6 +16,9 @@ using NotNull = JetBrains.Annotations.NotNullAttribute;
 using SuppressMessage = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+#if !ENABLE_UNITY_SERVICES_VERBOSE_LOGGING
+using System.Diagnostics;
+#endif
 
 namespace Unity.Services.Core.Registration
 {
@@ -97,10 +99,7 @@ namespace Unity.Services.Core.Registration
                 InitializeCloudProjectId();
                 if (string.IsNullOrEmpty(CloudProjectId.GetCloudProjectId()))
                 {
-                    //TODO: actually throw the exception when we make a major version release
-                    var exception = new UnityProjectNotLinkedException(ProjectUnlinkMessage);
-                    CoreDiagnostics.Instance.SendCorePackageInitDiagnostics(exception);
-                    CoreLogger.LogError(exception.Message);
+                    throw new UnityProjectNotLinkedException(ProjectUnlinkMessage);
                 }
 
                 InitializeDiagnostics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
