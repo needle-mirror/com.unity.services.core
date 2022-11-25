@@ -11,6 +11,13 @@ namespace Unity.Services.Core.Scheduler.Internal
 
     class MinimumBinaryHeap<T> : MinimumBinaryHeap
     {
+        /// <remarks>
+        /// Members requiring thread safety:
+        /// * <see cref="m_HeapArray"/>.
+        /// * <see cref="Count"/>.
+        /// </remarks>
+        readonly object m_Lock = new object();
+
         readonly IComparer<T> m_Comparer;
         readonly int m_MinimumCapacity;
 
@@ -38,31 +45,38 @@ namespace Unity.Services.Core.Scheduler.Internal
             m_MinimumCapacity = minimumCapacity;
             m_Comparer = comparer;
 
-            Count = collection?.Count ?? 0;
-            var startSize = Math.Max(Count, minimumCapacity);
-            m_HeapArray = new T[startSize];
-            if (collection is null)
-                return;
-
-            // Reset count since we insert all items.
-            Count = 0;
-            foreach (var item in collection)
+            lock (m_Lock)
             {
-                Insert(item);
+                Count = collection?.Count ?? 0;
+                var startSize = Math.Max(Count, minimumCapacity);
+                m_HeapArray = new T[startSize];
+
+                if (collection is null)
+                    return;
+
+                // Reset count since we insert all items.
+                Count = 0;
+                foreach (var item in collection)
+                {
+                    Insert(item);
+                }
             }
         }
 
-        public void Insert(T data)
+        public void Insert(T item)
         {
-            IncreaseHeapCapacityWhenFull();
-            var dataPos = Count;
-            m_HeapArray[Count] = data;
-            Count++;
-            while (dataPos != 0
-                   && m_Comparer.Compare(m_HeapArray[dataPos], m_HeapArray[Parent(dataPos)]) < 0)
+            lock (m_Lock)
             {
-                Swap(ref m_HeapArray[dataPos], ref m_HeapArray[Parent(dataPos)]);
-                dataPos = Parent(dataPos);
+                IncreaseHeapCapacityWhenFull();
+                var itemIndex = Count;
+                m_HeapArray[Count] = item;
+                Count++;
+                while (itemIndex != 0
+                       && m_Comparer.Compare(m_HeapArray[itemIndex], m_HeapArray[GetParentIndex(itemIndex)]) < 0)
+                {
+                    Swap(ref m_HeapArray[itemIndex], ref m_HeapArray[GetParentIndex(itemIndex)]);
+                    itemIndex = GetParentIndex(itemIndex);
+                }
             }
         }
 
@@ -79,43 +93,61 @@ namespace Unity.Services.Core.Scheduler.Internal
             m_HeapArray = newHeapArray;
         }
 
-        public void Remove(T data)
+        public void Remove(T item)
         {
-            var key = GetKey(data);
-            if (key < 0)
-                return;
-
-            while (key != 0)
+            lock (m_Lock)
             {
-                Swap(ref m_HeapArray[key], ref m_HeapArray[Parent(key)]);
-                key = Parent(key);
+                var itemIndex = IndexOf(item);
+                if (itemIndex < 0)
+                    return;
+
+                while (itemIndex != 0)
+                {
+                    Swap(ref m_HeapArray[itemIndex], ref m_HeapArray[GetParentIndex(itemIndex)]);
+                    itemIndex = GetParentIndex(itemIndex);
+                }
+
+                ExtractMin();
+            }
+        }
+
+        int IndexOf(T item)
+        {
+            for (var i = 0; i < Count; i++)
+            {
+                if (m_HeapArray[i].Equals(item))
+                {
+                    return i;
+                }
             }
 
-            ExtractMin();
+            return -1;
         }
 
         public T ExtractMin()
         {
-            if (Count <= 0)
+            lock (m_Lock)
             {
-                throw new InvalidOperationException("Can not ExtractMin: BinaryHeap is empty.");
-            }
+                if (Count <= 0)
+                {
+                    throw new InvalidOperationException("Can not ExtractMin: BinaryHeap is empty.");
+                }
 
-            var data = m_HeapArray[0];
+                var item = m_HeapArray[0];
+                if (Count == 1)
+                {
+                    Count--;
+                    m_HeapArray[0] = default;
+                    return item;
+                }
 
-            if (Count == 1)
-            {
                 Count--;
-                m_HeapArray[0] = default;
-                return data;
+                m_HeapArray[0] = m_HeapArray[Count];
+                m_HeapArray[Count] = default;
+                MinHeapify();
+                DecreaseHeapCapacityWhenSpare();
+                return item;
             }
-
-            Count--;
-            m_HeapArray[0] = m_HeapArray[Count];
-            m_HeapArray[Count] = default;
-            MinHeapify();
-            DecreaseHeapCapacityWhenSpare();
-            return data;
         }
 
         void DecreaseHeapCapacityWhenSpare()
@@ -132,46 +164,31 @@ namespace Unity.Services.Core.Scheduler.Internal
             m_HeapArray = newHeapArray;
         }
 
-        int GetKey(T data)
-        {
-            var key = -1;
-            for (var i = 0; i < Count; i++)
-            {
-                if (m_HeapArray[i].Equals(data))
-                {
-                    key = i;
-                    break;
-                }
-            }
-
-            return key;
-        }
-
         void MinHeapify()
         {
-            int key;
+            int currentIndex;
             var smallest = 0;
             do
             {
-                key = smallest;
-                UpdateSmallestKey();
-                if (smallest == key)
+                currentIndex = smallest;
+                UpdateSmallestIndex();
+                if (smallest == currentIndex)
                 {
                     return;
                 }
 
-                Swap(ref m_HeapArray[key], ref m_HeapArray[smallest]);
+                Swap(ref m_HeapArray[currentIndex], ref m_HeapArray[smallest]);
             }
-            while (smallest != key);
+            while (smallest != currentIndex);
 
-            void UpdateSmallestKey()
+            void UpdateSmallestIndex()
             {
-                smallest = key;
-                var leftKey = LeftChild(key);
-                var rightKey = RightChild(key);
+                smallest = currentIndex;
+                var leftChildIndex = GetLeftChildIndex(currentIndex);
+                var rightChildIndex = GetRightChildIndex(currentIndex);
 
-                UpdateSmallestIfCandidateIsSmaller(leftKey);
-                UpdateSmallestIfCandidateIsSmaller(rightKey);
+                UpdateSmallestIfCandidateIsSmaller(leftChildIndex);
+                UpdateSmallestIfCandidateIsSmaller(rightChildIndex);
             }
 
             void UpdateSmallestIfCandidateIsSmaller(int candidate)
@@ -188,10 +205,10 @@ namespace Unity.Services.Core.Scheduler.Internal
 
         static void Swap(ref T lhs, ref T rhs) => (lhs, rhs) = (rhs, lhs);
 
-        static int Parent(int key) => (key - 1) / 2;
+        static int GetParentIndex(int index) => (index - 1) / 2;
 
-        static int LeftChild(int key) => 2 * key + 1;
+        static int GetLeftChildIndex(int index) => 2 * index + 1;
 
-        static int RightChild(int key) => 2 * key + 2;
+        static int GetRightChildIndex(int index) => 2 * index + 2;
     }
 }

@@ -213,7 +213,7 @@ namespace Unity.Services.Core.Registration
             catch (Exception e)
             {
                 CoreLogger.LogError(
-                    "En error occured while trying to get the project configuration for services." +
+                    "An error occured while trying to get the project configuration for services." +
                     $"\n{e.Message}" +
                     $"\n{e.StackTrace}");
                 return SerializableProjectConfiguration.Empty;

@@ -27,19 +27,22 @@ namespace Unity.Services.Core.Telemetry.Internal
     class FileCachePersister<TPayload> : FileCachePersister, ICachePersister<TPayload>
         where TPayload : ITelemetryPayload
     {
-        public FileCachePersister(string fileName)
+        const string k_MultipleInstanceDiagnosticsName = "telemetry_cache_file_multiple_instances_exception";
+        const string k_CacheFileException = "telemetry_cache_file_exception";
+        const string k_MultipleInstanceError =
+            "This exception is most likely caused by a multiple instance file sharing violation.";
+
+        readonly CoreDiagnostics m_Diagnostics;
+
+        public FileCachePersister(string fileName, CoreDiagnostics diagnostics)
         {
             FilePath = Path.Combine(GetPersistentDataPathFor(Application.platform), fileName);
+            m_Diagnostics = diagnostics;
         }
 
         public string FilePath { get; }
 
         public bool CanPersist { get; } = IsAvailableFor(Application.platform);
-
-        readonly string k_MultipleInstanceDiagnosticsName = "telemetry_cache_file_multiple_instances_exception";
-        readonly string k_CacheFileException = "telemetry_cache_file_exception";
-        readonly string k_MultipleInstanceError =
-            "This exception is most likely caused by a multiple instance file sharing violation.";
 
         public void Persist(CachedPayload<TPayload> cache)
         {
@@ -58,12 +61,12 @@ namespace Unity.Services.Core.Telemetry.Internal
             {
                 var exception = new IOException(k_MultipleInstanceError, e);
                 CoreLogger.LogTelemetry(exception);
-                CoreDiagnostics.Instance.SendCoreDiagnosticsAsync(k_MultipleInstanceDiagnosticsName, exception);
+                m_Diagnostics.SendCoreDiagnosticsAsync(k_MultipleInstanceDiagnosticsName, exception);
             }
             catch (Exception e)
             {
                 CoreLogger.LogTelemetry(e);
-                CoreDiagnostics.Instance.SendCoreDiagnosticsAsync(k_CacheFileException, e);
+                m_Diagnostics.SendCoreDiagnosticsAsync(k_CacheFileException, e);
             }
         }
 
@@ -86,36 +89,38 @@ namespace Unity.Services.Core.Telemetry.Internal
             {
                 var exception = new IOException(k_MultipleInstanceError, e);
                 CoreLogger.LogTelemetry(exception);
-                CoreDiagnostics.Instance.SendCoreDiagnosticsAsync(k_MultipleInstanceDiagnosticsName, exception);
+                m_Diagnostics.SendCoreDiagnosticsAsync(k_MultipleInstanceDiagnosticsName, exception);
                 return false;
             }
             catch (Exception e)
             {
                 CoreLogger.LogTelemetry(e);
-                CoreDiagnostics.Instance.SendCoreDiagnosticsAsync(k_CacheFileException, e);
+                m_Diagnostics.SendCoreDiagnosticsAsync(k_CacheFileException, e);
                 return false;
             }
         }
 
         public void Delete()
         {
-            if (File.Exists(FilePath))
+            if (!File.Exists(FilePath))
             {
-                try
-                {
-                    File.Delete(FilePath);
-                }
-                catch (IOException e)
-                {
-                    var exception = new IOException(k_MultipleInstanceError, e);
-                    CoreLogger.LogTelemetry(exception);
-                    CoreDiagnostics.Instance.SendCoreDiagnosticsAsync(k_MultipleInstanceDiagnosticsName, exception);
-                }
-                catch (Exception e)
-                {
-                    CoreLogger.LogTelemetry(e);
-                    CoreDiagnostics.Instance.SendCoreDiagnosticsAsync(k_CacheFileException, e);
-                }
+                return;
+            }
+
+            try
+            {
+                File.Delete(FilePath);
+            }
+            catch (IOException e)
+            {
+                var exception = new IOException(k_MultipleInstanceError, e);
+                CoreLogger.LogTelemetry(exception);
+                m_Diagnostics.SendCoreDiagnosticsAsync(k_MultipleInstanceDiagnosticsName, exception);
+            }
+            catch (Exception e)
+            {
+                CoreLogger.LogTelemetry(e);
+                m_Diagnostics.SendCoreDiagnosticsAsync(k_CacheFileException, e);
             }
         }
     }

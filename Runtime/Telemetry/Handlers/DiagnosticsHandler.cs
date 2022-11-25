@@ -56,7 +56,7 @@ namespace Unity.Services.Core.Telemetry.Internal
                 case TaskStatus.Canceled:
                 case TaskStatus.Faulted:
                 {
-                    castState.Self.Cache.AddRangeFrom(castState.Payload);
+                    castState.Self.ThreadSafeCache(castState.Payload);
                     break;
                 }
                 case TaskStatus.RanToCompletion:
@@ -67,6 +67,14 @@ namespace Unity.Services.Core.Telemetry.Internal
                 default:
                     throw new ArgumentOutOfRangeException(
                         nameof(sendOperation.Status), "Can't continue without the send operation being completed.");
+            }
+        }
+
+        void ThreadSafeCache(CachedPayload<DiagnosticsPayload> payload)
+        {
+            lock (Lock)
+            {
+                Cache.AddRangeFrom(payload);
             }
         }
 

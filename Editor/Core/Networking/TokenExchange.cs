@@ -14,7 +14,7 @@ namespace Unity.Services.Core.Editor
             Token = token;
         }
 
-        public TokenExchangeRequest() { }
+        public TokenExchangeRequest() {}
 
         [JsonProperty("token")]
         public string Token;
@@ -80,7 +80,7 @@ namespace Unity.Services.Core.Editor
             }
         }
 
-        internal async Task<string> ExchangeServicesGatewayTokenAsync(string genesisToken)
+        internal virtual async Task<string> ExchangeServicesGatewayTokenAsync(string genesisToken)
         {
             var tokenExchangeRequest = new TokenExchangeRequest(genesisToken);
             var responseJson = await SendUnityWebRequestAndGetResponseAsync(tokenExchangeRequest);

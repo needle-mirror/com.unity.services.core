@@ -4,6 +4,8 @@
         "Unity.Services.Core",
         "Unity.Services.Core.Networking",
         "Unity.Services.Core.Internal",
+        "Unity.Services.Core.Scheduler",
+        "Unity.Services.Core.Configuration",
         "Unity.Services.Core.Configuration.Editor",
         "Unity.Services.Core.Telemetry",
         "Unity.Services.Core.Registration"

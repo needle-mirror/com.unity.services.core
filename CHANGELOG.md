@@ -5,6 +5,19 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2022-11-25
+
+### Fixed
+
+- Improved thread safety for scheduler component. `IActionScheduler` is now safely callable from any thread.
+- Improved thread safety for telemetry components. `IMetrics` and `IDisagnostics` are now safely callable from any
+  thread.
+
+### Changed
+
+- Editor `AccessTokens` now caches the Gateway JWT per session and refreshes it as needed.
+  It can now be used directly without needing to cache the results.
+
 ## [1.6.0] - 2022-10-31
 
 ### Changed

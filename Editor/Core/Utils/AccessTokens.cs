@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Unity.Services.Core.Scheduler.Internal;
 using UnityEditor;
 
 namespace Unity.Services.Core.Editor
@@ -6,13 +7,13 @@ namespace Unity.Services.Core.Editor
     /// <summary>
     /// Helper class to get the different kind of tokens used by services at editor time.
     /// </summary>
-    public class AccessTokens
+    public class AccessTokens : IAccessTokens
     {
-        readonly TokenExchange m_TokenExchange;
+        readonly IGatewayTokens m_GatewayTokens;
 
-        internal AccessTokens(TokenExchange tokenExchange)
+        internal AccessTokens(IGatewayTokens gatewayTokens)
         {
-            m_TokenExchange = tokenExchange;
+            m_GatewayTokens = gatewayTokens;
         }
 
         /// <summary>
@@ -21,14 +22,16 @@ namespace Unity.Services.Core.Editor
         public AccessTokens()
         {
             var env = new CloudEnvironmentConfigProvider();
+            ITokenExchangeUrls urls;
             if (env.IsStaging())
             {
-                m_TokenExchange = new TokenExchange(new StagingTokenExchangeUrls());
+                urls = new StagingTokenExchangeUrls();
             }
             else
             {
-                m_TokenExchange = new TokenExchange(new ProductionTokenExchangeUrls());
+                urls = new ProductionTokenExchangeUrls();
             }
+            m_GatewayTokens = new GatewayTokens(new TokenExchange(urls), new UtcTimeProvider());
         }
 
         /// <summary>
@@ -48,11 +51,14 @@ namespace Unity.Services.Core.Editor
         /// <returns>
         /// Task with a result that represents the services gateway token.
         /// </returns>
-        public async Task<string> GetServicesGatewayTokenAsync()
+        public Task<string> GetServicesGatewayTokenAsync()
         {
-            var genesisToken = GetGenesisToken();
-            var token = await m_TokenExchange.ExchangeServicesGatewayTokenAsync(genesisToken);
-            return token;
+            return m_GatewayTokens.GetGatewayTokenAsync(GetGenesisToken());
+        }
+
+        string IAccessTokens.GetGenesisToken()
+        {
+            return GetGenesisToken();
         }
     }
 }

@@ -52,6 +52,13 @@ namespace Unity.Services.Core.Telemetry.Internal
 
         public CachedPayload<TPayload> Cache { get; }
 
+        /// <remarks>
+        /// Members requiring thread safety:
+        /// * <see cref="Cache"/>.
+        /// * <see cref="m_CachePersister"/>.
+        /// </remarks>
+        protected object Lock { get; } = new object();
+
         protected TelemetryHandler(
             TelemetryConfig config, CachedPayload<TPayload> cache, IActionScheduler scheduler,
             ICachePersister<TPayload> cachePersister, TelemetrySender sender)
@@ -77,17 +84,20 @@ namespace Unity.Services.Core.Telemetry.Internal
 
         internal void HandlePersistedCache()
         {
-            if (!m_CachePersister.CanPersist
-                || !m_CachePersister.TryFetch(out var persistedCache))
-                return;
-
-            if (persistedCache.IsEmpty())
+            lock (Lock)
             {
-                m_CachePersister.Delete();
-                return;
-            }
+                if (!m_CachePersister.CanPersist
+                    || !m_CachePersister.TryFetch(out var persistedCache))
+                    return;
 
-            SendPersistedCache(persistedCache);
+                if (persistedCache.IsEmpty())
+                {
+                    m_CachePersister.Delete();
+                    return;
+                }
+
+                SendPersistedCache(persistedCache);
+            }
         }
 
         internal abstract void SendPersistedCache(CachedPayload<TPayload> persistedCache);
@@ -118,7 +128,10 @@ namespace Unity.Services.Core.Telemetry.Internal
             void SendingLoop()
             {
                 ScheduleSendingLoop();
-                SendCachedPayload();
+                lock (Lock)
+                {
+                    SendCachedPayload();
+                }
             }
         }
 
@@ -138,24 +151,31 @@ namespace Unity.Services.Core.Telemetry.Internal
 
         internal void PersistCache()
         {
-            if (!m_CachePersister.CanPersist
-                || Cache.TimeOfOccurenceTicks <= 0
-                || Cache.Payload.Count <= 0)
-                return;
+            lock (Lock)
+            {
+                if (!m_CachePersister.CanPersist
+                    || Cache.TimeOfOccurenceTicks <= 0
+                    || Cache.Payload.Count <= 0)
+                    return;
 
-            m_CachePersister.Persist(Cache);
+                m_CachePersister.Persist(Cache);
+            }
         }
 
         public void Register(TEvent telemetryEvent)
         {
-            CoreLogger.LogTelemetry(
-                $"Cached the {typeof(TEvent).Name} event: {JsonConvert.SerializeObject(telemetryEvent)}");
-            Cache.Add(telemetryEvent);
+            lock (Lock)
+            {
+                CoreLogger.LogTelemetry(
+                    $"Cached the {typeof(TEvent).Name} event: {JsonConvert.SerializeObject(telemetryEvent)}");
+                Cache.Add(telemetryEvent);
 
-            if (!IsCacheFull())
-                return;
+                if (!IsCacheFull())
+                    return;
 
-            SendCachedPayload();
+                SendCachedPayload();
+            }
+
             m_Scheduler.CancelAction(SendingLoopScheduleId);
             ScheduleSendingLoop();
 

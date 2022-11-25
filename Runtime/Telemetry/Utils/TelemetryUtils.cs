@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Environments.Internal;
+using Unity.Services.Core.Internal;
 using Unity.Services.Core.Scheduler.Internal;
 using UnityEngine;
 
@@ -83,7 +84,7 @@ namespace Unity.Services.Core.Telemetry.Internal
             if (platform == RuntimePlatform.Switch)
                 return new DisabledCachePersister<TPayload>();
 
-            return new FileCachePersister<TPayload>(fileName);
+            return new FileCachePersister<TPayload>(fileName, CoreDiagnostics.Instance);
         }
 
         internal static TelemetryConfig CreateTelemetryConfig(IProjectConfiguration projectConfiguration)

@@ -11,6 +11,12 @@ namespace Unity.Services.Core.Scheduler.Internal
     {
         readonly ITimeProvider m_TimeProvider;
 
+        /// <remarks>
+        /// Members requiring thread safety:
+        /// * <see cref="m_NextId"/>.
+        /// * <see cref="m_ScheduledActions"/>.
+        /// * <see cref="m_IdScheduledInvocationMap"/>.
+        /// </remarks>
         readonly object m_Lock = new object();
 
         readonly MinimumBinaryHeap<ScheduledInvocation> m_ScheduledActions
@@ -52,37 +58,35 @@ namespace Unity.Services.Core.Scheduler.Internal
                 throw new ArgumentNullException(nameof(action));
             }
 
-            var scheduledInvocation = new ScheduledInvocation
-            {
-                Action = action,
-                InvocationTime = m_TimeProvider.Now.AddSeconds(delaySeconds),
-                ActionId = m_NextId++
-            };
-
-            if (m_NextId < k_MinimumIdValue)
-            {
-                m_NextId = k_MinimumIdValue;
-            }
-
             lock (m_Lock)
             {
+                var scheduledInvocation = new ScheduledInvocation
+                {
+                    Action = action,
+                    InvocationTime = m_TimeProvider.Now.AddSeconds(delaySeconds),
+                    ActionId = m_NextId++
+                };
+
+                if (m_NextId < k_MinimumIdValue)
+                {
+                    m_NextId = k_MinimumIdValue;
+                }
+
                 m_ScheduledActions.Insert(scheduledInvocation);
                 m_IdScheduledInvocationMap.Add(scheduledInvocation.ActionId, scheduledInvocation);
-            }
 
-            return scheduledInvocation.ActionId;
+                return scheduledInvocation.ActionId;
+            }
         }
 
         public void CancelAction(long actionId)
         {
             lock (m_Lock)
             {
-                if (!m_IdScheduledInvocationMap.ContainsKey(actionId))
+                if (!m_IdScheduledInvocationMap.TryGetValue(actionId, out var scheduledInvocation))
                 {
                     return;
                 }
-
-                var scheduledInvocation = m_IdScheduledInvocationMap[actionId];
 
                 m_ScheduledActions.Remove(scheduledInvocation);
                 m_IdScheduledInvocationMap.Remove(scheduledInvocation.ActionId);
@@ -91,7 +95,7 @@ namespace Unity.Services.Core.Scheduler.Internal
 
         internal void ExecuteExpiredActions()
         {
-            List<ScheduledInvocation> scheduledInvocationList = new List<ScheduledInvocation>();
+            var scheduledInvocationList = new List<ScheduledInvocation>();
             lock (m_Lock)
             {
                 while (m_ScheduledActions.Count > 0
