@@ -30,7 +30,7 @@ namespace Unity.Services.Core.Internal
         {
             if (Metrics is null)
             {
-                CoreLogger.LogVerbose($"Can't send AllPackagesInitSuccess, Metrics is null.");
+                CoreLogger.LogTelemetry("Can't send AllPackagesInitSuccess, Metrics is null.");
             }
             else
             {
@@ -42,7 +42,7 @@ namespace Unity.Services.Core.Internal
         {
             if (Metrics is null)
             {
-                CoreLogger.LogVerbose($"Can't send AllPackagesInitTime, Metrics is null.");
+                CoreLogger.LogTelemetry("Can't send AllPackagesInitTime, Metrics is null.");
             }
             else
             {
@@ -58,7 +58,7 @@ namespace Unity.Services.Core.Internal
             }
             else
             {
-                CoreLogger.LogVerbose($"There are no metrics for {packageType.Name}.");
+                CoreLogger.LogTelemetry($"There are no metrics for {packageType.Name}.");
             }
         }
 
@@ -72,7 +72,7 @@ namespace Unity.Services.Core.Internal
             }
             else
             {
-                CoreLogger.LogVerbose("Metrics couldn't be created for Core package.");
+                CoreLogger.LogTelemetry("Metrics couldn't be created for Core package.");
             }
         }
 
@@ -96,7 +96,7 @@ namespace Unity.Services.Core.Internal
                     var packageType = Type.GetType(initializerFullName);
                     if (packageType is null)
                     {
-                        CoreLogger.LogVerbose($"'{initializerFullName}' not found. It may have been stripped.");
+                        CoreLogger.LogTelemetry($"'{initializerFullName}' not found. It may have been stripped.");
                         continue;
                     }
 

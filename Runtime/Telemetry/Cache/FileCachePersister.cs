@@ -51,21 +51,21 @@ namespace Unity.Services.Core.Telemetry.Internal
                 return;
             }
 
-            var serializedEvents = JsonConvert.SerializeObject(cache);
-
             try
             {
+                var serializedEvents = JsonConvert.SerializeObject(cache);
                 File.WriteAllText(FilePath, serializedEvents);
             }
             catch (IOException e)
+                when (TelemetryUtils.LogTelemetryException(e))
             {
                 var exception = new IOException(k_MultipleInstanceError, e);
                 CoreLogger.LogTelemetry(exception);
                 m_Diagnostics.SendCoreDiagnosticsAsync(k_MultipleInstanceDiagnosticsName, exception);
             }
             catch (Exception e)
+                when (TelemetryUtils.LogTelemetryException(e, true))
             {
-                CoreLogger.LogTelemetry(e);
                 m_Diagnostics.SendCoreDiagnosticsAsync(k_CacheFileException, e);
             }
         }
@@ -93,8 +93,8 @@ namespace Unity.Services.Core.Telemetry.Internal
                 return false;
             }
             catch (Exception e)
+                when (TelemetryUtils.LogTelemetryException(e, true))
             {
-                CoreLogger.LogTelemetry(e);
                 m_Diagnostics.SendCoreDiagnosticsAsync(k_CacheFileException, e);
                 return false;
             }
@@ -118,8 +118,8 @@ namespace Unity.Services.Core.Telemetry.Internal
                 m_Diagnostics.SendCoreDiagnosticsAsync(k_MultipleInstanceDiagnosticsName, exception);
             }
             catch (Exception e)
+                when (TelemetryUtils.LogTelemetryException(e, true))
             {
-                CoreLogger.LogTelemetry(e);
                 m_Diagnostics.SendCoreDiagnosticsAsync(k_CacheFileException, e);
             }
         }

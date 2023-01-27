@@ -61,23 +61,31 @@ namespace Unity.Services.Core.Telemetry.Internal
 
             void OnRequestCompleted(WebRequest webRequest)
             {
-                if (webRequest.IsSuccess)
+                try
                 {
-                    CoreLogger.LogTelemetry($"{typeof(TPayload).Name} sent successfully");
-                    completionSource.SetResult(null);
+                    if (webRequest.IsSuccess)
+                    {
+                        CoreLogger.LogTelemetry($"{typeof(TPayload).Name} sent successfully");
+                        completionSource.TrySetResult(null);
+                    }
+                    else if (m_RetryPolicy.CanRetry(webRequest, sendCount))
+                    {
+                        var delayBeforeSendingSeconds = m_RetryPolicy.GetDelayBeforeSendingSeconds(sendCount);
+                        m_Scheduler.ScheduleAction(SendWebRequest, delayBeforeSendingSeconds);
+                    }
+                    else
+                    {
+                        var errorMessage = $"Error: {webRequest.ErrorMessage}\nBody: {webRequest.ErrorBody}";
+                        completionSource.TrySetException(new Exception(errorMessage));
+                        CoreLogger.LogTelemetry(
+                            $"{typeof(TPayload).Name} couldn't be sent after {sendCount.ToString()} tries."
+                            + $"\n{errorMessage}");
+                    }
                 }
-                else if (m_RetryPolicy.CanRetry(webRequest, sendCount))
+                catch (Exception e)
+                    when (TelemetryUtils.LogTelemetryException(e, true))
                 {
-                    var delayBeforeSendingSeconds = m_RetryPolicy.GetDelayBeforeSendingSeconds(sendCount);
-                    m_Scheduler.ScheduleAction(SendWebRequest, delayBeforeSendingSeconds);
-                }
-                else
-                {
-                    var errorMessage = $"Error: {webRequest.ErrorMessage}\nBody: {webRequest.ErrorBody}";
-                    completionSource.TrySetException(new Exception(errorMessage));
-                    CoreLogger.LogTelemetry(
-                        $"{typeof(TPayload).Name} couldn't be sent after {sendCount.ToString()} tries."
-                        + $"\n{errorMessage}");
+                    completionSource.TrySetException(e);
                 }
             }
         }

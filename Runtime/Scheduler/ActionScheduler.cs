@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.LowLevel;
 using Unity.Services.Core.Internal;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
@@ -9,6 +8,10 @@ namespace Unity.Services.Core.Scheduler.Internal
 {
     class ActionScheduler : IActionScheduler
     {
+        const long k_MinimumIdValue = 1;
+
+        internal readonly PlayerLoopSystem SchedulerLoopSystem;
+
         readonly ITimeProvider m_TimeProvider;
 
         /// <remarks>
@@ -25,9 +28,7 @@ namespace Unity.Services.Core.Scheduler.Internal
         readonly Dictionary<long, ScheduledInvocation> m_IdScheduledInvocationMap
             = new Dictionary<long, ScheduledInvocation>();
 
-        const long k_MinimumIdValue = 1;
-
-        internal readonly PlayerLoopSystem SchedulerLoopSystem;
+        readonly List<ScheduledInvocation> m_ExpiredActions = new List<ScheduledInvocation>();
 
         long m_NextId = k_MinimumIdValue;
 
@@ -95,52 +96,35 @@ namespace Unity.Services.Core.Scheduler.Internal
 
         internal void ExecuteExpiredActions()
         {
-            var scheduledInvocationList = new List<ScheduledInvocation>();
             lock (m_Lock)
             {
+                m_ExpiredActions.Clear();
+
                 while (m_ScheduledActions.Count > 0
                        && m_ScheduledActions.Min?.InvocationTime <= m_TimeProvider.Now)
                 {
-                    var scheduledInvocation = m_ScheduledActions.ExtractMin();
-                    scheduledInvocationList.Add(scheduledInvocation);
-                    m_ScheduledActions.Remove(scheduledInvocation);
-                    m_IdScheduledInvocationMap.Remove(scheduledInvocation.ActionId);
+                    var expiredAction = m_ScheduledActions.ExtractMin();
+                    m_ExpiredActions.Add(expiredAction);
+                    m_ScheduledActions.Remove(expiredAction);
+                    m_IdScheduledInvocationMap.Remove(expiredAction.ActionId);
                 }
-            }
 
-            foreach (var scheduledInv in scheduledInvocationList)
-            {
-                try
+                foreach (var expiredAction in m_ExpiredActions)
                 {
-                    scheduledInv.Action();
-                }
-                catch (Exception e)
-                {
-                    CoreLogger.LogException(e);
+                    try
+                    {
+                        expiredAction.Action();
+                    }
+                    catch (Exception e)
+                    {
+                        CoreLogger.LogException(e);
+                    }
                 }
             }
         }
 
-#if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ClearActionSchedulerFromPlayerLoop()
-        {
-            var currentPlayerLoop = PlayerLoop.GetCurrentPlayerLoop();
-            var currentSubSystems = new List<PlayerLoopSystem>(currentPlayerLoop.subSystemList);
-            for (var i = currentSubSystems.Count - 1; i >= 0; i--)
-            {
-                if (currentSubSystems[i].type == typeof(ActionScheduler))
-                {
-                    currentSubSystems.RemoveAt(i);
-                }
-            }
-
-            UpdateSubSystemList(currentSubSystems, currentPlayerLoop);
-        }
-
-#endif
-
-        static void UpdateSubSystemList(List<PlayerLoopSystem> subSystemList, PlayerLoopSystem currentPlayerLoop)
+        internal static void UpdateCurrentPlayerLoopWith(
+            List<PlayerLoopSystem> subSystemList, PlayerLoopSystem currentPlayerLoop)
         {
             currentPlayerLoop.subSystemList = subSystemList.ToArray();
             PlayerLoop.SetPlayerLoop(currentPlayerLoop);
@@ -153,7 +137,7 @@ namespace Unity.Services.Core.Scheduler.Internal
             if (!currentSubSystems.Contains(SchedulerLoopSystem))
             {
                 currentSubSystems.Add(SchedulerLoopSystem);
-                UpdateSubSystemList(currentSubSystems, currentPlayerLoop);
+                UpdateCurrentPlayerLoopWith(currentSubSystems, currentPlayerLoop);
             }
         }
 
@@ -161,8 +145,10 @@ namespace Unity.Services.Core.Scheduler.Internal
         {
             var currentPlayerLoop = PlayerLoop.GetCurrentPlayerLoop();
             var currentSubSystems = new List<PlayerLoopSystem>(currentPlayerLoop.subSystemList);
-            currentSubSystems.Remove(SchedulerLoopSystem);
-            UpdateSubSystemList(currentSubSystems, currentPlayerLoop);
+            if (currentSubSystems.Remove(SchedulerLoopSystem))
+            {
+                UpdateCurrentPlayerLoopWith(currentSubSystems, currentPlayerLoop);
+            }
         }
     }
 }

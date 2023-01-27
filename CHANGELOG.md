@@ -5,6 +5,24 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] - 2023-01-27
+
+### Changed
+
+- Improved assembly filtering when generating the link file to only link assemblies providing a `IServiceComponent`.
+
+### Fixed
+
+- `ActionScheduler` doesn't generate GC allocation (used to be 40 bytes) each frame anymore.
+- Failed telemetry request no longer log errors when they fail, unless `ENABLE_UNITY_SERVICES_CORE_TELEMETRY_LOGGING` is
+  enabled as scripting define.
+- All `ActionScheduler` registered during play mode are now properly unregistered when exiting playmode.
+
+### Added
+
+- A link.xml generator to make sure all required service assemblies are properly preserved in build with code stripping
+  enabled.
+
 ## [1.7.0] - 2022-11-25
 
 ### Fixed

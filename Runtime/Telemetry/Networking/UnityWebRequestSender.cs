@@ -13,13 +13,21 @@ namespace Unity.Services.Core.Telemetry.Internal
 
             void OnSendingRequestCompleted(UnityEngine.AsyncOperation operation)
             {
-                using (var webRequest = ((UnityWebRequestAsyncOperation)operation).webRequest)
+                try
                 {
-                    if (callback is null)
-                        return;
+                    using (var webRequest = ((UnityWebRequestAsyncOperation)operation).webRequest)
+                    {
+                        if (callback is null)
+                            return;
 
-                    var simplifiedRequest = Simplify(webRequest);
-                    callback(simplifiedRequest);
+                        var simplifiedRequest = Simplify(webRequest);
+                        callback(simplifiedRequest);
+                    }
+                }
+                catch (Exception e)
+                    when (TelemetryUtils.LogTelemetryException(e))
+                {
+                    // Never reached.
                 }
             }
         }

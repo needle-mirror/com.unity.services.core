@@ -31,34 +31,20 @@ namespace Unity.Services.Core.Editor
             {
                 urls = new ProductionTokenExchangeUrls();
             }
+
             m_GatewayTokens = new GatewayTokens(new TokenExchange(urls), new UtcTimeProvider());
         }
 
-        /// <summary>
-        /// The access token used by Genesis.
-        /// </summary>
-        /// <returns>
-        /// Genesis Access Token.
-        /// </returns>
-        public static string GetGenesisToken()
-        {
-            return CloudProjectSettings.accessToken;
-        }
+        /// <inheritdoc cref="IAccessTokens.GetGenesisToken"/>
+        public static string GetGenesisToken() => CloudProjectSettings.accessToken;
 
-        /// <summary>
-        /// Task that represents an asynchronous operation to get services gateway token.
-        /// </summary>
-        /// <returns>
-        /// Task with a result that represents the services gateway token.
-        /// </returns>
+        /// <inheritdoc cref="IAccessTokens.GetServicesGatewayTokenAsync"/>
         public Task<string> GetServicesGatewayTokenAsync()
         {
             return m_GatewayTokens.GetGatewayTokenAsync(GetGenesisToken());
         }
 
-        string IAccessTokens.GetGenesisToken()
-        {
-            return GetGenesisToken();
-        }
+        /// <inheritdoc/>
+        string IAccessTokens.GetGenesisToken() => GetGenesisToken();
     }
 }

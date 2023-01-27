@@ -1,6 +1,4 @@
-#if UNITY_ANDROID && !UNITY_EDITOR
 using System;
-#endif
 using Newtonsoft.Json;
 using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Environments.Internal;
@@ -123,14 +121,31 @@ namespace Unity.Services.Core.Telemetry.Internal
 
         internal void ScheduleSendingLoop()
         {
-            SendingLoopScheduleId = m_Scheduler.ScheduleAction(SendingLoop, Config.PayloadSendingMaxIntervalSeconds);
+            try
+            {
+                SendingLoopScheduleId = m_Scheduler.ScheduleAction(
+                    SendingLoop, Config.PayloadSendingMaxIntervalSeconds);
+            }
+            catch (Exception e)
+                when (TelemetryUtils.LogTelemetryException(e))
+            {
+                // Never reached.
+            }
 
             void SendingLoop()
             {
                 ScheduleSendingLoop();
                 lock (Lock)
                 {
-                    SendCachedPayload();
+                    try
+                    {
+                        SendCachedPayload();
+                    }
+                    catch (Exception e)
+                        when (TelemetryUtils.LogTelemetryException(e))
+                    {
+                        // Never reached.
+                    }
                 }
             }
         }
@@ -139,13 +154,29 @@ namespace Unity.Services.Core.Telemetry.Internal
 
         internal void SchedulePersistenceLoop()
         {
-            PersistenceLoopScheduleId = m_Scheduler.ScheduleAction(
-                PersistenceLoop, Config.SafetyPersistenceIntervalSeconds);
+            try
+            {
+                PersistenceLoopScheduleId = m_Scheduler.ScheduleAction(
+                    PersistenceLoop, Config.SafetyPersistenceIntervalSeconds);
+            }
+            catch (Exception e)
+                when (TelemetryUtils.LogTelemetryException(e))
+            {
+                // Never reached.
+            }
 
             void PersistenceLoop()
             {
                 SchedulePersistenceLoop();
-                PersistCache();
+                try
+                {
+                    PersistCache();
+                }
+                catch (Exception e)
+                    when (TelemetryUtils.LogTelemetryException(e))
+                {
+                    // Never reached.
+                }
             }
         }
 
@@ -164,20 +195,27 @@ namespace Unity.Services.Core.Telemetry.Internal
 
         public void Register(TEvent telemetryEvent)
         {
-            lock (Lock)
+            try
             {
-                CoreLogger.LogTelemetry(
-                    $"Cached the {typeof(TEvent).Name} event: {JsonConvert.SerializeObject(telemetryEvent)}");
-                Cache.Add(telemetryEvent);
+                lock (Lock)
+                {
+                    CoreLogger.LogTelemetry(
+                        $"Cached the {typeof(TEvent).Name} event: {JsonConvert.SerializeObject(telemetryEvent)}");
+                    Cache.Add(telemetryEvent);
+                    if (!IsCacheFull())
+                        return;
 
-                if (!IsCacheFull())
-                    return;
+                    SendCachedPayload();
+                }
 
-                SendCachedPayload();
+                m_Scheduler.CancelAction(SendingLoopScheduleId);
+                ScheduleSendingLoop();
             }
-
-            m_Scheduler.CancelAction(SendingLoopScheduleId);
-            ScheduleSendingLoop();
+            catch (Exception e)
+                when (TelemetryUtils.LogTelemetryException(e))
+            {
+                // Never reached.
+            }
 
             bool IsCacheFull()
             {

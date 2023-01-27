@@ -14,10 +14,8 @@ namespace Unity.Services.Core.Configuration.Editor
         internal const string IoErrorMessage = "Service configuration file couldn't be created."
             + " Be sure you have read/write access to your project's Library folder.";
 
-        internal static readonly string CoreLibraryFolderPath
-            = Path.Combine(".", "Library", "com.unity.services.core");
         internal static readonly string ConfigCachePath
-            = Path.Combine(CoreLibraryFolderPath, ConfigurationUtils.ConfigFileName);
+            = Path.Combine(AssetUtils.CoreLibraryFolderPath, ConfigurationUtils.ConfigFileName);
 
         public override void PrepareForBuild(BuildPlayerContext buildPlayerContext)
         {
@@ -31,9 +29,9 @@ namespace Unity.Services.Core.Configuration.Editor
         {
             try
             {
-                if (!Directory.Exists(CoreLibraryFolderPath))
+                if (!Directory.Exists(AssetUtils.CoreLibraryFolderPath))
                 {
-                    Directory.CreateDirectory(CoreLibraryFolderPath);
+                    Directory.CreateDirectory(AssetUtils.CoreLibraryFolderPath);
                 }
 
                 var serializedConfig = JsonConvert.SerializeObject(config);

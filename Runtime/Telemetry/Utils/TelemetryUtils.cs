@@ -106,5 +106,23 @@ namespace Unity.Services.Core.Telemetry.Internal
             };
             return config;
         }
+
+        /// <summary>
+        /// Dummy predicate to log an exception in a when clause to avoid stack unwinding.
+        /// </summary>
+        /// <param name="e">
+        /// The exception to log.
+        /// </param>
+        /// <param name="predicateValue">
+        /// The value to return by this predicate.
+        /// </param>
+        /// <returns>
+        /// Returns the given <paramref name="predicateValue"/>.
+        /// </returns>
+        public static bool LogTelemetryException(Exception e, bool predicateValue = false)
+        {
+            CoreLogger.LogTelemetry(e);
+            return predicateValue;
+        }
     }
 }

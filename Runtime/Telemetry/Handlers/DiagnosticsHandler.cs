@@ -24,7 +24,7 @@ namespace Unity.Services.Core.Telemetry.Internal
         public DiagnosticsHandler(
             TelemetryConfig config, CachedPayload<DiagnosticsPayload> cache, IActionScheduler scheduler,
             ICachePersister<DiagnosticsPayload> cachePersister, TelemetrySender sender)
-            : base(config, cache, scheduler, cachePersister, sender) {}
+            : base(config, cache, scheduler, cachePersister, sender) { }
 
         internal override void SendPersistedCache(CachedPayload<DiagnosticsPayload> persistedCache)
         {
@@ -46,27 +46,36 @@ namespace Unity.Services.Core.Telemetry.Internal
 
         static void OnSendAsyncCompleted(Task sendOperation, object state)
         {
-            if (!(state is SendState castState))
+            try
             {
-                throw new ArgumentException("The given state is invalid.");
+                if (!(state is SendState castState))
+                {
+                    throw new ArgumentException("The given state is invalid.");
+                }
+
+                switch (sendOperation.Status)
+                {
+                    case TaskStatus.Canceled:
+                    case TaskStatus.Faulted:
+                    {
+                        castState.Self.ThreadSafeCache(castState.Payload);
+                        break;
+                    }
+                    case TaskStatus.RanToCompletion:
+                    {
+                        break;
+                    }
+
+                    default:
+                        throw new ArgumentOutOfRangeException(
+                            nameof(sendOperation.Status),
+                            "Can't continue without the send operation being completed.");
+                }
             }
-
-            switch (sendOperation.Status)
+            catch (Exception e)
+                when (TelemetryUtils.LogTelemetryException(e))
             {
-                case TaskStatus.Canceled:
-                case TaskStatus.Faulted:
-                {
-                    castState.Self.ThreadSafeCache(castState.Payload);
-                    break;
-                }
-                case TaskStatus.RanToCompletion:
-                {
-                    break;
-                }
-
-                default:
-                    throw new ArgumentOutOfRangeException(
-                        nameof(sendOperation.Status), "Can't continue without the send operation being completed.");
+                // Never reached.
             }
         }
 

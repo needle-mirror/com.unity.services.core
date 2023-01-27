@@ -69,7 +69,7 @@ namespace Unity.Services.Core.Internal
 
             if (DiagnosticsComponentProvider is null)
             {
-                CoreLogger.LogVerbose(
+                CoreLogger.LogTelemetry(
                     $"There is no {nameof(DiagnosticsComponentProvider)} set for {nameof(CoreDiagnostics)}.");
                 return null;
             }
