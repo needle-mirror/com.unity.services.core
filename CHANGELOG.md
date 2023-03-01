@@ -5,7 +5,17 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.7.1] - 2023-01-27
+## [1.8.1] - 2023-03-01
+
+### Added
+
+- The `IAnalyticsStandardEventComponent` component to provide a way to record analytics standard events from any package.
+
+### Changed
+
+- Package's license to refresh legal links.
+
+## [1.7.1] - 2023-01-30
 
 ### Changed
 
