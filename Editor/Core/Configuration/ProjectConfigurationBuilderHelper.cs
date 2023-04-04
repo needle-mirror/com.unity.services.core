@@ -1,5 +1,6 @@
 using System.IO;
 using Newtonsoft.Json;
+using Unity.Services.Core.Internal;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,8 +14,11 @@ namespace Unity.Services.Core.Configuration.Editor
         public static void GenerateConfigFileInProject(ProjectConfigurationBuilder builder)
         {
             var config = builder.BuildConfiguration();
-            var serializedConfig = JsonConvert.SerializeObject(config);
-            AddConfigToProject(serializedConfig);
+            using (new JsonConvertDefaultSettingsScope())
+            {
+                var serializedConfig = JsonConvert.SerializeObject(config);
+                AddConfigToProject(serializedConfig);
+            }
         }
 
         internal static void AddConfigToProject(string config)
@@ -27,7 +31,5 @@ namespace Unity.Services.Core.Configuration.Editor
             File.WriteAllText(RuntimeConfigFullPath, config);
             AssetDatabase.Refresh();
         }
-
-
     }
 }

@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
-using UnityEngine;
+using Unity.Services.Core.Internal;
 
 namespace Unity.Services.Core.Editor
 {
@@ -42,7 +41,10 @@ namespace Unity.Services.Core.Editor
                 [payloadFieldName] = serviceFlags,
             };
 
-            return JsonConvert.SerializeObject(payload);
+            using (new JsonConvertDefaultSettingsScope())
+            {
+                return JsonConvert.SerializeObject(payload);
+            }
         }
     }
 }

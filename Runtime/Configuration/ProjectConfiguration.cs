@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using Newtonsoft.Json;
 using Unity.Services.Core.Configuration.Internal;
+using Unity.Services.Core.Internal;
 
 namespace Unity.Services.Core.Configuration
 {
@@ -64,8 +65,12 @@ namespace Unity.Services.Core.Configuration
             if (m_JsonCache == null)
             {
                 var dict = m_ConfigValues.ToDictionary(pair => pair.Key, pair => pair.Value.Value);
-                m_JsonCache = JsonConvert.SerializeObject(dict);
+                using (new JsonConvertDefaultSettingsScope())
+                {
+                    m_JsonCache = JsonConvert.SerializeObject(dict);
+                }
             }
+
             return m_JsonCache;
         }
     }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Security;
 using System.Security.Permissions;
 using Newtonsoft.Json;
+using Unity.Services.Core.Internal;
 using UnityEditor.Build;
 using UnityEngine;
 
@@ -34,8 +35,11 @@ namespace Unity.Services.Core.Configuration.Editor
                     Directory.CreateDirectory(AssetUtils.CoreLibraryFolderPath);
                 }
 
-                var serializedConfig = JsonConvert.SerializeObject(config);
-                File.WriteAllText(ConfigCachePath, serializedConfig);
+                using (new JsonConvertDefaultSettingsScope())
+                {
+                    var serializedConfig = JsonConvert.SerializeObject(config);
+                    File.WriteAllText(ConfigCachePath, serializedConfig);
+                }
             }
             catch (SecurityException e)
                 when (e.PermissionType == typeof(FileIOPermission)

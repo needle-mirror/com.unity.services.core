@@ -40,11 +40,9 @@ namespace Unity.Services.Core.Editor
                 var organizationKey = CloudProjectSettings.organizationId;
 #endif
                 var projectApiUrl = configurationRequestTask.Result.BuildProjectApiUrl(organizationKey, CloudProjectSettings.projectId);
-                var getProjectFlagsRequest = new UnityWebRequest(projectApiUrl,
-                    UnityWebRequest.kHttpVerbGET)
-                {
-                    downloadHandler = new DownloadHandlerBuffer()
-                };
+                var getProjectFlagsRequest = new UnityWebRequest(
+                    projectApiUrl,
+                    UnityWebRequest.kHttpVerbGET) { downloadHandler = new DownloadHandlerBuffer() };
                 getProjectFlagsRequest.SetRequestHeader("AUTHORIZATION", $"Bearer {CloudProjectSettings.accessToken}");
                 var operation = getProjectFlagsRequest.SendWebRequest();
                 operation.completed += op => OnFetchServiceFlagsCompleted(getProjectFlagsRequest, resultAsyncOp);
@@ -73,19 +71,24 @@ namespace Unity.Services.Core.Editor
 
         static IDictionary<string, bool> ExtractServiceFlagsFromUnityWebRequest(UnityWebRequest unityWebRequest)
         {
-            IDictionary<string, bool> flags = null;
-            if (UnityWebRequestHelper.IsUnityWebRequestReadyForTextExtract(unityWebRequest, out var jsonContent))
+            if (!UnityWebRequestHelper.IsUnityWebRequestReadyForTextExtract(unityWebRequest, out var jsonContent))
             {
-                try
+                return null;
+            }
+
+            IDictionary<string, bool> flags;
+            try
+            {
+                using (new JsonConvertDefaultSettingsScope())
                 {
                     var jsonEntries = JsonConvert.DeserializeObject<JObject>(jsonContent);
-                    flags = ((JObject)jsonEntries?[k_ServiceFlagsKey])?.ToObject<IDictionary<string, bool>>();
+                    flags = ((JObject)jsonEntries ? [k_ServiceFlagsKey])?.ToObject<IDictionary<string, bool>>();
                 }
-                catch (Exception ex)
-                {
-                    CoreLogger.LogError($"Exception occurred when fetching service flags:\n{ex}");
-                    flags = new Dictionary<string, bool>();
-                }
+            }
+            catch (Exception ex)
+            {
+                CoreLogger.LogError($"Exception occurred when fetching service flags:\n{ex}");
+                flags = new Dictionary<string, bool>();
             }
 
             return flags;

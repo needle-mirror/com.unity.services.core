@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using Newtonsoft.Json;
+using Unity.Services.Core.Internal;
 
 namespace Unity.Services.Core.Editor
 {
@@ -32,7 +33,10 @@ namespace Unity.Services.Core.Editor
 
             var payload = parts[1];
             var payloadJson = Encoding.UTF8.GetString(Base64UrlDecode(payload));
-            return JsonConvert.DeserializeObject<JsonWebToken>(payloadJson);
+            using (new JsonConvertDefaultSettingsScope())
+            {
+                return JsonConvert.DeserializeObject<JsonWebToken>(payloadJson);
+            }
         }
 
         static byte[] Base64UrlDecode(string input)

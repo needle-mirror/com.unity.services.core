@@ -93,7 +93,12 @@ namespace Unity.Services.Core.Telemetry.Internal
         internal static byte[] SerializePayload<TPayload>(TPayload payload)
             where TPayload : ITelemetryPayload
         {
-            var jsonPayload = JsonConvert.SerializeObject(payload);
+            string jsonPayload;
+            using (new JsonConvertDefaultSettingsScope())
+            {
+                jsonPayload = JsonConvert.SerializeObject(payload);
+            }
+
             var serializedPayload = Encoding.UTF8.GetBytes(jsonPayload);
             return serializedPayload;
         }

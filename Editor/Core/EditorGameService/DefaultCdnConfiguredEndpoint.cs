@@ -1,7 +1,5 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
-using UnityEngine;
 
 namespace Unity.Services.Core.Editor
 {

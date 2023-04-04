@@ -53,8 +53,11 @@ namespace Unity.Services.Core.Telemetry.Internal
 
             try
             {
-                var serializedEvents = JsonConvert.SerializeObject(cache);
-                File.WriteAllText(FilePath, serializedEvents);
+                using (new JsonConvertDefaultSettingsScope())
+                {
+                    var serializedEvents = JsonConvert.SerializeObject(cache);
+                    File.WriteAllText(FilePath, serializedEvents);
+                }
             }
             catch (IOException e)
                 when (TelemetryUtils.LogTelemetryException(e))
@@ -82,7 +85,10 @@ namespace Unity.Services.Core.Telemetry.Internal
             try
             {
                 var rawPersistedCache = File.ReadAllText(FilePath);
-                persistedCache = JsonConvert.DeserializeObject<CachedPayload<TPayload>>(rawPersistedCache);
+                using (new JsonConvertDefaultSettingsScope())
+                {
+                    persistedCache = JsonConvert.DeserializeObject<CachedPayload<TPayload>>(rawPersistedCache);
+                }
                 return persistedCache != null;
             }
             catch (IOException e)

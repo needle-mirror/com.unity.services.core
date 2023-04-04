@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Unity.Services.Core.Internal;
 using UnityEngine.Networking;
 
 namespace Unity.Services.Core.Editor
@@ -57,14 +58,16 @@ namespace Unity.Services.Core.Editor
         Task<UnityWebRequest> SendTokenExchangeUnityWebRequestAsync(TokenExchangeRequest tokenExchangeRequest)
         {
             var taskCompletionSource = new TaskCompletionSource<UnityWebRequest>();
-            var jsonPayload = JsonConvert.SerializeObject(tokenExchangeRequest);
+            string jsonPayload;
+            using (new JsonConvertDefaultSettingsScope())
+            {
+                jsonPayload = JsonConvert.SerializeObject(tokenExchangeRequest);
+            }
+
             var postBytes = Encoding.UTF8.GetBytes(jsonPayload);
             var unityWebRequest = new UnityWebRequest(
                 m_TokenExchangeUrls.ServicesGatewayTokenExchangeUrl, UnityWebRequest.kHttpVerbPOST);
-            unityWebRequest.uploadHandler = new UploadHandlerRaw(postBytes)
-            {
-                contentType = k_RequestContentType
-            };
+            unityWebRequest.uploadHandler = new UploadHandlerRaw(postBytes) { contentType = k_RequestContentType };
             unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
             unityWebRequest.SendWebRequest().completed += OnRequestCompleted;
 
@@ -75,7 +78,7 @@ namespace Unity.Services.Core.Editor
                 var request = ((UnityWebRequestAsyncOperation)operation).webRequest;
                 using (request)
                 {
-                    taskCompletionSource.TrySetResult(unityWebRequest);
+                    taskCompletionSource.TrySetResult(request);
                 }
             }
         }
@@ -84,15 +87,18 @@ namespace Unity.Services.Core.Editor
         {
             var tokenExchangeRequest = new TokenExchangeRequest(genesisToken);
             var responseJson = await SendUnityWebRequestAndGetResponseAsync(tokenExchangeRequest);
-            var tokenExchangeResponse = JsonConvert.DeserializeObject<TokenExchangeResponse>(responseJson);
 
-            if (tokenExchangeResponse?.Token == null)
+            using (new JsonConvertDefaultSettingsScope())
             {
+                var tokenExchangeResponse = JsonConvert.DeserializeObject<TokenExchangeResponse>(responseJson);
+                if (tokenExchangeResponse?.Token != null)
+                {
+                    return tokenExchangeResponse.Token;
+                }
+
                 var tokenExchangeError = JsonConvert.DeserializeObject<TokenExchangeRequestError>(responseJson);
                 throw new RequestFailedException(tokenExchangeError.Status, tokenExchangeError.Detail);
             }
-
-            return tokenExchangeResponse.Token;
         }
 
         /// <remarks>

@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Unity.Services.Core.Internal;
 using UnityEditor;
 using Unity.Services.Core.Scheduler.Internal;
 
@@ -35,6 +36,7 @@ namespace Unity.Services.Core.Editor
                 {
                     cachedTokens.GatewayToken = null;
                 }
+
                 cachedTokens.GenesisToken = genesisToken;
             }
 
@@ -52,7 +54,10 @@ namespace Unity.Services.Core.Editor
             var serialized = SessionState.GetString(k_CacheKey, string.Empty);
             try
             {
-                return JsonConvert.DeserializeObject<CachedTokens>(serialized);
+                using (new JsonConvertDefaultSettingsScope())
+                {
+                    return JsonConvert.DeserializeObject<CachedTokens>(serialized);
+                }
             }
             catch (JsonException)
             {
@@ -62,8 +67,11 @@ namespace Unity.Services.Core.Editor
 
         static void SaveCache(CachedTokens tokens)
         {
-            var serialized = JsonConvert.SerializeObject(tokens);
-            SessionState.SetString(k_CacheKey, serialized);
+            using (new JsonConvertDefaultSettingsScope())
+            {
+                var serialized = JsonConvert.SerializeObject(tokens);
+                SessionState.SetString(k_CacheKey, serialized);
+            }
         }
 
         static DateTime GetNextRefreshTime(string gatewayToken)

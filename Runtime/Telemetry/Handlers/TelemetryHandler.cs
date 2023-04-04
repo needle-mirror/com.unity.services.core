@@ -199,8 +199,12 @@ namespace Unity.Services.Core.Telemetry.Internal
             {
                 lock (Lock)
                 {
-                    CoreLogger.LogTelemetry(
-                        $"Cached the {typeof(TEvent).Name} event: {JsonConvert.SerializeObject(telemetryEvent)}");
+                    using (new JsonConvertDefaultSettingsScope())
+                    {
+                        CoreLogger.LogTelemetry(
+                            $"Cached the {typeof(TEvent).Name} event: {JsonConvert.SerializeObject(telemetryEvent)}");
+                    }
+
                     Cache.Add(telemetryEvent);
                     if (!IsCacheFull())
                         return;

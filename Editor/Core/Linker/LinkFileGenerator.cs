@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Unity.Services.Core.Configuration.Editor;
 using Unity.Services.Core.Internal;
 using UnityEditor;
@@ -10,6 +11,7 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.UnityLinker;
 using UnityEditorInternal;
+using Formatting = Newtonsoft.Json.Formatting;
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace Unity.Services.Core.Editor
@@ -21,9 +23,22 @@ namespace Unity.Services.Core.Editor
         internal static readonly string LinkerFilePath
             = Path.Combine(AssetUtils.CoreLibraryFolderPath, k_LinkerFileName);
 
+        readonly JsonSerializerSettings m_JsonSettings = new JsonSerializerSettings
+        {
+            Converters = new List<JsonConverter>
+            {
+                new XmlNodeConverter
+                {
+                    DeserializeRootElementName = "linker",
+                    WriteArrayAttribute = false,
+                    EncodeSpecialCharacters = false
+                }
+            }
+        };
+
         int IOrderedCallback.callbackOrder { get; }
 
-        internal static string GenerateAdditionalLinkXmlFile(IEnumerable<Assembly> packageAssemblies)
+        internal string GenerateAdditionalLinkXmlFile(IEnumerable<Assembly> packageAssemblies)
         {
             // Cleanup old linker file.
             if (File.Exists(LinkerFilePath))
@@ -61,16 +76,19 @@ namespace Unity.Services.Core.Editor
                 .SetPreserve(XmlLinkedPreserve.Nothing);
         }
 
-        internal static void CreateLinkerFile(XmlLinkerModel linker)
+        internal void CreateLinkerFile(XmlLinkerModel linker)
         {
             if (!Directory.Exists(AssetUtils.CoreLibraryFolderPath))
             {
                 Directory.CreateDirectory(AssetUtils.CoreLibraryFolderPath);
             }
 
-            var linkerJson = JsonConvert.SerializeObject(linker);
-            var xmlLinker = JsonConvert.DeserializeXmlNode(linkerJson, "linker");
-            File.WriteAllText(LinkerFilePath, xmlLinker.InnerXml);
+            using (new JsonConvertDefaultSettingsScope(m_JsonSettings))
+            {
+                var linkerJson = JsonConvert.SerializeObject(linker, Formatting.None);
+                var xmlLinker = JsonConvert.DeserializeXmlNode(linkerJson, "linker");
+                File.WriteAllText(LinkerFilePath, xmlLinker.InnerXml);
+            }
         }
 
         string IUnityLinkerProcessor.GenerateAdditionalLinkXmlFile(BuildReport report, UnityLinkerBuildPipelineData data)

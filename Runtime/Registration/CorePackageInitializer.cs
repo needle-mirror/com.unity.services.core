@@ -316,7 +316,13 @@ namespace Unity.Services.Core.Registration
         void LogInitializationInfoJson()
         {
             var result = new JObject();
-            var diagnostics = JObject.Parse(JsonConvert.SerializeObject(DiagnosticsFactory.CommonTags));
+            string serializedDiagnosticCommonTags;
+            using (new JsonConvertDefaultSettingsScope())
+            {
+                serializedDiagnosticCommonTags = JsonConvert.SerializeObject(DiagnosticsFactory.CommonTags);
+            }
+
+            var diagnostics = JObject.Parse(serializedDiagnosticCommonTags);
             var projectConfig = JObject.Parse(ProjectConfig.ToJson());
             var installationId = JObject.Parse($@"{{""installation_id"": ""{InstallationId.Identifier}""}}");
 
