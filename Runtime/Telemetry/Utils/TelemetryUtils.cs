@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Environments.Internal;
 using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 using Unity.Services.Core.Scheduler.Internal;
 using UnityEngine;
 
@@ -35,7 +36,12 @@ namespace Unity.Services.Core.Telemetry.Internal
             var retryPolicy = new ExponentialBackOffRetryPolicy();
             var requestSender = new UnityWebRequestSender();
             var metricsSender = new TelemetrySender(
-                config.TargetUrl, config.ServicePath, scheduler, retryPolicy, requestSender);
+                config.TargetUrl,
+                config.ServicePath,
+                scheduler,
+                retryPolicy,
+                requestSender,
+                new NewtonsoftSerializer());
             var handler = new MetricsHandler(config, cache, scheduler, cachePersister, metricsSender);
             handler.Initialize(cloudProjectId, environments);
 
@@ -66,7 +72,12 @@ namespace Unity.Services.Core.Telemetry.Internal
             var retryPolicy = new ExponentialBackOffRetryPolicy();
             var requestSender = new UnityWebRequestSender();
             var metricsSender = new TelemetrySender(
-                config.TargetUrl, config.ServicePath, scheduler, retryPolicy, requestSender);
+                config.TargetUrl,
+                config.ServicePath,
+                scheduler,
+                retryPolicy,
+                requestSender,
+                new NewtonsoftSerializer());
             var handler = new DiagnosticsHandler(
                 config, cache, scheduler, cachePersister, metricsSender);
             handler.Initialize(cloudProjectId, environments);
@@ -84,7 +95,7 @@ namespace Unity.Services.Core.Telemetry.Internal
             if (platform == RuntimePlatform.Switch)
                 return new DisabledCachePersister<TPayload>();
 
-            return new FileCachePersister<TPayload>(fileName, CoreDiagnostics.Instance);
+            return new FileCachePersister<TPayload>(fileName, new NewtonsoftSerializer(), CoreDiagnostics.Instance);
         }
 
         internal static TelemetryConfig CreateTelemetryConfig(IProjectConfiguration projectConfiguration)

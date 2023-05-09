@@ -8,6 +8,7 @@ namespace Unity.Services.Core.Environments
     public static class EnvironmentsOptionsExtensions
     {
         internal const string EnvironmentNameKey = "com.unity.services.core.environment-name";
+        internal const string EnvironmentDefaultNameValue = "production";
 
         /// <summary>
         /// An extension to set the environment to use.

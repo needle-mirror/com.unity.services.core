@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using UnityEditor;
 using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 
 namespace Unity.Services.Core.Editor
 {
@@ -39,7 +40,10 @@ namespace Unity.Services.Core.Editor
         /// Access to the editor game service registry
         /// </summary>
         public static EditorGameServiceRegistry Instance { get; internal set; } = new EditorGameServiceRegistry(
-            new ProjectStateRequest(), new ProjectStateHelper(), new ServiceFlagRequest(), new UserRoleHandler());
+            new ProjectStateRequest(),
+            new ProjectStateHelper(),
+            new ServiceFlagRequest(new NewtonsoftSerializer()),
+            new UserRoleHandler());
 
         [InitializeOnLoadMethod]
         static void RegisterAllServices()

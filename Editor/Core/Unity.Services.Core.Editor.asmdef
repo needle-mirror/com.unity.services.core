@@ -8,7 +8,8 @@
         "Unity.Services.Core.Configuration",
         "Unity.Services.Core.Configuration.Editor",
         "Unity.Services.Core.Telemetry",
-        "Unity.Services.Core.Registration"
+        "Unity.Services.Core.Registration",
+        "Unity.Services.Core.Environments"
     ],
     "includePlatforms": [
         "Editor"

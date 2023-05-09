@@ -14,8 +14,8 @@ using Unity.Services.Core.Threading.Internal;
 using UnityEngine;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 using SuppressMessage = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Unity.Services.Core.Internal.Serialization;
 #if !ENABLE_UNITY_SERVICES_VERBOSE_LOGGING
 using System.Diagnostics;
 #endif
@@ -47,12 +47,14 @@ namespace Unity.Services.Core.Registration
 
         internal UnityThreadUtilsInternal UnityThreadUtils { get; private set; }
 
+        readonly IJsonSerializer m_Serializer;
+
         InitializationOptions m_CurrentInitializationOptions;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Register()
         {
-            var corePackageInitializer = new CorePackageInitializer();
+            var corePackageInitializer = new CorePackageInitializer(new NewtonsoftSerializer());
             CoreDiagnostics.Instance.DiagnosticsComponentProvider = corePackageInitializer;
             CoreRegistry.Instance.RegisterPackage(corePackageInitializer)
                 .ProvidesComponent<IInstallationId>()
@@ -65,6 +67,8 @@ namespace Unity.Services.Core.Registration
                 .ProvidesComponent<IUnityThreadUtils>()
                 .ProvidesComponent<IExternalUserId>();
         }
+
+        public CorePackageInitializer(IJsonSerializer serializer) => m_Serializer = serializer;
 
         /// <summary>
         /// This is the Initialize callback that will be triggered by the Core package.
@@ -187,7 +191,7 @@ namespace Unity.Services.Core.Registration
             m_CurrentInitializationOptions = new InitializationOptions(options);
         }
 
-        internal static async Task<ProjectConfiguration> GenerateProjectConfigurationAsync(
+        internal async Task<ProjectConfiguration> GenerateProjectConfigurationAsync(
             [NotNull] InitializationOptions options)
         {
             var serializedConfig = await GetSerializedConfigOrEmptyAsync();
@@ -200,7 +204,7 @@ namespace Unity.Services.Core.Registration
             var configValues = new Dictionary<string, ConfigurationEntry>(serializedConfig.Keys.Length);
             configValues.FillWith(serializedConfig);
             configValues.FillWith(options);
-            return new ProjectConfiguration(configValues);
+            return new ProjectConfiguration(configValues, m_Serializer);
         }
 
         internal static async Task<SerializableProjectConfiguration> GetSerializedConfigOrEmptyAsync()
@@ -246,7 +250,9 @@ namespace Unity.Services.Core.Registration
                 return;
 
             var currentEnvironment = projectConfiguration.GetString(
-                EnvironmentsOptionsExtensions.EnvironmentNameKey, "production");
+                EnvironmentsOptionsExtensions.EnvironmentNameKey,
+                EnvironmentsOptionsExtensions.EnvironmentDefaultNameValue);
+
             Environments = new Environments.Internal.Environments
             {
                 Current = currentEnvironment,
@@ -316,12 +322,7 @@ namespace Unity.Services.Core.Registration
         void LogInitializationInfoJson()
         {
             var result = new JObject();
-            string serializedDiagnosticCommonTags;
-            using (new JsonConvertDefaultSettingsScope())
-            {
-                serializedDiagnosticCommonTags = JsonConvert.SerializeObject(DiagnosticsFactory.CommonTags);
-            }
-
+            var serializedDiagnosticCommonTags = m_Serializer.SerializeObject(DiagnosticsFactory.CommonTags);
             var diagnostics = JObject.Parse(serializedDiagnosticCommonTags);
             var projectConfig = JObject.Parse(ProjectConfig.ToJson());
             var installationId = JObject.Parse($@"{{""installation_id"": ""{InstallationId.Identifier}""}}");

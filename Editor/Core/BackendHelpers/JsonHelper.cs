@@ -1,29 +1,26 @@
 using System;
-using Newtonsoft.Json;
 using Unity.Services.Core.Internal;
-using UnityEngine;
+using Unity.Services.Core.Internal.Serialization;
 
 namespace Unity.Services.Core.Editor
 {
     static class JsonHelper
     {
-        public static bool TryJsonDeserialize<T>(string json, ref T dest, JsonSerializerSettings settings = null)
+        public static bool TryJsonDeserialize<T>(this IJsonSerializer self, string json, out T value)
         {
+            value = default;
             if (string.IsNullOrEmpty(json))
                 return false;
 
             try
             {
-                using (new JsonConvertDefaultSettingsScope(settings))
-                {
-                    dest = JsonConvert.DeserializeObject<T>(json);
-                }
-
+                value = self.DeserializeObject<T>(json);
                 return true;
             }
             catch (Exception e)
             {
-                Debug.LogWarning(e);
+                value = default;
+                CoreLogger.LogWarning(e);
             }
 
             return false;

@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Newtonsoft.Json;
 using Unity.Services.Core.Configuration.Internal;
-using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 
 namespace Unity.Services.Core.Configuration
 {
@@ -11,53 +10,44 @@ namespace Unity.Services.Core.Configuration
     {
         string m_JsonCache;
         readonly IReadOnlyDictionary<string, ConfigurationEntry> m_ConfigValues;
+        internal IJsonSerializer Serializer { get; }
 
-        public ProjectConfiguration(IReadOnlyDictionary<string, ConfigurationEntry> configValues)
+        public ProjectConfiguration(
+            IReadOnlyDictionary<string, ConfigurationEntry> configValues, IJsonSerializer serializer)
         {
             m_ConfigValues = configValues;
+            Serializer = serializer;
         }
 
         public bool GetBool(string key, bool defaultValue = default)
         {
             var stringConfig = GetString(key);
-            if (bool.TryParse(stringConfig, out var parsedValue))
-            {
-                return parsedValue;
-            }
-
-            return defaultValue;
+            return bool.TryParse(stringConfig, out var parsedValue)
+                ? parsedValue
+                : defaultValue;
         }
 
         public int GetInt(string key, int defaultValue = default)
         {
             var stringConfig = GetString(key);
-            if (int.TryParse(stringConfig, out var parsedValue))
-            {
-                return parsedValue;
-            }
-
-            return defaultValue;
+            return int.TryParse(stringConfig, out var parsedValue)
+                ? parsedValue
+                : defaultValue;
         }
 
         public float GetFloat(string key, float defaultValue = default)
         {
             var stringConfig = GetString(key);
-            if (float.TryParse(stringConfig, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedValue))
-            {
-                return parsedValue;
-            }
-
-            return defaultValue;
+            return float.TryParse(stringConfig, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedValue)
+                ? parsedValue
+                : defaultValue;
         }
 
         public string GetString(string key, string defaultValue = default)
         {
-            if (m_ConfigValues.TryGetValue(key, out var configValue))
-            {
-                return configValue.Value;
-            }
-
-            return defaultValue;
+            return m_ConfigValues.TryGetValue(key, out var configValue)
+                ? configValue.Value
+                : defaultValue;
         }
 
         public string ToJson()
@@ -65,10 +55,7 @@ namespace Unity.Services.Core.Configuration
             if (m_JsonCache == null)
             {
                 var dict = m_ConfigValues.ToDictionary(pair => pair.Key, pair => pair.Value.Value);
-                using (new JsonConvertDefaultSettingsScope())
-                {
-                    m_JsonCache = JsonConvert.SerializeObject(dict);
-                }
+                m_JsonCache = Serializer.SerializeObject(dict);
             }
 
             return m_JsonCache;

@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using Unity.Services.Core.Configuration.Editor;
 using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 using Unity.Services.Core.Networking;
 using Unity.Services.Core.Networking.Internal;
 using UnityEditor;
@@ -25,6 +26,7 @@ namespace Unity.Services.Core.Editor
         bool m_IsConfigurationLoaded;
         IAsyncOperation<string> m_FetchOperation;
         IHttpClient m_HttpClient;
+        readonly IJsonSerializer m_Serializer;
 
         internal virtual IHttpClient GetHttpClient()
         {
@@ -38,9 +40,13 @@ namespace Unity.Services.Core.Editor
         /// </summary>
         /// <param name="configUrl">The url to use to fetch the config</param>
         public EditorGameServiceRemoteConfiguration(string configUrl)
+            : this(configUrl, new NewtonsoftSerializer()) {}
+
+        internal EditorGameServiceRemoteConfiguration(string configUrl, IJsonSerializer serializer)
         {
             m_ConfigUrl = configUrl;
             m_SessionStateKey = $"EditorGameServiceConfig::{configUrl.GetHashCode()}";
+            m_Serializer = serializer;
         }
 
         /// <summary>
@@ -67,8 +73,9 @@ namespace Unity.Services.Core.Editor
 
             if (!m_IsConfigurationLoaded)
             {
-                m_IsConfigurationLoaded = JsonHelper.TryJsonDeserialize(
-                    SessionState.GetString(m_SessionStateKey, null), ref m_CachedConfiguration);
+                m_IsConfigurationLoaded = m_Serializer.TryJsonDeserialize(
+                    SessionState.GetString(m_SessionStateKey, null),
+                    out m_CachedConfiguration);
             }
 
             if (m_IsConfigurationLoaded)
@@ -90,7 +97,7 @@ namespace Unity.Services.Core.Editor
                 if (!m_IsConfigurationLoaded)
                 {
                     var json = fetchOperation.Result;
-                    if (JsonHelper.TryJsonDeserialize(json, ref m_CachedConfiguration))
+                    if (m_Serializer.TryJsonDeserialize(json, out m_CachedConfiguration))
                     {
                         SessionState.SetString(m_SessionStateKey, json);
                         m_IsConfigurationLoaded = true;
@@ -191,6 +198,6 @@ namespace Unity.Services.Core.Editor
         /// Initializes a new instance of the <see cref="CdnConfiguredEndpoint{T}" /> class.
         /// </summary>
         public CdnConfiguredEndpoint()
-            : base(k_CdnUrl) { }
+            : base(k_CdnUrl) {}
     }
 }

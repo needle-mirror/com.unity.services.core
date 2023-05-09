@@ -1,4 +1,5 @@
 #if !UNITY_2021_3_OR_NEWER
+using Unity.Services.Core.Internal.Serialization;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
@@ -18,7 +19,8 @@ namespace Unity.Services.Core.Configuration.Editor
         void IPreprocessBuildWithReport.OnPreprocessBuild(BuildReport report)
         {
             var builderWithAllProviders = ProjectConfigurationBuilder.CreateBuilderWithAllProvidersInProject();
-            ProjectConfigurationBuilderHelper.GenerateConfigFileInProject(builderWithAllProviders);
+            ProjectConfigurationBuilderHelper.GenerateConfigFileInProject(
+                builderWithAllProviders, new NewtonsoftSerializer());
 
             EditorApplication.update += RemoveConfigFromProjectWhenBuildEnds;
 

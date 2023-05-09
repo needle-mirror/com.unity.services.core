@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using Newtonsoft.Json;
 using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 using UnityEngine;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 
@@ -32,11 +32,13 @@ namespace Unity.Services.Core.Telemetry.Internal
         const string k_MultipleInstanceError =
             "This exception is most likely caused by a multiple instance file sharing violation.";
 
+        readonly IJsonSerializer m_Serializer;
         readonly CoreDiagnostics m_Diagnostics;
 
-        public FileCachePersister(string fileName, CoreDiagnostics diagnostics)
+        public FileCachePersister(string fileName, IJsonSerializer serializer, CoreDiagnostics diagnostics)
         {
             FilePath = Path.Combine(GetPersistentDataPathFor(Application.platform), fileName);
+            m_Serializer = serializer;
             m_Diagnostics = diagnostics;
         }
 
@@ -53,11 +55,8 @@ namespace Unity.Services.Core.Telemetry.Internal
 
             try
             {
-                using (new JsonConvertDefaultSettingsScope())
-                {
-                    var serializedEvents = JsonConvert.SerializeObject(cache);
-                    File.WriteAllText(FilePath, serializedEvents);
-                }
+                var serializedEvents = m_Serializer.SerializeObject(cache);
+                File.WriteAllText(FilePath, serializedEvents);
             }
             catch (IOException e)
                 when (TelemetryUtils.LogTelemetryException(e))
@@ -85,10 +84,7 @@ namespace Unity.Services.Core.Telemetry.Internal
             try
             {
                 var rawPersistedCache = File.ReadAllText(FilePath);
-                using (new JsonConvertDefaultSettingsScope())
-                {
-                    persistedCache = JsonConvert.DeserializeObject<CachedPayload<TPayload>>(rawPersistedCache);
-                }
+                persistedCache = m_Serializer.DeserializeObject<CachedPayload<TPayload>>(rawPersistedCache);
                 return persistedCache != null;
             }
             catch (IOException e)

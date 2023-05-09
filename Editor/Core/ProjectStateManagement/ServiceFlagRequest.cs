@@ -1,16 +1,20 @@
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine.Networking;
 using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 
 namespace Unity.Services.Core.Editor
 {
     class ServiceFlagRequest : IServiceFlagRequest
     {
         const string k_ServiceFlagsKey = "service_flags";
+
+        readonly IJsonSerializer m_Serializer;
+
+        public ServiceFlagRequest(IJsonSerializer serializer) => m_Serializer = serializer;
 
         public IAsyncOperation<IDictionary<string, bool>> FetchServiceFlags()
         {
@@ -30,7 +34,9 @@ namespace Unity.Services.Core.Editor
             return resultAsyncOp;
         }
 
-        static void QueryProjectFlags(IAsyncOperation<DefaultCdnEndpointConfiguration> configurationRequestTask, AsyncOperation<IDictionary<string, bool>> resultAsyncOp)
+        void QueryProjectFlags(
+            IAsyncOperation<DefaultCdnEndpointConfiguration> configurationRequestTask,
+            AsyncOperation<IDictionary<string, bool>> resultAsyncOp)
         {
             try
             {
@@ -53,7 +59,7 @@ namespace Unity.Services.Core.Editor
             }
         }
 
-        static void OnFetchServiceFlagsCompleted(UnityWebRequest getServiceFlagsRequest, AsyncOperation<IDictionary<string, bool>> resultAsyncOp)
+        void OnFetchServiceFlagsCompleted(UnityWebRequest getServiceFlagsRequest, AsyncOperation<IDictionary<string, bool>> resultAsyncOp)
         {
             try
             {
@@ -69,7 +75,7 @@ namespace Unity.Services.Core.Editor
             }
         }
 
-        static IDictionary<string, bool> ExtractServiceFlagsFromUnityWebRequest(UnityWebRequest unityWebRequest)
+        IDictionary<string, bool> ExtractServiceFlagsFromUnityWebRequest(UnityWebRequest unityWebRequest)
         {
             if (!UnityWebRequestHelper.IsUnityWebRequestReadyForTextExtract(unityWebRequest, out var jsonContent))
             {
@@ -79,11 +85,8 @@ namespace Unity.Services.Core.Editor
             IDictionary<string, bool> flags;
             try
             {
-                using (new JsonConvertDefaultSettingsScope())
-                {
-                    var jsonEntries = JsonConvert.DeserializeObject<JObject>(jsonContent);
-                    flags = ((JObject)jsonEntries ? [k_ServiceFlagsKey])?.ToObject<IDictionary<string, bool>>();
-                }
+                var jsonEntries = m_Serializer.DeserializeObject<JObject>(jsonContent);
+                flags = ((JObject)jsonEntries ? [k_ServiceFlagsKey])?.ToObject<IDictionary<string, bool>>();
             }
             catch (Exception ex)
             {

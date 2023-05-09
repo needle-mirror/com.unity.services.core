@@ -2,16 +2,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Unity.Services.Core.Configuration.Editor;
 using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.UnityLinker;
 using UnityEditorInternal;
-using Formatting = Newtonsoft.Json.Formatting;
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace Unity.Services.Core.Editor
@@ -23,20 +24,27 @@ namespace Unity.Services.Core.Editor
         internal static readonly string LinkerFilePath
             = Path.Combine(AssetUtils.CoreLibraryFolderPath, k_LinkerFileName);
 
-        readonly JsonSerializerSettings m_JsonSettings = new JsonSerializerSettings
-        {
-            Converters = new List<JsonConverter>
-            {
-                new XmlNodeConverter
-                {
-                    DeserializeRootElementName = "linker",
-                    WriteArrayAttribute = false,
-                    EncodeSpecialCharacters = false
-                }
-            }
-        };
+        readonly IJsonSerializer m_Serializer;
 
         int IOrderedCallback.callbackOrder { get; }
+
+        public LinkFileGenerator()
+            : this(
+                new NewtonsoftSerializer(
+                    new JsonSerializerSettings
+                    {
+                        Converters = new List<JsonConverter>
+                        {
+                            new XmlNodeConverter
+                            {
+                                DeserializeRootElementName = "linker",
+                                WriteArrayAttribute = false,
+                                EncodeSpecialCharacters = false,
+                            }
+                        },
+                    })) {}
+
+        internal LinkFileGenerator(IJsonSerializer serializer) => m_Serializer = serializer;
 
         internal string GenerateAdditionalLinkXmlFile(IEnumerable<Assembly> packageAssemblies)
         {
@@ -83,12 +91,9 @@ namespace Unity.Services.Core.Editor
                 Directory.CreateDirectory(AssetUtils.CoreLibraryFolderPath);
             }
 
-            using (new JsonConvertDefaultSettingsScope(m_JsonSettings))
-            {
-                var linkerJson = JsonConvert.SerializeObject(linker, Formatting.None);
-                var xmlLinker = JsonConvert.DeserializeXmlNode(linkerJson, "linker");
-                File.WriteAllText(LinkerFilePath, xmlLinker.InnerXml);
-            }
+            var linkerJson = m_Serializer.SerializeObject(linker);
+            var xmlLinker = m_Serializer.DeserializeObject<XmlDocument>(linkerJson);
+            File.WriteAllText(LinkerFilePath, xmlLinker.InnerXml);
         }
 
         string IUnityLinkerProcessor.GenerateAdditionalLinkXmlFile(BuildReport report, UnityLinkerBuildPipelineData data)
@@ -97,6 +102,7 @@ namespace Unity.Services.Core.Editor
             var eligibleProviderPackageNames = TypeCache.GetTypesDerivedFrom<IServiceComponent>()
                 .Where(x => !x.IsAbstract && !coreAssemblyNames.Contains(x.Assembly.GetName().Name))
                 .Select(x => PackageInfo.FindForAssembly(x.Assembly))
+                .Where(x => !(x is null))
                 .GroupBy(x => x.name)
                 .Select(x => x.Key)
                 .ToList();

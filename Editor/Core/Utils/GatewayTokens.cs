@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 using UnityEditor;
 using Unity.Services.Core.Scheduler.Internal;
 
@@ -14,11 +15,13 @@ namespace Unity.Services.Core.Editor
 
         readonly TokenExchange m_TokenExchange;
         readonly ITimeProvider m_Time;
+        readonly IJsonSerializer m_Serializer;
 
-        internal GatewayTokens(TokenExchange tokenExchange, ITimeProvider time)
+        internal GatewayTokens(TokenExchange tokenExchange, ITimeProvider time, IJsonSerializer serializer)
         {
             m_TokenExchange = tokenExchange;
             m_Time = time;
+            m_Serializer = serializer;
         }
 
         public async Task<string> GetGatewayTokenAsync(string genesisToken)
@@ -49,15 +52,12 @@ namespace Unity.Services.Core.Editor
             SessionState.EraseString(k_CacheKey);
         }
 
-        static CachedTokens LoadCache()
+        CachedTokens LoadCache()
         {
             var serialized = SessionState.GetString(k_CacheKey, string.Empty);
             try
             {
-                using (new JsonConvertDefaultSettingsScope())
-                {
-                    return JsonConvert.DeserializeObject<CachedTokens>(serialized);
-                }
+                return m_Serializer.DeserializeObject<CachedTokens>(serialized);
             }
             catch (JsonException)
             {
@@ -65,13 +65,10 @@ namespace Unity.Services.Core.Editor
             }
         }
 
-        static void SaveCache(CachedTokens tokens)
+        void SaveCache(CachedTokens tokens)
         {
-            using (new JsonConvertDefaultSettingsScope())
-            {
-                var serialized = JsonConvert.SerializeObject(tokens);
-                SessionState.SetString(k_CacheKey, serialized);
-            }
+            var serialized = m_Serializer.SerializeObject(tokens);
+            SessionState.SetString(k_CacheKey, serialized);
         }
 
         static DateTime GetNextRefreshTime(string gatewayToken)
@@ -85,7 +82,7 @@ namespace Unity.Services.Core.Editor
             return jwt.Expiration - k_RefreshGracePeriod;
         }
 
-        struct CachedTokens
+        internal struct CachedTokens
         {
             public string GatewayToken;
             public string GenesisToken;

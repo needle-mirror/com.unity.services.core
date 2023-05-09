@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using Newtonsoft.Json;
-using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 
 namespace Unity.Services.Core.Editor
 {
@@ -20,7 +20,7 @@ namespace Unity.Services.Core.Editor
 
         public override string ToString()
         {
-            return JsonConvert.SerializeObject(this);
+            return new NewtonsoftSerializer().SerializeObject(this);
         }
 
         public static JsonWebToken Decode(string token)
@@ -33,10 +33,7 @@ namespace Unity.Services.Core.Editor
 
             var payload = parts[1];
             var payloadJson = Encoding.UTF8.GetString(Base64UrlDecode(payload));
-            using (new JsonConvertDefaultSettingsScope())
-            {
-                return JsonConvert.DeserializeObject<JsonWebToken>(payloadJson);
-            }
+            return new NewtonsoftSerializer().DeserializeObject<JsonWebToken>(payloadJson);
         }
 
         static byte[] Base64UrlDecode(string input)

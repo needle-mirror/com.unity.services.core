@@ -64,5 +64,15 @@ namespace Unity.Services.Core
         /// The request was understood but the API refused to process it because something about it was invalid.
         /// </summary>
         public const int InvalidRequest = 55;
+
+        /// <summary>
+        /// Access to this endpoint was restricted for the specified project.
+        /// </summary>
+        public const int ProjectPolicyAccessDenied = 56;
+
+        /// <summary>
+        /// Access to this endpoint for the current player was restricted for the specified project.
+        /// </summary>
+        public const int PlayerPolicyAccessDenied = 57;
     }
 }

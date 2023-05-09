@@ -3,8 +3,7 @@ using System;
 using System.IO;
 using System.Security;
 using System.Security.Permissions;
-using Newtonsoft.Json;
-using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 using UnityEditor.Build;
 using UnityEngine;
 
@@ -18,6 +17,16 @@ namespace Unity.Services.Core.Configuration.Editor
         internal static readonly string ConfigCachePath
             = Path.Combine(AssetUtils.CoreLibraryFolderPath, ConfigurationUtils.ConfigFileName);
 
+        readonly IJsonSerializer m_Serializer;
+
+        public ProjectConfigurationBuildInjectorWithPlayerProcessor()
+            : this(new NewtonsoftSerializer()) { }
+
+        public ProjectConfigurationBuildInjectorWithPlayerProcessor(IJsonSerializer serializer)
+        {
+            m_Serializer = serializer;
+        }
+
         public override void PrepareForBuild(BuildPlayerContext buildPlayerContext)
         {
             var config = ProjectConfigurationBuilder.CreateBuilderWithAllProvidersInProject()
@@ -26,7 +35,7 @@ namespace Unity.Services.Core.Configuration.Editor
             buildPlayerContext.AddAdditionalPathToStreamingAssets(ConfigCachePath);
         }
 
-        internal static void CreateProjectConfigFile(SerializableProjectConfiguration config)
+        internal void CreateProjectConfigFile(SerializableProjectConfiguration config)
         {
             try
             {
@@ -35,11 +44,8 @@ namespace Unity.Services.Core.Configuration.Editor
                     Directory.CreateDirectory(AssetUtils.CoreLibraryFolderPath);
                 }
 
-                using (new JsonConvertDefaultSettingsScope())
-                {
-                    var serializedConfig = JsonConvert.SerializeObject(config);
-                    File.WriteAllText(ConfigCachePath, serializedConfig);
-                }
+                var serializedConfig = m_Serializer.SerializeObject(config);
+                File.WriteAllText(ConfigCachePath, serializedConfig);
             }
             catch (SecurityException e)
                 when (e.PermissionType == typeof(FileIOPermission)

@@ -1,20 +1,19 @@
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 
 namespace Unity.Services.Core.Configuration
 {
     class StreamingAssetsConfigurationLoader : IConfigurationLoader
     {
+        readonly IJsonSerializer m_Serializer;
+        public StreamingAssetsConfigurationLoader(IJsonSerializer serializer) => m_Serializer = serializer;
+
         public async Task<SerializableProjectConfiguration> GetConfigAsync()
         {
             var jsonConfig = await StreamingAssetsUtils.GetFileTextFromStreamingAssetsAsync(
                 ConfigurationUtils.ConfigFileName);
-            using (new JsonConvertDefaultSettingsScope())
-            {
-                var config = JsonConvert.DeserializeObject<SerializableProjectConfiguration>(jsonConfig);
-                return config;
-            }
+            var config = m_Serializer.DeserializeObject<SerializableProjectConfiguration>(jsonConfig);
+            return config;
         }
     }
 }

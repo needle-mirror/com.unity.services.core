@@ -1,5 +1,4 @@
 using System;
-using Newtonsoft.Json;
 using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Environments.Internal;
 using Unity.Services.Core.Internal;
@@ -58,8 +57,11 @@ namespace Unity.Services.Core.Telemetry.Internal
         protected object Lock { get; } = new object();
 
         protected TelemetryHandler(
-            TelemetryConfig config, CachedPayload<TPayload> cache, IActionScheduler scheduler,
-            ICachePersister<TPayload> cachePersister, TelemetrySender sender)
+            TelemetryConfig config,
+            CachedPayload<TPayload> cache,
+            IActionScheduler scheduler,
+            ICachePersister<TPayload> cachePersister,
+            TelemetrySender sender)
         {
             Config = config;
             Cache = cache;
@@ -199,11 +201,8 @@ namespace Unity.Services.Core.Telemetry.Internal
             {
                 lock (Lock)
                 {
-                    using (new JsonConvertDefaultSettingsScope())
-                    {
-                        CoreLogger.LogTelemetry(
-                            $"Cached the {typeof(TEvent).Name} event: {JsonConvert.SerializeObject(telemetryEvent)}");
-                    }
+                    CoreLogger.LogTelemetry(
+                        $"Cached the {typeof(TEvent).Name} event: {m_Sender.Serializer.SerializeObject(telemetryEvent)}");
 
                     Cache.Add(telemetryEvent);
                     if (!IsCacheFull())

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 using UnityEditor;
 using UnityEngine.Networking;
 
@@ -9,6 +10,13 @@ namespace Unity.Services.Core.Editor
 {
     class UserRoleRequest : IUserRoleRequest
     {
+        readonly IJsonSerializer m_Serializer;
+
+        public UserRoleRequest()
+            : this(new NewtonsoftSerializer()) {}
+
+        internal UserRoleRequest(IJsonSerializer serializer) => m_Serializer = serializer;
+
         public IAsyncOperation<UserRole> GetUserRole()
         {
             var resultAsyncOp = new AsyncOperation<UserRole>();
@@ -27,7 +35,7 @@ namespace Unity.Services.Core.Editor
             return resultAsyncOp;
         }
 
-        static void QueryProjectUsers(IAsyncOperation<DefaultCdnEndpointConfiguration> configurationRequestTask, AsyncOperation<UserRole> resultAsyncOp)
+        void QueryProjectUsers(IAsyncOperation<DefaultCdnEndpointConfiguration> configurationRequestTask, AsyncOperation<UserRole> resultAsyncOp)
         {
             try
             {
@@ -37,7 +45,8 @@ namespace Unity.Services.Core.Editor
                 var organizationKey = CloudProjectSettings.organizationId;
 #endif
                 var usersUrl = configurationRequestTask.Result.BuildUsersUrl(organizationKey, CloudProjectSettings.projectId);
-                var getProjectUsersRequest = new UnityWebRequest(usersUrl,
+                var getProjectUsersRequest = new UnityWebRequest(
+                    usersUrl,
                     UnityWebRequest.kHttpVerbGET)
                 {
                     downloadHandler = new DownloadHandlerBuffer()
@@ -52,7 +61,7 @@ namespace Unity.Services.Core.Editor
             }
         }
 
-        static void FindUserRoleToFinishAsyncOperation(UnityWebRequest getProjectUsersRequest, AsyncOperation<UserRole> resultAsyncOp)
+        void FindUserRoleToFinishAsyncOperation(UnityWebRequest getProjectUsersRequest, AsyncOperation<UserRole> resultAsyncOp)
         {
             const int requestNotAuthorizedCode = 401;
             try
@@ -93,18 +102,15 @@ namespace Unity.Services.Core.Editor
             }
         }
 
-        static UserList ExtractUserListFromUnityWebRequest(UnityWebRequest unityWebRequest)
+        UserList ExtractUserListFromUnityWebRequest(UnityWebRequest unityWebRequest)
         {
-            if (UnityWebRequestHelper.IsUnityWebRequestReadyForTextExtract(unityWebRequest, out var jsonContent))
+            if (!UnityWebRequestHelper.IsUnityWebRequestReadyForTextExtract(unityWebRequest, out var jsonContent))
             {
-                UserList userList = null;
-                if (JsonHelper.TryJsonDeserialize(jsonContent, ref userList))
-                {
-                    return userList;
-                }
+                return null;
             }
 
-            return null;
+            m_Serializer.TryJsonDeserialize<UserList>(jsonContent, out var userList);
+            return userList;
         }
 
         static User FindCurrentUserInList(string currentUserId, IEnumerable<User> users)
@@ -131,13 +137,13 @@ namespace Unity.Services.Core.Editor
         class User
         {
             [JsonProperty("foreign_key")]
-            public string ForeignKey  { get; set; }
+            public string ForeignKey { get; set; }
 
             [JsonProperty("name")]
-            public string Name  { get; set; }
+            public string Name { get; set; }
 
             [JsonProperty("email")]
-            public string Email  { get; set; }
+            public string Email { get; set; }
 
             [JsonProperty("access_granted_by")]
             public string AccessGrantedBy { get; set; }

@@ -1,9 +1,9 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using UnityEngine.Networking;
 using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 using Unity.Services.Core.Scheduler.Internal;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 
@@ -19,15 +19,21 @@ namespace Unity.Services.Core.Telemetry.Internal
 
         readonly IUnityWebRequestSender m_RequestSender;
 
+        internal IJsonSerializer Serializer { get; }
+
         public TelemetrySender(
-            [NotNull] string targetUrl, [NotNull] string servicePath,
-            [NotNull] IActionScheduler scheduler, [NotNull] ExponentialBackOffRetryPolicy retryPolicy,
-            [NotNull] IUnityWebRequestSender requestSender)
+            [NotNull] string targetUrl,
+            [NotNull] string servicePath,
+            [NotNull] IActionScheduler scheduler,
+            [NotNull] ExponentialBackOffRetryPolicy retryPolicy,
+            [NotNull] IUnityWebRequestSender requestSender,
+            [NotNull] IJsonSerializer serializer)
         {
             TargetUrl = $"{targetUrl}/{servicePath}";
             m_RetryPolicy = retryPolicy;
             m_Scheduler = scheduler;
             m_RequestSender = requestSender;
+            Serializer = serializer;
         }
 
         public Task SendAsync<TPayload>(TPayload payload)
@@ -90,15 +96,10 @@ namespace Unity.Services.Core.Telemetry.Internal
             }
         }
 
-        internal static byte[] SerializePayload<TPayload>(TPayload payload)
+        internal byte[] SerializePayload<TPayload>(TPayload payload)
             where TPayload : ITelemetryPayload
         {
-            string jsonPayload;
-            using (new JsonConvertDefaultSettingsScope())
-            {
-                jsonPayload = JsonConvert.SerializeObject(payload);
-            }
-
+            var jsonPayload = Serializer.SerializeObject(payload);
             var serializedPayload = Encoding.UTF8.GetBytes(jsonPayload);
             return serializedPayload;
         }

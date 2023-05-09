@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Unity.Services.Core.Internal.Serialization;
 using Unity.Services.Core.Scheduler.Internal;
 using UnityEditor;
 
@@ -32,7 +33,9 @@ namespace Unity.Services.Core.Editor
                 urls = new ProductionTokenExchangeUrls();
             }
 
-            m_GatewayTokens = new GatewayTokens(new TokenExchange(urls), new UtcTimeProvider());
+            var serializer = new NewtonsoftSerializer();
+            m_GatewayTokens = new GatewayTokens(
+                new TokenExchange(urls, serializer), new UtcTimeProvider(), serializer);
         }
 
         /// <inheritdoc cref="IAccessTokens.GetGenesisToken"/>

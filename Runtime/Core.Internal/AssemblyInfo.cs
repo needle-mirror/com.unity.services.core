@@ -21,10 +21,12 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Unity.Services.Core.Scheduler")]
 [assembly: InternalsVisibleTo("Unity.Services.Core.Telemetry")]
 [assembly: InternalsVisibleTo("Unity.Services.Core.Threading")]
+[assembly: InternalsVisibleTo("Unity.Services.Core.Environments.Editor")]
 
 // Test assemblies
 #if UNITY_INCLUDE_TESTS
 [assembly: InternalsVisibleTo("Unity.Services.Core.Tests")]
+[assembly: InternalsVisibleTo("Unity.Services.Core.EditorTests.Environments")]
 [assembly: InternalsVisibleTo("Unity.Services.Core.EditorTests")]
 [assembly: InternalsVisibleTo("Unity.Services.Core.TestUtils.Tests")]
 [assembly: InternalsVisibleTo("Unity.Services.Core.TestUtils.EditorTests")]
