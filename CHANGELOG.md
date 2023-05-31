@@ -5,6 +5,14 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.10.1] - 2023-05-31
+
+### Added
+
+- The `IAnalyticsUserId` component to provide a way to obtain the user ID that the analytics SDK is currently recording events against.
+- Added new environment selector in Project Settings > Services > Environments.
+- Added new environment api to allow services to use a single access point for the current environment.
+
 ## [1.9.0] - 2023-05-09
 
 ### Added

@@ -22,9 +22,14 @@ namespace Unity.Services.Authentication.Internal
 
 namespace Unity.Services.Core.Analytics.Internal
 {
-    [UnityEngine.Scripting.RequireImplementors] public interface IAnalyticsStandardEventComponent : Unity.Services.Core.Internal.IServiceComponent
+    public interface IAnalyticsStandardEventComponent : Unity.Services.Core.Internal.IServiceComponent
     {
         public void Record(string eventName, System.Collections.Generic.IDictionary<string, object> eventParameters, int eventVersion, string packageName);
+    }
+
+    public interface IAnalyticsUserId : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public string GetAnalyticsUserId();
     }
 }
 
