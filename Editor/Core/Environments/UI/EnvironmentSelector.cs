@@ -1,8 +1,10 @@
+using System;
 using System.IO;
 using System.Linq;
 using Unity.Services.Core.Editor.Shared.EditorUtils;
 using Unity.Services.Core.Editor.Shared.UI;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -11,12 +13,22 @@ namespace Unity.Services.Core.Editor.Environments.UI
     class EnvironmentSelector : VisualElement
     {
         const string k_UxmlPath = "Packages/com.unity.services.core/Editor/Core/Environments/UI/Assets/EnvironmentSelectorUI.uxml";
+#if UNITY_2021_3_OR_NEWER
+        const string k_UxmlPathDropdown = "Packages/com.unity.services.core/Editor/Core/Environments/UI/Assets/EnvironmentDropdown.uxml";
+#endif
 
         readonly ModelBinding<IEnvironmentService> m_EnvironmentBindings;
 
         VisualElement m_ContainerDropdown;
         VisualElement m_ContainerFetching;
         VisualElement m_ContainerWarning;
+
+#if UNITY_2021_3_OR_NEWER
+        DropdownField m_DropdownControl;
+#else
+        PopupField<string> m_DropdownControl;
+#endif
+
 
         public EnvironmentSelector()
         {
@@ -27,18 +39,21 @@ namespace Unity.Services.Core.Editor.Environments.UI
                 {
                     SetVisibleContainer(m_ContainerFetching);
                 }
-                else
+                else if (m_DropdownControl != null)
                 {
-                    var dropdownField = this.Q<DropdownField>();
-                    dropdownField.choices = service.Environments.Select(env => env.Name).ToList();
+                    m_DropdownControl.choices = service.Environments.Select(env => env.Name).ToList();
 
                     var currentEnvInfo = service.ActiveEnvironmentInfo();
                     if (currentEnvInfo != null)
                     {
-                        dropdownField.SetValueWithoutNotify(currentEnvInfo.Value.Name);
+                        m_DropdownControl.SetValueWithoutNotify(currentEnvInfo.Value.Name);
                     }
 
                     SetVisibleContainer(m_ContainerDropdown);
+                }
+                else
+                {
+                    throw new Exception("Dropdown field of the Environment Selector has not been set.");
                 }
 
                 OnEnvironmentChanged(service.ActiveEnvironmentInfo());
@@ -55,8 +70,7 @@ namespace Unity.Services.Core.Editor.Environments.UI
 
             Setup();
 
-            var dropdownField = this.Q<DropdownField>();
-            dropdownField.RegisterValueChangedCallback(v =>
+            m_DropdownControl.RegisterValueChangedCallback(v =>
             {
                 var info = environmentService.EnvironmentInfoFromName(v.newValue);
                 if (info != null)
@@ -96,6 +110,24 @@ namespace Unity.Services.Core.Editor.Environments.UI
         {
             m_ContainerDropdown = containerElement.Q(UxmlNames.ContainerDropdown);
             m_ContainerFetching = containerElement.Q(UxmlNames.ContainerFetching);
+
+#if UNITY_2021_3_OR_NEWER
+            var uxmlAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(k_UxmlPathDropdown);
+            if (uxmlAsset != null)
+            {
+                uxmlAsset.CloneTree(m_ContainerDropdown);
+                m_DropdownControl = this.Q<DropdownField>();
+            }
+            else
+            {
+                throw new MissingReferenceException("Could not find a uxml asset to load.");
+            }
+#else
+            m_DropdownControl = new PopupField<string> { name = "Dropdown Control" };
+            m_ContainerDropdown.Add(m_DropdownControl);
+            m_DropdownControl.label = "Editor Environment";
+            m_DropdownControl.AddToClassList("no-margin");
+#endif
         }
 
         static void SetupManageEnvironments(VisualElement containerElement)

@@ -51,12 +51,14 @@ namespace Unity.Services.Core.Editor
 
         static void SendEvent(string component, string action, string package)
         {
+#if !UNITY_2023_2_OR_NEWER
             EditorAnalytics.SendEventWithLimit(k_EventName, new EditorGameServiceEvent
             {
                 action = action,
                 component = component,
                 package = package
             }, k_Version);
+#endif
         }
 
         /// <remarks>Lowercase is used here for compatibility with analytics.</remarks>

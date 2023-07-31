@@ -1,5 +1,6 @@
 {
     "name": "Unity.Services.Core.Environments.Editor",
+    "rootNamespace": "",
     "references": [
         "Unity.Services.Core.Internal",
         "Unity.Services.Core.Editor",
@@ -15,7 +16,7 @@
     "precompiledReferences": [],
     "autoReferenced": false,
     "defineConstraints": [
-        "UNITY_2021_3_OR_NEWER"
+        "UNITY_2020_3_OR_NEWER"
     ],
     "versionDefines": [],
     "noEngineReferences": false

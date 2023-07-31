@@ -51,7 +51,7 @@ namespace Unity.Services.Core.Environments.Client
 
             if(headers == null)
             {
-                Headers = headers;
+                Headers = new Dictionary<string, string>();
             }
             else
             {

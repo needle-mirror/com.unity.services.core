@@ -127,9 +127,9 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
             /// </summary>
             /// <param name="request">Request object for UnityGetEnvironments.</param>
             /// <param name="operationConfiguration">Configuration for UnityGetEnvironments.</param>
-            /// <returns>Task for a Response object containing status code, headers, and InlineResponse2004 object.</returns>
+            /// <returns>Task for a Response object containing status code, headers, and UnityGetEnvironments200Response object.</returns>
             /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<InlineResponse2004>> UnityGetEnvironmentsAsync(Unity.Services.Core.Environments.Client.Default.UnityGetEnvironmentsRequest request, Configuration operationConfiguration = null);
+            Task<Response<UnityGetEnvironments200Response>> UnityGetEnvironmentsAsync(Unity.Services.Core.Environments.Client.Default.UnityGetEnvironmentsRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -147,19 +147,9 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
             /// </summary>
             /// <param name="request">Request object for UnityGetOrganizationMembers.</param>
             /// <param name="operationConfiguration">Configuration for UnityGetOrganizationMembers.</param>
-            /// <returns>Task for a Response object containing status code, headers, and InlineResponse2002 object.</returns>
+            /// <returns>Task for a Response object containing status code, headers, and UnityGetOrganizationMembers200Response object.</returns>
             /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<InlineResponse2002>> UnityGetOrganizationMembersAsync(Unity.Services.Core.Environments.Client.Default.UnityGetOrganizationMembersRequest request, Configuration operationConfiguration = null);
-
-            /// <summary>
-            /// Async Operation.
-            /// List members belonging to a project with direct link.
-            /// </summary>
-            /// <param name="request">Request object for UnityGetProjectMembers.</param>
-            /// <param name="operationConfiguration">Configuration for UnityGetProjectMembers.</param>
-            /// <returns>Task for a Response object containing status code, headers, and InlineResponse2003 object.</returns>
-            /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<InlineResponse2003>> UnityGetProjectMembersAsync(Unity.Services.Core.Environments.Client.Default.UnityGetProjectMembersRequest request, Configuration operationConfiguration = null);
+            Task<Response<UnityGetOrganizationMembers200Response>> UnityGetOrganizationMembersAsync(Unity.Services.Core.Environments.Client.Default.UnityGetOrganizationMembersRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -177,9 +167,9 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
             /// </summary>
             /// <param name="request">Request object for UnityGetUserGuestProjects.</param>
             /// <param name="operationConfiguration">Configuration for UnityGetUserGuestProjects.</param>
-            /// <returns>Task for a Response object containing status code, headers, and InlineResponse2005 object.</returns>
+            /// <returns>Task for a Response object containing status code, headers, and UnityGetUserGuestProjects200Response object.</returns>
             /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<InlineResponse2005>> UnityGetUserGuestProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityGetUserGuestProjectsRequest request, Configuration operationConfiguration = null);
+            Task<Response<UnityGetUserGuestProjects200Response>> UnityGetUserGuestProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityGetUserGuestProjectsRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -197,9 +187,9 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
             /// </summary>
             /// <param name="request">Request object for UnityGetUserPermissions.</param>
             /// <param name="operationConfiguration">Configuration for UnityGetUserPermissions.</param>
-            /// <returns>Task for a Response object containing status code, headers, and InlineResponse2006 object.</returns>
+            /// <returns>Task for a Response object containing status code, headers, and UnityGetUserPermissions200Response object.</returns>
             /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<InlineResponse2006>> UnityGetUserPermissionsAsync(Unity.Services.Core.Environments.Client.Default.UnityGetUserPermissionsRequest request, Configuration operationConfiguration = null);
+            Task<Response<UnityGetUserPermissions200Response>> UnityGetUserPermissionsAsync(Unity.Services.Core.Environments.Client.Default.UnityGetUserPermissionsRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -207,9 +197,9 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
             /// </summary>
             /// <param name="request">Request object for UnityListFavoriteProjects.</param>
             /// <param name="operationConfiguration">Configuration for UnityListFavoriteProjects.</param>
-            /// <returns>Task for a Response object containing status code, headers, and InlineResponse2001 object.</returns>
+            /// <returns>Task for a Response object containing status code, headers, and UnityListOrganizationFavoriteProjects200Response object.</returns>
             /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<InlineResponse2001>> UnityListFavoriteProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityListFavoriteProjectsRequest request, Configuration operationConfiguration = null);
+            Task<Response<UnityListOrganizationFavoriteProjects200Response>> UnityListFavoriteProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityListFavoriteProjectsRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -217,9 +207,9 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
             /// </summary>
             /// <param name="request">Request object for UnityListOrganizationFavoriteProjects.</param>
             /// <param name="operationConfiguration">Configuration for UnityListOrganizationFavoriteProjects.</param>
-            /// <returns>Task for a Response object containing status code, headers, and InlineResponse2001 object.</returns>
+            /// <returns>Task for a Response object containing status code, headers, and UnityListOrganizationFavoriteProjects200Response object.</returns>
             /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<InlineResponse2001>> UnityListOrganizationFavoriteProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityListOrganizationFavoriteProjectsRequest request, Configuration operationConfiguration = null);
+            Task<Response<UnityListOrganizationFavoriteProjects200Response>> UnityListOrganizationFavoriteProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityListOrganizationFavoriteProjectsRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -227,9 +217,9 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
             /// </summary>
             /// <param name="request">Request object for UnityListProjects.</param>
             /// <param name="operationConfiguration">Configuration for UnityListProjects.</param>
-            /// <returns>Task for a Response object containing status code, headers, and InlineResponse200 object.</returns>
+            /// <returns>Task for a Response object containing status code, headers, and UnityListProjects200Response object.</returns>
             /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<InlineResponse200>> UnityListProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityListProjectsRequest request, Configuration operationConfiguration = null);
+            Task<Response<UnityListProjects200Response>> UnityListProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityListProjectsRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -267,9 +257,9 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
             /// </summary>
             /// <param name="request">Request object for UnityUploadIconV1.</param>
             /// <param name="operationConfiguration">Configuration for UnityUploadIconV1.</param>
-            /// <returns>Task for a Response object containing status code, headers, and InlineResponse201 object.</returns>
+            /// <returns>Task for a Response object containing status code, headers, and UnityUploadIconV1201Response object.</returns>
             /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<InlineResponse201>> UnityUploadIconV1Async(Unity.Services.Core.Environments.Client.Default.UnityUploadIconV1Request request, Configuration operationConfiguration = null);
+            Task<Response<UnityUploadIconV1201Response>> UnityUploadIconV1Async(Unity.Services.Core.Environments.Client.Default.UnityUploadIconV1Request request, Configuration operationConfiguration = null);
 
     }
 
@@ -588,12 +578,12 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
         /// </summary>
         /// <param name="request">Request object for UnityGetEnvironments.</param>
         /// <param name="operationConfiguration">Configuration for UnityGetEnvironments.</param>
-        /// <returns>Task for a Response object containing status code, headers, and InlineResponse2004 object.</returns>
+        /// <returns>Task for a Response object containing status code, headers, and UnityGetEnvironments200Response object.</returns>
         /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<InlineResponse2004>> UnityGetEnvironmentsAsync(Unity.Services.Core.Environments.Client.Default.UnityGetEnvironmentsRequest request,
+        public async Task<Response<UnityGetEnvironments200Response>> UnityGetEnvironmentsAsync(Unity.Services.Core.Environments.Client.Default.UnityGetEnvironmentsRequest request,
             Configuration operationConfiguration = null)
         {
-            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(InlineResponse2004)   } };
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(UnityGetEnvironments200Response)   } };
 
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
@@ -604,8 +594,8 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
                 request.ConstructHeaders(finalConfiguration),
                 finalConfiguration.RequestTimeout ?? _baseTimeout);
 
-            var handledResponse = ResponseHandler.HandleAsyncResponse<InlineResponse2004>(response, statusCodeToTypeMap);
-            return new Response<InlineResponse2004>(response, handledResponse);
+            var handledResponse = ResponseHandler.HandleAsyncResponse<UnityGetEnvironments200Response>(response, statusCodeToTypeMap);
+            return new Response<UnityGetEnvironments200Response>(response, handledResponse);
         }
 
 
@@ -642,12 +632,12 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
         /// </summary>
         /// <param name="request">Request object for UnityGetOrganizationMembers.</param>
         /// <param name="operationConfiguration">Configuration for UnityGetOrganizationMembers.</param>
-        /// <returns>Task for a Response object containing status code, headers, and InlineResponse2002 object.</returns>
+        /// <returns>Task for a Response object containing status code, headers, and UnityGetOrganizationMembers200Response object.</returns>
         /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<InlineResponse2002>> UnityGetOrganizationMembersAsync(Unity.Services.Core.Environments.Client.Default.UnityGetOrganizationMembersRequest request,
+        public async Task<Response<UnityGetOrganizationMembers200Response>> UnityGetOrganizationMembersAsync(Unity.Services.Core.Environments.Client.Default.UnityGetOrganizationMembersRequest request,
             Configuration operationConfiguration = null)
         {
-            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(InlineResponse2002)   } };
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(UnityGetOrganizationMembers200Response)   } };
 
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
@@ -658,35 +648,8 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
                 request.ConstructHeaders(finalConfiguration),
                 finalConfiguration.RequestTimeout ?? _baseTimeout);
 
-            var handledResponse = ResponseHandler.HandleAsyncResponse<InlineResponse2002>(response, statusCodeToTypeMap);
-            return new Response<InlineResponse2002>(response, handledResponse);
-        }
-
-
-        /// <summary>
-        /// Async Operation.
-        /// List members belonging to a project with direct link.
-        /// </summary>
-        /// <param name="request">Request object for UnityGetProjectMembers.</param>
-        /// <param name="operationConfiguration">Configuration for UnityGetProjectMembers.</param>
-        /// <returns>Task for a Response object containing status code, headers, and InlineResponse2003 object.</returns>
-        /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<InlineResponse2003>> UnityGetProjectMembersAsync(Unity.Services.Core.Environments.Client.Default.UnityGetProjectMembersRequest request,
-            Configuration operationConfiguration = null)
-        {
-            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(InlineResponse2003)   } };
-
-            // Merge the operation/request level configuration with the client level configuration.
-            var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
-
-            var response = await HttpClient.MakeRequestAsync("GET",
-                request.ConstructUrl(finalConfiguration.BasePath),
-                request.ConstructBody(),
-                request.ConstructHeaders(finalConfiguration),
-                finalConfiguration.RequestTimeout ?? _baseTimeout);
-
-            var handledResponse = ResponseHandler.HandleAsyncResponse<InlineResponse2003>(response, statusCodeToTypeMap);
-            return new Response<InlineResponse2003>(response, handledResponse);
+            var handledResponse = ResponseHandler.HandleAsyncResponse<UnityGetOrganizationMembers200Response>(response, statusCodeToTypeMap);
+            return new Response<UnityGetOrganizationMembers200Response>(response, handledResponse);
         }
 
 
@@ -723,12 +686,12 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
         /// </summary>
         /// <param name="request">Request object for UnityGetUserGuestProjects.</param>
         /// <param name="operationConfiguration">Configuration for UnityGetUserGuestProjects.</param>
-        /// <returns>Task for a Response object containing status code, headers, and InlineResponse2005 object.</returns>
+        /// <returns>Task for a Response object containing status code, headers, and UnityGetUserGuestProjects200Response object.</returns>
         /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<InlineResponse2005>> UnityGetUserGuestProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityGetUserGuestProjectsRequest request,
+        public async Task<Response<UnityGetUserGuestProjects200Response>> UnityGetUserGuestProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityGetUserGuestProjectsRequest request,
             Configuration operationConfiguration = null)
         {
-            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(InlineResponse2005)   } };
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(UnityGetUserGuestProjects200Response)   } };
 
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
@@ -739,8 +702,8 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
                 request.ConstructHeaders(finalConfiguration),
                 finalConfiguration.RequestTimeout ?? _baseTimeout);
 
-            var handledResponse = ResponseHandler.HandleAsyncResponse<InlineResponse2005>(response, statusCodeToTypeMap);
-            return new Response<InlineResponse2005>(response, handledResponse);
+            var handledResponse = ResponseHandler.HandleAsyncResponse<UnityGetUserGuestProjects200Response>(response, statusCodeToTypeMap);
+            return new Response<UnityGetUserGuestProjects200Response>(response, handledResponse);
         }
 
 
@@ -777,12 +740,12 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
         /// </summary>
         /// <param name="request">Request object for UnityGetUserPermissions.</param>
         /// <param name="operationConfiguration">Configuration for UnityGetUserPermissions.</param>
-        /// <returns>Task for a Response object containing status code, headers, and InlineResponse2006 object.</returns>
+        /// <returns>Task for a Response object containing status code, headers, and UnityGetUserPermissions200Response object.</returns>
         /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<InlineResponse2006>> UnityGetUserPermissionsAsync(Unity.Services.Core.Environments.Client.Default.UnityGetUserPermissionsRequest request,
+        public async Task<Response<UnityGetUserPermissions200Response>> UnityGetUserPermissionsAsync(Unity.Services.Core.Environments.Client.Default.UnityGetUserPermissionsRequest request,
             Configuration operationConfiguration = null)
         {
-            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(InlineResponse2006)   } };
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(UnityGetUserPermissions200Response)   } };
 
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
@@ -793,8 +756,8 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
                 request.ConstructHeaders(finalConfiguration),
                 finalConfiguration.RequestTimeout ?? _baseTimeout);
 
-            var handledResponse = ResponseHandler.HandleAsyncResponse<InlineResponse2006>(response, statusCodeToTypeMap);
-            return new Response<InlineResponse2006>(response, handledResponse);
+            var handledResponse = ResponseHandler.HandleAsyncResponse<UnityGetUserPermissions200Response>(response, statusCodeToTypeMap);
+            return new Response<UnityGetUserPermissions200Response>(response, handledResponse);
         }
 
 
@@ -804,12 +767,12 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
         /// </summary>
         /// <param name="request">Request object for UnityListFavoriteProjects.</param>
         /// <param name="operationConfiguration">Configuration for UnityListFavoriteProjects.</param>
-        /// <returns>Task for a Response object containing status code, headers, and InlineResponse2001 object.</returns>
+        /// <returns>Task for a Response object containing status code, headers, and UnityListOrganizationFavoriteProjects200Response object.</returns>
         /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<InlineResponse2001>> UnityListFavoriteProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityListFavoriteProjectsRequest request,
+        public async Task<Response<UnityListOrganizationFavoriteProjects200Response>> UnityListFavoriteProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityListFavoriteProjectsRequest request,
             Configuration operationConfiguration = null)
         {
-            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(InlineResponse2001)   } };
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(UnityListOrganizationFavoriteProjects200Response)   } };
 
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
@@ -820,8 +783,8 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
                 request.ConstructHeaders(finalConfiguration),
                 finalConfiguration.RequestTimeout ?? _baseTimeout);
 
-            var handledResponse = ResponseHandler.HandleAsyncResponse<InlineResponse2001>(response, statusCodeToTypeMap);
-            return new Response<InlineResponse2001>(response, handledResponse);
+            var handledResponse = ResponseHandler.HandleAsyncResponse<UnityListOrganizationFavoriteProjects200Response>(response, statusCodeToTypeMap);
+            return new Response<UnityListOrganizationFavoriteProjects200Response>(response, handledResponse);
         }
 
 
@@ -831,12 +794,12 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
         /// </summary>
         /// <param name="request">Request object for UnityListOrganizationFavoriteProjects.</param>
         /// <param name="operationConfiguration">Configuration for UnityListOrganizationFavoriteProjects.</param>
-        /// <returns>Task for a Response object containing status code, headers, and InlineResponse2001 object.</returns>
+        /// <returns>Task for a Response object containing status code, headers, and UnityListOrganizationFavoriteProjects200Response object.</returns>
         /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<InlineResponse2001>> UnityListOrganizationFavoriteProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityListOrganizationFavoriteProjectsRequest request,
+        public async Task<Response<UnityListOrganizationFavoriteProjects200Response>> UnityListOrganizationFavoriteProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityListOrganizationFavoriteProjectsRequest request,
             Configuration operationConfiguration = null)
         {
-            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(InlineResponse2001)   } };
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(UnityListOrganizationFavoriteProjects200Response)   } };
 
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
@@ -847,8 +810,8 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
                 request.ConstructHeaders(finalConfiguration),
                 finalConfiguration.RequestTimeout ?? _baseTimeout);
 
-            var handledResponse = ResponseHandler.HandleAsyncResponse<InlineResponse2001>(response, statusCodeToTypeMap);
-            return new Response<InlineResponse2001>(response, handledResponse);
+            var handledResponse = ResponseHandler.HandleAsyncResponse<UnityListOrganizationFavoriteProjects200Response>(response, statusCodeToTypeMap);
+            return new Response<UnityListOrganizationFavoriteProjects200Response>(response, handledResponse);
         }
 
 
@@ -858,12 +821,12 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
         /// </summary>
         /// <param name="request">Request object for UnityListProjects.</param>
         /// <param name="operationConfiguration">Configuration for UnityListProjects.</param>
-        /// <returns>Task for a Response object containing status code, headers, and InlineResponse200 object.</returns>
+        /// <returns>Task for a Response object containing status code, headers, and UnityListProjects200Response object.</returns>
         /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<InlineResponse200>> UnityListProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityListProjectsRequest request,
+        public async Task<Response<UnityListProjects200Response>> UnityListProjectsAsync(Unity.Services.Core.Environments.Client.Default.UnityListProjectsRequest request,
             Configuration operationConfiguration = null)
         {
-            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(InlineResponse200)   } };
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(UnityListProjects200Response)   } };
 
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
@@ -874,8 +837,8 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
                 request.ConstructHeaders(finalConfiguration),
                 finalConfiguration.RequestTimeout ?? _baseTimeout);
 
-            var handledResponse = ResponseHandler.HandleAsyncResponse<InlineResponse200>(response, statusCodeToTypeMap);
-            return new Response<InlineResponse200>(response, handledResponse);
+            var handledResponse = ResponseHandler.HandleAsyncResponse<UnityListProjects200Response>(response, statusCodeToTypeMap);
+            return new Response<UnityListProjects200Response>(response, handledResponse);
         }
 
 
@@ -966,12 +929,12 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
         /// </summary>
         /// <param name="request">Request object for UnityUploadIconV1.</param>
         /// <param name="operationConfiguration">Configuration for UnityUploadIconV1.</param>
-        /// <returns>Task for a Response object containing status code, headers, and InlineResponse201 object.</returns>
+        /// <returns>Task for a Response object containing status code, headers, and UnityUploadIconV1201Response object.</returns>
         /// <exception cref="Unity.Services.Core.Environments.Client.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<InlineResponse201>> UnityUploadIconV1Async(Unity.Services.Core.Environments.Client.Default.UnityUploadIconV1Request request,
+        public async Task<Response<UnityUploadIconV1201Response>> UnityUploadIconV1Async(Unity.Services.Core.Environments.Client.Default.UnityUploadIconV1Request request,
             Configuration operationConfiguration = null)
         {
-            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"201", typeof(InlineResponse201)   } };
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"201", typeof(UnityUploadIconV1201Response)   } };
 
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
@@ -983,8 +946,8 @@ namespace Unity.Services.Core.Environments.Client.Apis.Default
                 finalConfiguration.RequestTimeout ?? _baseTimeout,
                 "BoundaryUnityUploadIconV1Boundary");
 
-            var handledResponse = ResponseHandler.HandleAsyncResponse<InlineResponse201>(response, statusCodeToTypeMap);
-            return new Response<InlineResponse201>(response, handledResponse);
+            var handledResponse = ResponseHandler.HandleAsyncResponse<UnityUploadIconV1201Response>(response, statusCodeToTypeMap);
+            return new Response<UnityUploadIconV1201Response>(response, handledResponse);
         }
 
     }

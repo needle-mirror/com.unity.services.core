@@ -11,7 +11,7 @@
         <ui:Label name="Description" text="Set which environment to use during runtime initialization and service interaction in the editor" class="label-container" />
     </ui:VisualElement>
     <ui:VisualElement name="Dropdown Section" class="section-container">
-        <ui:DropdownField label="Editor Environment" index="-1" class="no-margin" />
+        <!--Dropdown is added via UXML in 2021.3+-->
     </ui:VisualElement>
     <ui:VisualElement name="Fetching Environments Section" class="section-container">
         <ui:Label name="Fetching message" text="Fetching environments..." class="label" />

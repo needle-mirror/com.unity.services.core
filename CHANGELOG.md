@@ -5,6 +5,23 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2023-07-31
+
+### Added
+
+- Adding `IServerAccessToken` and `IServerEnvironmentId` components for packages that want to support running operations in the context of a server.
+- Adding `IAccessTokenObserver` component for packages to be notified of changes to the `IAccessToken` value.
+
+### Fixed
+- Implement JsonConverters to prevent NotImplementedException when converters are invoked by reflection
+
+## [1.10.2-pre.24] - 2023-07-20
+
+## [1.10.2-pre.2] - 2023-06-14
+
+### Added
+- Added support for the environments UI to Unity Editor 2020.3
+
 ## [1.10.1] - 2023-05-31
 
 ### Added

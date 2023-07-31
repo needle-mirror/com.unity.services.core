@@ -19,6 +19,7 @@ using UnityEngine.Networking;
 using UnityEngine.Scripting;
 using Unity.Services.Core.Environments.Client.Models;
 using Unity.Services.Core.Environments.Client.Scheduler;
+using Unity.Services.Core.Environments.Client.Http;
 
 
 namespace Unity.Services.Core.Environments.Client.Default
@@ -32,7 +33,7 @@ namespace Unity.Services.Core.Environments.Client.Default
 
         public static string SerializeToString<T>(T obj)
         {
-            return JsonConvert.SerializeObject(obj, new JsonSerializerSettings{ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore});
+            return IsolatedJsonConvert.SerializeObject(obj, new JsonSerializerSettings{ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore});
         }
     }
 
@@ -484,9 +485,9 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// <summary>Accessor for organizationId </summary>
         [Preserve]
         public System.Guid OrganizationId { get; }
-        /// <summary>Accessor for inlineObject5 </summary>
+        /// <summary>Accessor for unityCreateAddressRequestParameter </summary>
         [Preserve]
-        public Unity.Services.Core.Environments.Client.Models.InlineObject5 InlineObject5 { get; }
+        public Unity.Services.Core.Environments.Client.Models.UnityCreateAddressRequest UnityCreateAddressRequestParameter { get; }
         string PathAndQueryParams;
 
         /// <summary>
@@ -494,13 +495,13 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// Create an address for an organization
         /// </summary>
         /// <param name="organizationId">ID of the organization</param>
-        /// <param name="inlineObject5">InlineObject5 param</param>
+        /// <param name="unityCreateAddressRequestParameter">Parameters for creating an address</param>
         [Preserve]
-        public UnityCreateAddressRequest(System.Guid organizationId, Unity.Services.Core.Environments.Client.Models.InlineObject5 inlineObject5 = default(Unity.Services.Core.Environments.Client.Models.InlineObject5))
+        public UnityCreateAddressRequest(System.Guid organizationId, Unity.Services.Core.Environments.Client.Models.UnityCreateAddressRequest unityCreateAddressRequestParameter = default(Unity.Services.Core.Environments.Client.Models.UnityCreateAddressRequest))
         {
             OrganizationId = organizationId;
 
-            InlineObject5 = inlineObject5;
+            UnityCreateAddressRequestParameter = unityCreateAddressRequestParameter;
             PathAndQueryParams = $"/api/unity/v1/organizations/{organizationId}/addresses";
 
 
@@ -523,9 +524,9 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// <returns>A list of IMultipartFormSection representing the request body.</returns>
         public byte[] ConstructBody()
         {
-            if(InlineObject5 != null)
+            if(UnityCreateAddressRequestParameter != null)
             {
-                return ConstructBody(InlineObject5);
+                return ConstructBody(UnityCreateAddressRequestParameter);
             }
             return null;
         }
@@ -591,9 +592,9 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// <summary>Accessor for projectId </summary>
         [Preserve]
         public string ProjectId { get; }
-        /// <summary>Accessor for inlineObject6 </summary>
+        /// <summary>Accessor for unityCreateEnvironmentRequestParameter </summary>
         [Preserve]
-        public Unity.Services.Core.Environments.Client.Models.InlineObject6 InlineObject6 { get; }
+        public Unity.Services.Core.Environments.Client.Models.UnityCreateEnvironmentRequest UnityCreateEnvironmentRequestParameter { get; }
         string PathAndQueryParams;
 
         /// <summary>
@@ -601,13 +602,13 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// Create an environment for the project
         /// </summary>
         /// <param name="projectId">Project ID</param>
-        /// <param name="inlineObject6">InlineObject6 param</param>
+        /// <param name="unityCreateEnvironmentRequestParameter">Parameters for creating an environment</param>
         [Preserve]
-        public UnityCreateEnvironmentRequest(string projectId, Unity.Services.Core.Environments.Client.Models.InlineObject6 inlineObject6 = default(Unity.Services.Core.Environments.Client.Models.InlineObject6))
+        public UnityCreateEnvironmentRequest(string projectId, Unity.Services.Core.Environments.Client.Models.UnityCreateEnvironmentRequest unityCreateEnvironmentRequestParameter = default(Unity.Services.Core.Environments.Client.Models.UnityCreateEnvironmentRequest))
         {
             ProjectId = projectId;
 
-            InlineObject6 = inlineObject6;
+            UnityCreateEnvironmentRequestParameter = unityCreateEnvironmentRequestParameter;
             PathAndQueryParams = $"/api/unity/v1/projects/{projectId}/environments";
 
 
@@ -630,9 +631,9 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// <returns>A list of IMultipartFormSection representing the request body.</returns>
         public byte[] ConstructBody()
         {
-            if(InlineObject6 != null)
+            if(UnityCreateEnvironmentRequestParameter != null)
             {
-                return ConstructBody(InlineObject6);
+                return ConstructBody(UnityCreateEnvironmentRequestParameter);
             }
             return null;
         }
@@ -798,20 +799,20 @@ namespace Unity.Services.Core.Environments.Client.Default
     [Preserve]
     internal class UnityCreateOrganizationRequest : DefaultApiBaseRequest
     {
-        /// <summary>Accessor for inlineObject3 </summary>
+        /// <summary>Accessor for unityCreateOrganizationRequestParameter </summary>
         [Preserve]
-        public Unity.Services.Core.Environments.Client.Models.InlineObject3 InlineObject3 { get; }
+        public Unity.Services.Core.Environments.Client.Models.UnityCreateOrganizationRequest UnityCreateOrganizationRequestParameter { get; }
         string PathAndQueryParams;
 
         /// <summary>
         /// UnityCreateOrganization Request Object.
         /// Create a new organization
         /// </summary>
-        /// <param name="inlineObject3">InlineObject3 param</param>
+        /// <param name="unityCreateOrganizationRequestParameter">Parameters for creating an organization</param>
         [Preserve]
-        public UnityCreateOrganizationRequest(Unity.Services.Core.Environments.Client.Models.InlineObject3 inlineObject3 = default(Unity.Services.Core.Environments.Client.Models.InlineObject3))
+        public UnityCreateOrganizationRequest(Unity.Services.Core.Environments.Client.Models.UnityCreateOrganizationRequest unityCreateOrganizationRequestParameter = default(Unity.Services.Core.Environments.Client.Models.UnityCreateOrganizationRequest))
         {
-            InlineObject3 = inlineObject3;
+            UnityCreateOrganizationRequestParameter = unityCreateOrganizationRequestParameter;
             PathAndQueryParams = $"/api/unity/v1/organizations";
 
 
@@ -834,9 +835,9 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// <returns>A list of IMultipartFormSection representing the request body.</returns>
         public byte[] ConstructBody()
         {
-            if(InlineObject3 != null)
+            if(UnityCreateOrganizationRequestParameter != null)
             {
-                return ConstructBody(InlineObject3);
+                return ConstructBody(UnityCreateOrganizationRequestParameter);
             }
             return null;
         }
@@ -902,9 +903,9 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// <summary>Accessor for organizationId </summary>
         [Preserve]
         public System.Guid OrganizationId { get; }
-        /// <summary>Accessor for inlineObject </summary>
+        /// <summary>Accessor for unityCreateProjectRequestParameter </summary>
         [Preserve]
-        public Unity.Services.Core.Environments.Client.Models.InlineObject InlineObject { get; }
+        public Unity.Services.Core.Environments.Client.Models.UnityCreateProjectRequest UnityCreateProjectRequestParameter { get; }
         string PathAndQueryParams;
 
         /// <summary>
@@ -912,13 +913,13 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// Create a new project
         /// </summary>
         /// <param name="organizationId">ID of the organization</param>
-        /// <param name="inlineObject">InlineObject param</param>
+        /// <param name="unityCreateProjectRequestParameter">Parameters for creating a project</param>
         [Preserve]
-        public UnityCreateProjectRequest(System.Guid organizationId, Unity.Services.Core.Environments.Client.Models.InlineObject inlineObject = default(Unity.Services.Core.Environments.Client.Models.InlineObject))
+        public UnityCreateProjectRequest(System.Guid organizationId, Unity.Services.Core.Environments.Client.Models.UnityCreateProjectRequest unityCreateProjectRequestParameter = default(Unity.Services.Core.Environments.Client.Models.UnityCreateProjectRequest))
         {
             OrganizationId = organizationId;
 
-            InlineObject = inlineObject;
+            UnityCreateProjectRequestParameter = unityCreateProjectRequestParameter;
             PathAndQueryParams = $"/api/unity/v1/organizations/{organizationId}/projects";
 
 
@@ -941,9 +942,9 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// <returns>A list of IMultipartFormSection representing the request body.</returns>
         public byte[] ConstructBody()
         {
-            if(InlineObject != null)
+            if(UnityCreateProjectRequestParameter != null)
             {
-                return ConstructBody(InlineObject);
+                return ConstructBody(UnityCreateProjectRequestParameter);
             }
             return null;
         }
@@ -1584,132 +1585,6 @@ namespace Unity.Services.Core.Environments.Client.Default
             {
                 queryParams = AddParamsToQueryParams(queryParams, "search", Search);
             }
-            if(Roles != null)
-            {
-                var rolesStringValues = Roles.Select(v => v.ToString()).ToList();
-                queryParams = AddParamsToQueryParams(queryParams, "roles", rolesStringValues, "form", true);
-            }
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
-        }
-
-        /// <summary>
-        /// Helper function for constructing URL from request base path and
-        /// query params.
-        /// </summary>
-        /// <param name="requestBasePath"></param>
-        /// <returns></returns>
-        public string ConstructUrl(string requestBasePath)
-        {
-            return requestBasePath + PathAndQueryParams;
-        }
-
-        /// <summary>
-        /// Helper for constructing the request body.
-        /// </summary>
-        /// <returns>A list of IMultipartFormSection representing the request body.</returns>
-        public byte[] ConstructBody()
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// Helper function for constructing the headers.
-        /// </summary>
-        /// <param name="operationConfiguration">The operation configuration to use.</param>
-        /// <returns>A dictionary representing the request headers.</returns>
-        public Dictionary<string, string> ConstructHeaders(Configuration operationConfiguration = null)
-        {
-            var headers = new Dictionary<string, string>();
-
-            // Analytics headers
-            headers.Add("Unity-Client-Version", Application.unityVersion);
-            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
-
-            string[] contentTypes = {
-            };
-
-            string[] accepts = {
-                "application/json"
-            };
-
-            var acceptHeader = GenerateAcceptHeader(accepts);
-            if (!string.IsNullOrEmpty(acceptHeader))
-            {
-                headers.Add("Accept", acceptHeader);
-            }
-            var httpMethod = "GET";
-            var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
-            if (!string.IsNullOrEmpty(contentTypeHeader))
-            {
-                headers.Add("Content-Type", contentTypeHeader);
-            }
-            else if (httpMethod == "POST" || httpMethod == "PATCH")
-            {
-                headers.Add("Content-Type", "application/json");
-            }
-
-
-            // We also check if there are headers that are defined as part of
-            // the request configuration.
-            if (operationConfiguration != null && operationConfiguration.Headers != null)
-            {
-                foreach (var pair in operationConfiguration.Headers)
-                {
-                    headers[pair.Key] = pair.Value;
-                }
-            }
-
-            return headers;
-        }
-    }
-    /// <summary>
-    /// UnityGetProjectMembersRequest
-    /// List members belonging to a project with direct link
-    /// </summary>
-    [Preserve]
-    internal class UnityGetProjectMembersRequest : DefaultApiBaseRequest
-    {
-        /// <summary>Accessor for projectId </summary>
-        [Preserve]
-        public System.Guid ProjectId { get; }
-        /// <summary>Accessor for limit </summary>
-        [Preserve]
-        public int? Limit { get; }
-        /// <summary>Accessor for offset </summary>
-        [Preserve]
-        public int? Offset { get; }
-        /// <summary>Accessor for roles </summary>
-        [Preserve]
-        public List<string> Roles { get; }
-        string PathAndQueryParams;
-
-        /// <summary>
-        /// UnityGetProjectMembers Request Object.
-        /// List members belonging to a project with direct link
-        /// </summary>
-        /// <param name="projectId">ID of the project</param>
-        /// <param name="limit">Maximum number of items to return, by default returns 10 members per page</param>
-        /// <param name="offset">Number of items to skip</param>
-        /// <param name="roles">Array of member roles that the result set will contain, the values have to be a subset of {user,manager,owner,none}</param>
-        [Preserve]
-        public UnityGetProjectMembersRequest(System.Guid projectId, int? limit = default(int?), int? offset = default(int?), List<string> roles = default(List<string>))
-        {
-            ProjectId = projectId;
-
-            Limit = limit;
-            Offset = offset;
-            Roles = roles;
-            PathAndQueryParams = $"/api/unity/v1/projects/{projectId}/members";
-
-            List<string> queryParams = new List<string>();
-
-            var limitStringValue = Limit.ToString();
-            queryParams = AddParamsToQueryParams(queryParams, "limit", limitStringValue);
-            var offsetStringValue = Offset.ToString();
-            queryParams = AddParamsToQueryParams(queryParams, "offset", offsetStringValue);
             if(Roles != null)
             {
                 var rolesStringValues = Roles.Select(v => v.ToString()).ToList();
@@ -2608,9 +2483,9 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// <summary>Accessor for projectId </summary>
         [Preserve]
         public System.Guid ProjectId { get; }
-        /// <summary>Accessor for inlineObject1 </summary>
+        /// <summary>Accessor for unityPatchProjectV1RequestParameter </summary>
         [Preserve]
-        public Unity.Services.Core.Environments.Client.Models.InlineObject1 InlineObject1 { get; }
+        public Unity.Services.Core.Environments.Client.Models.UnityPatchProjectV1Request UnityPatchProjectV1RequestParameter { get; }
         string PathAndQueryParams;
 
         /// <summary>
@@ -2618,13 +2493,13 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// Update a project (v1)
         /// </summary>
         /// <param name="projectId">Project ID</param>
-        /// <param name="inlineObject1">InlineObject1 param</param>
+        /// <param name="unityPatchProjectV1RequestParameter">Contains the properties to update</param>
         [Preserve]
-        public UnityPatchProjectV1Request(System.Guid projectId, Unity.Services.Core.Environments.Client.Models.InlineObject1 inlineObject1 = default(Unity.Services.Core.Environments.Client.Models.InlineObject1))
+        public UnityPatchProjectV1Request(System.Guid projectId, Unity.Services.Core.Environments.Client.Models.UnityPatchProjectV1Request unityPatchProjectV1RequestParameter = default(Unity.Services.Core.Environments.Client.Models.UnityPatchProjectV1Request))
         {
             ProjectId = projectId;
 
-            InlineObject1 = inlineObject1;
+            UnityPatchProjectV1RequestParameter = unityPatchProjectV1RequestParameter;
             PathAndQueryParams = $"/api/unity/v1/projects/{projectId}";
 
 
@@ -2647,9 +2522,9 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// <returns>A list of IMultipartFormSection representing the request body.</returns>
         public byte[] ConstructBody()
         {
-            if(InlineObject1 != null)
+            if(UnityPatchProjectV1RequestParameter != null)
             {
-                return ConstructBody(InlineObject1);
+                return ConstructBody(UnityPatchProjectV1RequestParameter);
             }
             return null;
         }
@@ -2718,9 +2593,9 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// <summary>Accessor for projectId </summary>
         [Preserve]
         public System.Guid ProjectId { get; }
-        /// <summary>Accessor for inlineObject2 </summary>
+        /// <summary>Accessor for unityTransferProjectRequestParameter </summary>
         [Preserve]
-        public Unity.Services.Core.Environments.Client.Models.InlineObject2 InlineObject2 { get; }
+        public Unity.Services.Core.Environments.Client.Models.UnityTransferProjectRequest UnityTransferProjectRequestParameter { get; }
         string PathAndQueryParams;
 
         /// <summary>
@@ -2729,15 +2604,15 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// </summary>
         /// <param name="organizationId">ID of the organization</param>
         /// <param name="projectId">ID of the project</param>
-        /// <param name="inlineObject2">InlineObject2 param</param>
+        /// <param name="unityTransferProjectRequestParameter">Parameters for transferring a project</param>
         [Preserve]
-        public UnityTransferProjectRequest(System.Guid organizationId, System.Guid projectId, Unity.Services.Core.Environments.Client.Models.InlineObject2 inlineObject2 = default(Unity.Services.Core.Environments.Client.Models.InlineObject2))
+        public UnityTransferProjectRequest(System.Guid organizationId, System.Guid projectId, Unity.Services.Core.Environments.Client.Models.UnityTransferProjectRequest unityTransferProjectRequestParameter = default(Unity.Services.Core.Environments.Client.Models.UnityTransferProjectRequest))
         {
             OrganizationId = organizationId;
 
             ProjectId = projectId;
 
-            InlineObject2 = inlineObject2;
+            UnityTransferProjectRequestParameter = unityTransferProjectRequestParameter;
             PathAndQueryParams = $"/api/unity/v1/organizations/{organizationId}/projects/{projectId}/transfer";
 
 
@@ -2760,9 +2635,9 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// <returns>A list of IMultipartFormSection representing the request body.</returns>
         public byte[] ConstructBody()
         {
-            if(InlineObject2 != null)
+            if(UnityTransferProjectRequestParameter != null)
             {
-                return ConstructBody(InlineObject2);
+                return ConstructBody(UnityTransferProjectRequestParameter);
             }
             return null;
         }
@@ -2828,9 +2703,9 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// <summary>Accessor for organizationId </summary>
         [Preserve]
         public System.Guid OrganizationId { get; }
-        /// <summary>Accessor for inlineObject4 </summary>
+        /// <summary>Accessor for unityUpdateOrganizationRequestParameter </summary>
         [Preserve]
-        public Unity.Services.Core.Environments.Client.Models.InlineObject4 InlineObject4 { get; }
+        public Unity.Services.Core.Environments.Client.Models.UnityUpdateOrganizationRequest UnityUpdateOrganizationRequestParameter { get; }
         string PathAndQueryParams;
 
         /// <summary>
@@ -2838,13 +2713,13 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// Update an organization
         /// </summary>
         /// <param name="organizationId">ID of the organization</param>
-        /// <param name="inlineObject4">InlineObject4 param</param>
+        /// <param name="unityUpdateOrganizationRequestParameter">Parameters for updating an organization</param>
         [Preserve]
-        public UnityUpdateOrganizationRequest(System.Guid organizationId, Unity.Services.Core.Environments.Client.Models.InlineObject4 inlineObject4 = default(Unity.Services.Core.Environments.Client.Models.InlineObject4))
+        public UnityUpdateOrganizationRequest(System.Guid organizationId, Unity.Services.Core.Environments.Client.Models.UnityUpdateOrganizationRequest unityUpdateOrganizationRequestParameter = default(Unity.Services.Core.Environments.Client.Models.UnityUpdateOrganizationRequest))
         {
             OrganizationId = organizationId;
 
-            InlineObject4 = inlineObject4;
+            UnityUpdateOrganizationRequestParameter = unityUpdateOrganizationRequestParameter;
             PathAndQueryParams = $"/api/unity/v1/organizations/{organizationId}";
 
 
@@ -2867,9 +2742,9 @@ namespace Unity.Services.Core.Environments.Client.Default
         /// <returns>A list of IMultipartFormSection representing the request body.</returns>
         public byte[] ConstructBody()
         {
-            if(InlineObject4 != null)
+            if(UnityUpdateOrganizationRequestParameter != null)
             {
-                return ConstructBody(InlineObject4);
+                return ConstructBody(UnityUpdateOrganizationRequestParameter);
             }
             return null;
         }

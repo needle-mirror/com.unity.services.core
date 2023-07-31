@@ -22,67 +22,67 @@ using Unity.Services.Core.Environments.Client.Http;
 namespace Unity.Services.Core.Environments.Client.Models
 {
     /// <summary>
-    /// UnityUserOrganizationsV1 model
+    /// UnityUserOrganizationsV1OrganizationsInner model
     /// </summary>
     [Preserve]
-    [DataContract(Name = "unity.UserOrganizations.v1")]
-    internal class UnityUserOrganizationsV1
+    [DataContract(Name = "unity_UserOrganizations_v1_organizations_inner")]
+    internal class UnityUserOrganizationsV1OrganizationsInner
     {
         /// <summary>
-        /// Creates an instance of UnityUserOrganizationsV1.
+        /// Creates an instance of UnityUserOrganizationsV1OrganizationsInner.
         /// </summary>
-        /// <param name="id">ID of the user</param>
-        /// <param name="genesisId">ID of the user as provided by Genesis</param>
-        /// <param name="name">Name of the user</param>
-        /// <param name="email">The email of the user</param>
-        /// <param name="organizations">organizations param</param>
+        /// <param name="id">ID of the organization</param>
+        /// <param name="genesisId">ID provided by Genesis</param>
+        /// <param name="name">Name of the organization</param>
+        /// <param name="role">Role of the user in the organization</param>
+        /// <param name="address">address param</param>
         [Preserve]
-        public UnityUserOrganizationsV1(System.Guid id = default, string genesisId = default, string name = default, string email = default, List<UnityUserOrganizationsV1OrganizationsInner> organizations = default)
+        public UnityUserOrganizationsV1OrganizationsInner(System.Guid id = default, string genesisId = default, string name = default, string role = default, UnityAddressV1 address = default)
         {
             Id = id;
             GenesisId = genesisId;
             Name = name;
-            Email = email;
-            Organizations = organizations;
+            Role = role;
+            Address = address;
         }
 
         /// <summary>
-        /// ID of the user
+        /// ID of the organization
         /// </summary>
         [Preserve]
         [DataMember(Name = "id", EmitDefaultValue = false)]
         public System.Guid Id{ get; }
         
         /// <summary>
-        /// ID of the user as provided by Genesis
+        /// ID provided by Genesis
         /// </summary>
         [Preserve]
         [DataMember(Name = "genesisId", EmitDefaultValue = false)]
         public string GenesisId{ get; }
         
         /// <summary>
-        /// Name of the user
+        /// Name of the organization
         /// </summary>
         [Preserve]
         [DataMember(Name = "name", EmitDefaultValue = false)]
         public string Name{ get; }
         
         /// <summary>
-        /// The email of the user
+        /// Role of the user in the organization
         /// </summary>
         [Preserve]
-        [DataMember(Name = "email", EmitDefaultValue = false)]
-        public string Email{ get; }
+        [DataMember(Name = "role", EmitDefaultValue = false)]
+        public string Role{ get; }
         
         /// <summary>
-        /// Parameter organizations of UnityUserOrganizationsV1
+        /// Parameter address of UnityUserOrganizationsV1OrganizationsInner
         /// </summary>
         [Preserve]
-        [DataMember(Name = "organizations", EmitDefaultValue = false)]
-        public List<UnityUserOrganizationsV1OrganizationsInner> Organizations{ get; }
+        [DataMember(Name = "address", EmitDefaultValue = false)]
+        public UnityAddressV1 Address{ get; }
     
         /// <summary>
-        /// Formats a UnityUserOrganizationsV1 into a string of key-value pairs for use as a path parameter.
+        /// Formats a UnityUserOrganizationsV1OrganizationsInner into a string of key-value pairs for use as a path parameter.
         /// </summary>
         /// <returns>Returns a string representation of the key-value pairs.</returns>
         internal string SerializeAsPathParam()
@@ -101,19 +101,19 @@ namespace Unity.Services.Core.Environments.Client.Models
             {
                 serializedModel += "name," + Name + ",";
             }
-            if (Email != null)
+            if (Role != null)
             {
-                serializedModel += "email," + Email + ",";
+                serializedModel += "role," + Role + ",";
             }
-            if (Organizations != null)
+            if (Address != null)
             {
-                serializedModel += "organizations," + Organizations.ToString();
+                serializedModel += "address," + Address.ToString();
             }
             return serializedModel;
         }
 
         /// <summary>
-        /// Returns a UnityUserOrganizationsV1 as a dictionary of key-value pairs for use as a query parameter.
+        /// Returns a UnityUserOrganizationsV1OrganizationsInner as a dictionary of key-value pairs for use as a query parameter.
         /// </summary>
         /// <returns>Returns a dictionary of string key-value pairs.</returns>
         internal Dictionary<string, string> GetAsQueryParam()
@@ -138,10 +138,10 @@ namespace Unity.Services.Core.Environments.Client.Models
                 dictionary.Add("name", nameStringValue);
             }
             
-            if (Email != null)
+            if (Role != null)
             {
-                var emailStringValue = Email.ToString();
-                dictionary.Add("email", emailStringValue);
+                var roleStringValue = Role.ToString();
+                dictionary.Add("role", roleStringValue);
             }
             
             return dictionary;
