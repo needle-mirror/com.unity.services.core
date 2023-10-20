@@ -30,6 +30,12 @@ namespace Unity.Services.Core.Internal
             return Registry.GetServiceComponent<TComponent>();
         }
 
+        public bool TryGetServiceComponent<TComponent>(out TComponent component)
+            where TComponent : IServiceComponent
+        {
+            return Registry.TryGetServiceComponent(out component);
+        }
+
         public void ResetProvidedComponents(IDictionary<int, IServiceComponent> componentTypeHashToInstance) => throw new InvalidOperationException(k_ErrorMessage);
     }
 }

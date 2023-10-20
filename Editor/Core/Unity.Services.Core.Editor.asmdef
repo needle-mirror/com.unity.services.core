@@ -1,5 +1,6 @@
 {
     "name": "Unity.Services.Core.Editor",
+    "rootNamespace": "",
     "references": [
         "Unity.Services.Core",
         "Unity.Services.Core.Networking",

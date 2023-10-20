@@ -32,7 +32,13 @@ namespace Unity.Services.Core.Configuration.Editor
         }
 
         [InitializeOnEnterPlayMode]
-        internal static void SetUpPlayModeConfigOnEnteringPlayMode(EnterPlayModeOptions _)
+        static void SetUpPlayModeConfigOnEnteringPlayMode(EnterPlayModeOptions _)
+        {
+            InitializeConfiguration();
+        }
+
+
+        internal static void InitializeConfiguration()
         {
             var builderWithAllProviders = CreateBuilderWithAllProvidersInProject();
             ConfigurationUtils.ConfigurationLoader = new MemoryConfigurationLoader

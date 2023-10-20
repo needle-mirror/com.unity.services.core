@@ -8,6 +8,11 @@ namespace Unity.Services.Authentication.Internal
         public string AccessToken { get; }
     }
 
+    [UnityEngine.Scripting.RequireImplementors] public interface IAccessTokenObserver : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public event System.Action<string> AccessTokenChanged;
+    }
+
     [UnityEngine.Scripting.RequireImplementors] public interface IEnvironmentId : Unity.Services.Core.Internal.IServiceComponent
     {
         public string EnvironmentId { get; }
@@ -20,14 +25,25 @@ namespace Unity.Services.Authentication.Internal
     }
 }
 
+namespace Unity.Services.Authentication.Server.Internal
+{
+    [UnityEngine.Scripting.RequireImplementors] public interface IServerAccessToken : Unity.Services.Authentication.Internal.IAccessToken, Unity.Services.Authentication.Internal.IAccessTokenObserver, Unity.Services.Core.Internal.IServiceComponent
+    {
+    }
+
+    [UnityEngine.Scripting.RequireImplementors] public interface IServerEnvironmentId : Unity.Services.Authentication.Internal.IEnvironmentId, Unity.Services.Core.Internal.IServiceComponent
+    {
+    }
+}
+
 namespace Unity.Services.Core.Analytics.Internal
 {
-    public interface IAnalyticsStandardEventComponent : Unity.Services.Core.Internal.IServiceComponent
+    [UnityEngine.Scripting.RequireImplementors] public interface IAnalyticsStandardEventComponent : Unity.Services.Core.Internal.IServiceComponent
     {
         public void Record(string eventName, System.Collections.Generic.IDictionary<string, object> eventParameters, int eventVersion, string packageName);
     }
 
-    public interface IAnalyticsUserId : Unity.Services.Core.Internal.IServiceComponent
+    [UnityEngine.Scripting.RequireImplementors] public interface IAnalyticsUserId : Unity.Services.Core.Internal.IServiceComponent
     {
         public string GetAnalyticsUserId();
     }
@@ -79,6 +95,12 @@ namespace Unity.Services.Core.Internal
         public CircularDependencyException(string message) {}
     }
 
+    public sealed class CorePackageRegistry
+    {
+        public static CorePackageRegistry Instance { get; }
+        public CoreRegistration Register<TPackage>([JetBrains.Annotations.NotNull] TPackage package) where TPackage : IInitializablePackage;
+    }
+
     public readonly struct CoreRegistration
     {
         public CoreRegistration DependsOn<T>() where T : IServiceComponent;
@@ -89,14 +111,24 @@ namespace Unity.Services.Core.Internal
     public sealed class CoreRegistry
     {
         public static CoreRegistry Instance { get; }
+        public string InstanceId { get; }
+        public T GetService<T>() where T : IService;
         public TComponent GetServiceComponent<TComponent>() where TComponent : IServiceComponent;
         public CoreRegistration RegisterPackage<TPackage>([JetBrains.Annotations.NotNull] TPackage package) where TPackage : IInitializablePackage;
+        public void RegisterService<T>([JetBrains.Annotations.NotNull] T service) where T : IService;
         public void RegisterServiceComponent<TComponent>([JetBrains.Annotations.NotNull] TComponent component) where TComponent : IServiceComponent;
+        public bool TryGetServiceComponent<TComponent>(out TComponent component) where TComponent : IServiceComponent;
     }
 
     public interface IInitializablePackage
     {
         public System.Threading.Tasks.Task Initialize(CoreRegistry registry);
+    }
+
+    public interface IInitializablePackageV2 : IInitializablePackage
+    {
+        public System.Threading.Tasks.Task InitializeInstanceAsync(CoreRegistry registry);
+        public void Register(CorePackageRegistry registry);
     }
 
     public interface IServiceComponent

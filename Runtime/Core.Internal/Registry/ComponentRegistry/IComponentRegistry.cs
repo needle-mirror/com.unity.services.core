@@ -12,6 +12,9 @@ namespace Unity.Services.Core.Internal
         TComponent GetServiceComponent<TComponent>()
             where TComponent : IServiceComponent;
 
+        bool TryGetServiceComponent<TComponent>(out TComponent component)
+            where TComponent : IServiceComponent;
+
         void ResetProvidedComponents(IDictionary<int, IServiceComponent> componentTypeHashToInstance);
     }
 }

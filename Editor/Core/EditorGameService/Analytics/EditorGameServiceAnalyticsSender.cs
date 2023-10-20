@@ -1,11 +1,14 @@
 using System;
 using UnityEditor;
-using UnityEngine;
 
 namespace Unity.Services.Core.Editor
 {
     class EditorGameServiceAnalyticsSender : IEditorGameServiceAnalyticsSender
     {
+#if UNITY_2023_2_OR_NEWER
+        internal const string VendorKey = "unity.services.core.editor";
+#endif
+
         static class AnalyticsComponent
         {
             public const string ProjectSettings = "Project Settings";
@@ -20,9 +23,6 @@ namespace Unity.Services.Core.Editor
             public const string ProjectBindPopupDisplayed = "Project Bind Popup Displayed";
             public const string ClickedSignUpLink = "Clicked Signup Link";
         }
-
-        const int k_Version = 1;
-        const string k_EventName = "editorgameserviceeditor";
 
         public void SendProjectSettingsGoToDashboardEvent(string package)
         {
@@ -51,23 +51,14 @@ namespace Unity.Services.Core.Editor
 
         static void SendEvent(string component, string action, string package)
         {
-#if !UNITY_2023_2_OR_NEWER
-            EditorAnalytics.SendEventWithLimit(k_EventName, new EditorGameServiceEvent
-            {
-                action = action,
-                component = component,
-                package = package
-            }, k_Version);
+#if UNITY_2023_2_OR_NEWER
+            EditorAnalytics.SendAnalytic(new EditorGameServiceAnalytic(component, action, package));
+#else
+            EditorAnalytics.SendEventWithLimit(
+                EditorGameServiceAnalyticData.EventName,
+                new EditorGameServiceAnalyticData { action = action, component = component, package = package },
+                EditorGameServiceAnalyticData.Version);
 #endif
-        }
-
-        /// <remarks>Lowercase is used here for compatibility with analytics.</remarks>
-        [Serializable]
-        public struct EditorGameServiceEvent
-        {
-            public string action;
-            public string component;
-            public string package;
         }
     }
 }

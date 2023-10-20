@@ -5,15 +5,23 @@ using SuppressMessage = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute
 namespace Unity.Services.Core.Internal
 {
     /// <summary>
-    /// A container to store all available <see cref="IInitializablePackage"/>
-    /// and <see cref="IServiceComponent"/> in the project.
+    /// A container to store all available <see cref="IServiceComponent"/> and <see cref="IService"/> in the project.
     /// </summary>
     public sealed class CoreRegistry
     {
         /// <summary>
-        /// Get the only registry of this project.
+        /// Get the main registry of this project.
         /// </summary>
         public static CoreRegistry Instance { get; internal set; }
+
+        /// <summary>
+        /// The unique identifier of the instance.
+        /// </summary>
+        public string InstanceId { get; }
+
+        internal ServicesType Type { get; private set; }
+
+        internal InitializationOptions Options { get; set; }
 
         [NotNull]
         internal IPackageRegistry PackageRegistry { get; private set; }
@@ -21,21 +29,27 @@ namespace Unity.Services.Core.Internal
         [NotNull]
         internal IComponentRegistry ComponentRegistry { get; private set; }
 
+        [NotNull]
+        internal IServiceRegistry ServiceRegistry { get; private set; }
+
         internal CoreRegistry()
         {
-            var dependencyTree = new DependencyTree();
-            PackageRegistry = new PackageRegistry(dependencyTree);
-            var componentTypeHashToInstance = new Dictionary<int, IServiceComponent>(
-                dependencyTree.ComponentTypeHashToInstance.Count);
-            ComponentRegistry = new ComponentRegistry(componentTypeHashToInstance);
+            Type = ServicesType.Default;
+            InstanceId = null;
+
+            PackageRegistry = new PackageRegistry(new DependencyTree());
+            ComponentRegistry = new ComponentRegistry();
+            ServiceRegistry = new ServiceRegistry();
         }
 
-        internal CoreRegistry(
-            [NotNull] IPackageRegistry packageRegistry,
-            [NotNull] IComponentRegistry componentRegistry)
+        internal CoreRegistry(IPackageRegistry packageRegistry, ServicesType type = ServicesType.Default, string instanceId = null)
         {
+            Type = type;
+            InstanceId = instanceId;
+
             PackageRegistry = packageRegistry;
-            ComponentRegistry = componentRegistry;
+            ComponentRegistry = new ComponentRegistry();
+            ServiceRegistry = new ServiceRegistry();
         }
 
         /// <summary>
@@ -94,14 +108,47 @@ namespace Unity.Services.Core.Internal
             return ComponentRegistry.GetServiceComponent<TComponent>();
         }
 
-        internal void LockPackageRegistration()
+        /// <summary>
+        /// Get the instance of the given <see cref="IServiceComponent"/> type and if it is registered.
+        /// </summary>
+        /// <typeparam name="TComponent">
+        /// The type of <see cref="IServiceComponent"/> to get.
+        /// </typeparam>
+        /// <param name="component">The component instance or the default value</param>
+        /// <returns>If the component was found in the registry.</returns>
+        public bool TryGetServiceComponent<TComponent>(out TComponent component)
+            where TComponent : IServiceComponent
         {
-            if (PackageRegistry is LockedPackageRegistry)
-            {
-                return;
-            }
+            return ComponentRegistry.TryGetServiceComponent<TComponent>(out component);
+        }
 
-            PackageRegistry = new LockedPackageRegistry(PackageRegistry);
+        /// <summary>
+        /// Store the given service in this registry.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of <see cref="IService"/> to register.
+        /// </typeparam>
+        /// <param name="service">
+        /// The service instance to register.
+        /// </param>
+        public void RegisterService<T>([NotNull] T service) where T : IService
+        {
+            ServiceRegistry.RegisterService(service);
+        }
+
+        /// <summary>
+        /// Returns the given service in this registry.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of <see cref="IService"/> to get.
+        /// </typeparam>
+        /// <returns>
+        /// Return the instance of the given <see cref="IService"/> type if it has been registered;
+        /// returns null otherwise.
+        /// </returns>
+        public T GetService<T>() where T : IService
+        {
+            return ServiceRegistry.GetService<T>();
         }
 
         internal void LockComponentRegistration()
@@ -112,6 +159,16 @@ namespace Unity.Services.Core.Internal
             }
 
             ComponentRegistry = new LockedComponentRegistry(ComponentRegistry);
+        }
+
+        internal void LockServiceRegistration()
+        {
+            if (ServiceRegistry is LockedServiceRegistry)
+            {
+                return;
+            }
+
+            ServiceRegistry = new LockedServiceRegistry(ServiceRegistry);
         }
     }
 }

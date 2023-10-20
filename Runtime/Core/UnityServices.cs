@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -9,7 +10,11 @@ namespace Unity.Services.Core
     /// </summary>
     public static class UnityServices
     {
+        /// <summary>
+        /// The main runtime instance of unity services.
+        /// </summary>
         internal static IUnityServices Instance { get; set; }
+
         internal static TaskCompletionSource<object> InstantiationCompletion { get; set; }
         internal static ExternalUserIdProperty ExternalUserIdProperty = new ExternalUserIdProperty();
 
@@ -102,12 +107,8 @@ namespace Unity.Services.Core
                 await InstantiationCompletion.Task;
             }
 
-            if (options is null)
-            {
-                options = new InitializationOptions();
-            }
-
             await Instance.InitializeAsync(options);
         }
+
     }
 }

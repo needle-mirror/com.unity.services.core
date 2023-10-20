@@ -6,17 +6,22 @@ namespace Unity.Services.Core.Editor.Environments.Analytics
 {
     class EnvironmentAnalyticsSender : IAnalyticsSender
     {
-        internal const string EditorGameServiceEventName = "editorgameserviceeditor";
-        internal const int EditorGameServiceEventVersion = 1;
-
         public AnalyticsResult SendEvent(object parameters)
         {
-            var result = EditorAnalytics.SendEventWithLimit(
-                EditorGameServiceEventName,
-                parameters,
-                EditorGameServiceEventVersion);
+            var result = AnalyticsResult.InvalidData;
+            if (parameters is EnvironmentChangedParameters environmentChangedParameters)
+            {
+#if UNITY_2023_2_OR_NEWER
+                result = EditorAnalytics.SendAnalytic(new EnvironmentAnalyticEvent(environmentChangedParameters));
+#else
+                result = EditorAnalytics.SendEventWithLimit(
+                    EditorGameServiceAnalyticData.EventName,
+                    parameters,
+                    EditorGameServiceAnalyticData.Version);
+#endif
+            }
 
-            LogVerbose(EditorGameServiceEventName, EditorGameServiceEventVersion, result, parameters);
+            LogVerbose(EditorGameServiceAnalyticData.EventName, EditorGameServiceAnalyticData.Version, result, parameters);
             return result;
         }
 

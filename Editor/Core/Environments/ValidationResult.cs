@@ -26,6 +26,7 @@ namespace Unity.Services.Core.Editor.Environments
         /// <summary>
         /// ValidationResult Constructor.
         /// </summary>
+        /// <param name="errorMessage">The error message</param>
         public ValidationResult(string errorMessage)
         {
             ErrorMessage = errorMessage;

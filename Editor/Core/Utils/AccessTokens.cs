@@ -1,7 +1,4 @@
 using System.Threading.Tasks;
-using Unity.Services.Core.Internal.Serialization;
-using Unity.Services.Core.Scheduler.Internal;
-using UnityEditor;
 
 namespace Unity.Services.Core.Editor
 {
@@ -10,41 +7,20 @@ namespace Unity.Services.Core.Editor
     /// </summary>
     public class AccessTokens : IAccessTokens
     {
-        readonly IGatewayTokens m_GatewayTokens;
-
-        internal AccessTokens(IGatewayTokens gatewayTokens)
-        {
-            m_GatewayTokens = gatewayTokens;
-        }
-
         /// <summary>
         /// Initialize a new instance of the <see cref="AccessTokens"/> class.
         /// </summary>
         public AccessTokens()
         {
-            var env = new CloudEnvironmentConfigProvider();
-            ITokenExchangeUrls urls;
-            if (env.IsStaging())
-            {
-                urls = new StagingTokenExchangeUrls();
-            }
-            else
-            {
-                urls = new ProductionTokenExchangeUrls();
-            }
-
-            var serializer = new NewtonsoftSerializer();
-            m_GatewayTokens = new GatewayTokens(
-                new TokenExchange(urls, serializer), new UtcTimeProvider(), serializer);
         }
 
         /// <inheritdoc cref="IAccessTokens.GetGenesisToken"/>
-        public static string GetGenesisToken() => CloudProjectSettings.accessToken;
+        public static string GetGenesisToken() => AccessTokensSingleton.Instance.GetGenesisToken();
 
         /// <inheritdoc cref="IAccessTokens.GetServicesGatewayTokenAsync"/>
         public Task<string> GetServicesGatewayTokenAsync()
         {
-            return m_GatewayTokens.GetGatewayTokenAsync(GetGenesisToken());
+            return AccessTokensSingleton.Instance.GetServicesGatewayTokenAsync();
         }
 
         /// <inheritdoc/>

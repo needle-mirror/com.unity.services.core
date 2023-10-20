@@ -1,4 +1,3 @@
-using Unity.Services.Core.Editor.Settings;
 using UnityEngine.Analytics;
 
 namespace Unity.Services.Core.Editor.Environments.Analytics

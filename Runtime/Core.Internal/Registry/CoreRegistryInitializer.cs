@@ -60,7 +60,7 @@ namespace Unity.Services.Core.Internal
                 try
                 {
                     stopwatch.Restart();
-                    await package.Initialize(m_Registry);
+                    await InitializePackageAsync(package);
 
                     stopwatch.Stop();
                     var initializationInfo = new PackageInitializationInfo
@@ -81,6 +81,23 @@ namespace Unity.Services.Core.Internal
             {
                 var packageTypeHash = m_SortedPackageTypeHashes[index];
                 return dependencyTree.PackageTypeHashToInstance[packageTypeHash];
+            }
+
+            async Task InitializePackageAsync(IInitializablePackage package)
+            {
+                switch (m_Registry.Type)
+                {
+                    case ServicesType.Default:
+                        await package.Initialize(m_Registry);
+                        break;
+                    case ServicesType.Instance:
+                        if (package is IInitializablePackageV2)
+                        {
+                            var packageV2 = ((IInitializablePackageV2)package);
+                            await packageV2.InitializeInstanceAsync(m_Registry);
+                        }
+                        break;
+                }
             }
 
             void Fail()

@@ -50,6 +50,10 @@ namespace Unity.Services.Core.Editor.Environments.UI
             });
         }
 
+        /// <summary>
+        /// Bind the environment service
+        /// </summary>
+        /// <param name="environmentService">The service</param>
         public void Bind(IEnvironmentsApi environmentService)
         {
             m_EnvironmentBinding.Source = environmentService;

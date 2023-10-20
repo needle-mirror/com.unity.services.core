@@ -74,5 +74,10 @@ namespace Unity.Services.Core
         /// Access to this endpoint for the current player was restricted for the specified project.
         /// </summary>
         public const int PlayerPolicyAccessDenied = 57;
+
+        /// <summary>
+        /// There is a conflict between the request and the current state of the resource.
+        /// </summary>
+        public const int Conflict = 58;
     }
 }

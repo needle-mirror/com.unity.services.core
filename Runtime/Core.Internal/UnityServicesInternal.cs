@@ -16,14 +16,18 @@ namespace Unity.Services.Core.Internal
         /// </summary>
         public ServicesInitializationState State { get; private set; }
 
-        public InitializationOptions Options { get; internal set; }
+        public InitializationOptions Options
+        {
+            get => Registry.Options;
+            internal set => Registry.Options = value;
+        }
 
         internal bool CanInitialize;
 
         TaskCompletionSource<object> m_Initialization;
 
         [NotNull]
-        CoreRegistry Registry { get; }
+        internal CoreRegistry Registry { get; }
 
         [NotNull]
         CoreMetrics Metrics { get; }
@@ -49,10 +53,15 @@ namespace Unity.Services.Core.Internal
         /// </returns>
         public async Task InitializeAsync(InitializationOptions options)
         {
+            if (options is null)
+            {
+                options = new InitializationOptions();
+            }
+
             if (!HasRequestedInitialization()
                 || HasInitializationFailed())
             {
-                Options = options;
+                Registry.Options = options;
                 m_Initialization = new TaskCompletionSource<object>();
             }
 
@@ -71,6 +80,11 @@ namespace Unity.Services.Core.Internal
                 return m_Initialization.Task.IsCompleted
                     && m_Initialization.Task.Status != TaskStatus.RanToCompletion;
             }
+        }
+
+        public T GetService<T>() where T : IService
+        {
+            return Registry.GetService<T>();
         }
 
         bool HasRequestedInitialization()
@@ -141,8 +155,8 @@ namespace Unity.Services.Core.Internal
             void SucceedServicesInitialization()
             {
                 State = ServicesInitializationState.Initialized;
-                Registry.PackageRegistry.Tree = null;
                 Registry.LockComponentRegistration();
+
                 initStopwatch.Stop();
                 m_Initialization.TrySetResult(null);
 
@@ -159,11 +173,16 @@ namespace Unity.Services.Core.Internal
             }
         }
 
+        internal void EnableInitialization()
+        {
+            CanInitialize = true;
+        }
+
         internal async Task EnableInitializationAsync()
         {
             CanInitialize = true;
 
-            Registry.LockPackageRegistration();
+            CorePackageRegistry.Instance.Lock();
 
             if (!HasRequestedInitialization())
                 return;

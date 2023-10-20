@@ -11,7 +11,7 @@ namespace Unity.Services.Core.Editor.Environments
             Initialize(new ServiceCollection());
         }
 
-        internal override void Register(ServiceCollection collection)
+        public override void Register(ServiceCollection collection)
         {
             collection.RegisterSingleton(Factories.Default<IEnvironmentsApi, EnvironmentsApiInternal>);
 

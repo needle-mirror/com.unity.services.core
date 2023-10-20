@@ -13,6 +13,11 @@ namespace Unity.Services.Core.Internal
         [NotNull]
         internal Dictionary<int, IServiceComponent> ComponentTypeHashToInstance { get; }
 
+        public ComponentRegistry()
+        {
+            ComponentTypeHashToInstance = new Dictionary<int, IServiceComponent>();
+        }
+
         public ComponentRegistry(
             [NotNull] Dictionary<int, IServiceComponent> componentTypeHashToInstance)
         {
@@ -53,6 +58,16 @@ namespace Unity.Services.Core.Internal
             }
 
             return (TComponent)component;
+        }
+
+        public bool TryGetServiceComponent<TComponent>(out TComponent component)
+            where TComponent : IServiceComponent
+        {
+            var componentType = typeof(TComponent);
+            var exists = ComponentTypeHashToInstance.TryGetValue(componentType.GetHashCode(), out var baseComponent)
+                && !(baseComponent is MissingComponent);
+            component = exists ? (TComponent)baseComponent : default;
+            return exists;
         }
 
         bool IsComponentTypeRegistered(int componentTypeHash)

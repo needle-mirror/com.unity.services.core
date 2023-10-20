@@ -10,6 +10,9 @@ namespace Unity.Services.Core
 
         internal static TaskScheduler UnityThreadScheduler { get; private set; }
 
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+#endif
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void CaptureUnityThreadInfo()
         {

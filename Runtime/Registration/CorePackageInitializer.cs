@@ -23,7 +23,7 @@ using System.Diagnostics;
 namespace Unity.Services.Core.Registration
 {
     [SuppressMessage("ReSharper", "RedundantTypeArgumentsOfMethod")]
-    class CorePackageInitializer : IInitializablePackage, IDiagnosticsComponentProvider
+    class CorePackageInitializer : IInitializablePackageV2, IDiagnosticsComponentProvider
     {
         internal const string CorePackageName = "com.unity.services.core";
 
@@ -47,16 +47,22 @@ namespace Unity.Services.Core.Registration
 
         internal UnityThreadUtilsInternal UnityThreadUtils { get; private set; }
 
+        CoreRegistry m_Registry;
         readonly IJsonSerializer m_Serializer;
 
         InitializationOptions m_CurrentInitializationOptions;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        static void Register()
+        static void InitializeOnLoad()
         {
-            var corePackageInitializer = new CorePackageInitializer(new NewtonsoftSerializer());
-            CoreDiagnostics.Instance.DiagnosticsComponentProvider = corePackageInitializer;
-            CoreRegistry.Instance.RegisterPackage(corePackageInitializer)
+            var initializer = new CorePackageInitializer(new NewtonsoftSerializer());
+            initializer.Register(CorePackageRegistry.Instance);
+        }
+
+        public void Register(CorePackageRegistry registry)
+        {
+            CoreDiagnostics.Instance.DiagnosticsComponentProvider = this;
+            registry.Register(this)
                 .ProvidesComponent<IInstallationId>()
                 .ProvidesComponent<ICloudProjectId>()
                 .ProvidesComponent<IActionScheduler>()
@@ -66,6 +72,11 @@ namespace Unity.Services.Core.Registration
                 .ProvidesComponent<IDiagnosticsFactory>()
                 .ProvidesComponent<IUnityThreadUtils>()
                 .ProvidesComponent<IExternalUserId>();
+        }
+
+        public CorePackageInitializer()
+        {
+            m_Serializer = new NewtonsoftSerializer();
         }
 
         public CorePackageInitializer(IJsonSerializer serializer) => m_Serializer = serializer;
@@ -80,7 +91,19 @@ namespace Unity.Services.Core.Registration
         /// <returns>
         /// Return a Task representing your initialization.
         /// </returns>
-        public async Task Initialize(CoreRegistry registry)
+        public Task Initialize(CoreRegistry registry)
+        {
+            m_Registry = registry;
+            return InitializeComponents();
+        }
+
+        public Task InitializeInstanceAsync(CoreRegistry registry)
+        {
+            m_Registry = registry;
+            return InitializeComponents();
+        }
+
+        async Task InitializeComponents()
         {
             try
             {
@@ -95,7 +118,7 @@ namespace Unity.Services.Core.Registration
 
                 InitializeActionScheduler();
 
-                await InitializeProjectConfigAsync(UnityServices.Instance.Options);
+                await InitializeProjectConfigAsync(m_Registry.Options);
 
                 InitializeExternalUserId(ProjectConfig);
 
@@ -127,15 +150,15 @@ namespace Unity.Services.Core.Registration
 
             void RegisterProvidedComponents()
             {
-                registry.RegisterServiceComponent<IInstallationId>(InstallationId);
-                registry.RegisterServiceComponent<IActionScheduler>(ActionScheduler);
-                registry.RegisterServiceComponent<IProjectConfiguration>(ProjectConfig);
-                registry.RegisterServiceComponent<IEnvironments>(Environments);
-                registry.RegisterServiceComponent<ICloudProjectId>(CloudProjectId);
-                registry.RegisterServiceComponent<IDiagnosticsFactory>(DiagnosticsFactory);
-                registry.RegisterServiceComponent<IMetricsFactory>(MetricsFactory);
-                registry.RegisterServiceComponent<IUnityThreadUtils>(UnityThreadUtils);
-                registry.RegisterServiceComponent<IExternalUserId>(ExternalUserId);
+                m_Registry.RegisterServiceComponent<IInstallationId>(InstallationId);
+                m_Registry.RegisterServiceComponent<IActionScheduler>(ActionScheduler);
+                m_Registry.RegisterServiceComponent<IProjectConfiguration>(ProjectConfig);
+                m_Registry.RegisterServiceComponent<IEnvironments>(Environments);
+                m_Registry.RegisterServiceComponent<ICloudProjectId>(CloudProjectId);
+                m_Registry.RegisterServiceComponent<IDiagnosticsFactory>(DiagnosticsFactory);
+                m_Registry.RegisterServiceComponent<IMetricsFactory>(MetricsFactory);
+                m_Registry.RegisterServiceComponent<IUnityThreadUtils>(UnityThreadUtils);
+                m_Registry.RegisterServiceComponent<IExternalUserId>(ExternalUserId);
             }
 
             // Fake predicate to avoid stack unwinding on rethrow.
@@ -149,7 +172,7 @@ namespace Unity.Services.Core.Registration
         bool HaveInitOptionsChanged()
         {
             return !(m_CurrentInitializationOptions is null)
-                && !m_CurrentInitializationOptions.Values.ValueEquals(UnityServices.Instance.Options.Values);
+                && !m_CurrentInitializationOptions.Values.ValueEquals(m_Registry.Options.Values);
         }
 
         void FreeOptionsDependantComponents()
@@ -305,7 +328,7 @@ namespace Unity.Services.Core.Registration
             }
 
             InitializeActionScheduler();
-            await InitializeProjectConfigAsync(UnityServices.Instance.Options);
+            await InitializeProjectConfigAsync(m_Registry.Options);
             InitializeEnvironments(ProjectConfig);
             InitializeCloudProjectId();
             InitializeDiagnostics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
@@ -338,7 +361,7 @@ namespace Unity.Services.Core.Registration
 
         public async Task<string> GetSerializedProjectConfigurationAsync()
         {
-            await InitializeProjectConfigAsync(UnityServices.Instance.Options);
+            await InitializeProjectConfigAsync(m_Registry.Options);
             return ProjectConfig.ToJson();
         }
     }

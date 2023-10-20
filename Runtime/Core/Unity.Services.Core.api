@@ -6,10 +6,13 @@ namespace Unity.Services.Core
     public static class CommonErrorCodes
     {
         public const int ApiMissing = 4;
+        public const int Conflict = 58;
         public const int Forbidden = 53;
         public const int InvalidRequest = 55;
         public const int InvalidToken = 51;
         public const int NotFound = 54;
+        public const int PlayerPolicyAccessDenied = 57;
+        public const int ProjectPolicyAccessDenied = 56;
         public const int RequestRejected = 5;
         public const int ServiceUnavailable = 3;
         public const int Timeout = 2;
@@ -32,11 +35,26 @@ namespace Unity.Services.Core
         public bool TryGetOption(string key, out string option);
     }
 
+    public interface IService
+    {
+    }
+
+    public interface IUnityServices
+    {
+        public ServicesInitializationState State { get; }
+        public T GetService<T>() where T : IService;
+        public System.Threading.Tasks.Task InitializeAsync(InitializationOptions options = default(InitializationOptions));
+    }
+
     public class RequestFailedException : System.Exception
     {
         public int ErrorCode { get; }
         public RequestFailedException(int errorCode, string message) {}
         public RequestFailedException(int errorCode, string message, System.Exception innerException) {}
+    }
+
+    public sealed class ServicesCreationException : System.Exception
+    {
     }
 
     public class ServicesInitializationException : System.Exception
