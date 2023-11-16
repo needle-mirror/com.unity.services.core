@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Unity.Services.Core.Editor.Shared.EditorUtils;
 using Unity.Services.Core.Editor.Shared.UI;
 using UnityEditor;
@@ -41,7 +42,21 @@ namespace Unity.Services.Core.Editor.Environments.UI
                 }
                 else if (m_DropdownControl != null)
                 {
-                    m_DropdownControl.choices = service.Environments.Select(env => env.Name).ToList();
+                    var choices = service.Environments.Select(env => env.Name).ToList();
+
+                    // Unity Editor 2021.1 has `choices` set as internal
+#if UNITY_2021_1_OR_NEWER && !UNITY_2021_2_OR_NEWER
+                    m_DropdownControl
+                        .GetType()
+                        .InvokeMember(
+                            "choices",
+                            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.SetProperty,
+                            null,
+                            m_DropdownControl,
+                            new object[] { choices });
+#else
+                    m_DropdownControl.choices = choices;
+#endif
 
                     var currentEnvInfo = service.ActiveEnvironmentInfo();
                     if (currentEnvInfo != null)

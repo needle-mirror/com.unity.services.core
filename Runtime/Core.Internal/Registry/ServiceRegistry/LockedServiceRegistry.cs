@@ -17,12 +17,12 @@ namespace Unity.Services.Core.Internal
             Registry = registryToLock;
         }
 
-        public void RegisterService<T>(T service) where T : IService
+        public void RegisterService<T>(T service)
         {
             throw new InvalidOperationException(k_ErrorMessage);
         }
 
-        public T GetService<T>() where T : IService
+        public T GetService<T>()
         {
             return Registry.GetService<T>();
         }

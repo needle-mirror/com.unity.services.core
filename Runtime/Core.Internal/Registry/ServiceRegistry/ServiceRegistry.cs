@@ -7,23 +7,23 @@ namespace Unity.Services.Core.Internal
     class ServiceRegistry : IServiceRegistry
     {
         /// <summary>
-        /// Key: Hash code of a <see cref="IService"/> type.
+        /// Key: Hash code of a service type.
         /// Value: Service instance.
         /// </summary>
         [NotNull]
-        internal Dictionary<int, IService> ServiceTypeHashToInstance { get; }
+        internal Dictionary<int, object> ServiceTypeHashToInstance { get; }
 
         public ServiceRegistry()
         {
-            ServiceTypeHashToInstance = new Dictionary<int, IService>();
+            ServiceTypeHashToInstance = new Dictionary<int, object>();
         }
 
-        public ServiceRegistry([NotNull] Dictionary<int, IService> serviceTypeHashToInstance)
+        public ServiceRegistry([NotNull] Dictionary<int, object> serviceTypeHashToInstance)
         {
             ServiceTypeHashToInstance = serviceTypeHashToInstance;
         }
 
-        public void RegisterService<T>(T service) where T : IService
+        public void RegisterService<T>(T service)
         {
             var serviceType = typeof(T);
 
@@ -38,7 +38,7 @@ namespace Unity.Services.Core.Internal
             ServiceTypeHashToInstance[serviceTypeHash] = service;
         }
 
-        public T GetService<T>() where T : IService
+        public T GetService<T>()
         {
             var serviceType = typeof(T);
             if (!ServiceTypeHashToInstance.TryGetValue(serviceType.GetHashCode(), out var service))

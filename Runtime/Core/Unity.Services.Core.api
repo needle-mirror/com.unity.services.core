@@ -35,15 +35,22 @@ namespace Unity.Services.Core
         public bool TryGetOption(string key, out string option);
     }
 
-    public interface IService
+    [System.Obsolete] public interface IService
     {
     }
 
     public interface IUnityServices
     {
         public ServicesInitializationState State { get; }
-        public T GetService<T>() where T : IService;
+        public T GetService<T>();
         public System.Threading.Tasks.Task InitializeAsync(InitializationOptions options = default(InitializationOptions));
+    }
+
+    public interface IUnityServicesBuilder
+    {
+        public string InstanceId { get; }
+        public IUnityServices Build();
+        public IUnityServicesBuilder WithInstanceId(string instanceId);
     }
 
     public class RequestFailedException : System.Exception
@@ -74,8 +81,11 @@ namespace Unity.Services.Core
     public static class UnityServices
     {
         public static string ExternalUserId { get; set; }
+        public static System.Collections.Generic.Dictionary<string, IUnityServices> Instances { get; }
         public static ServicesInitializationState State { get; }
+        public static IUnityServices GetInstance(string instanceId);
         public static System.Threading.Tasks.Task InitializeAsync();
         public static System.Threading.Tasks.Task InitializeAsync(InitializationOptions options);
+        public static IUnityServicesBuilder SetupInstance();
     }
 }

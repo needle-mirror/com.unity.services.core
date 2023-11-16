@@ -82,7 +82,7 @@ namespace Unity.Services.Core.Internal
             }
         }
 
-        public T GetService<T>() where T : IService
+        public T GetService<T>()
         {
             return Registry.GetService<T>();
         }

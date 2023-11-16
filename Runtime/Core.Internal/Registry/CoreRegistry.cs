@@ -5,7 +5,7 @@ using SuppressMessage = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute
 namespace Unity.Services.Core.Internal
 {
     /// <summary>
-    /// A container to store all available <see cref="IServiceComponent"/> and <see cref="IService"/> in the project.
+    /// A container to store all available <see cref="IServiceComponent"/> and services in the project.
     /// </summary>
     public sealed class CoreRegistry
     {
@@ -126,12 +126,12 @@ namespace Unity.Services.Core.Internal
         /// Store the given service in this registry.
         /// </summary>
         /// <typeparam name="T">
-        /// The type of <see cref="IService"/> to register.
+        /// The interface type of the service to register.
         /// </typeparam>
         /// <param name="service">
         /// The service instance to register.
         /// </param>
-        public void RegisterService<T>([NotNull] T service) where T : IService
+        public void RegisterService<T>([NotNull] T service)
         {
             ServiceRegistry.RegisterService(service);
         }
@@ -140,13 +140,13 @@ namespace Unity.Services.Core.Internal
         /// Returns the given service in this registry.
         /// </summary>
         /// <typeparam name="T">
-        /// The type of <see cref="IService"/> to get.
+        /// The interface type of service to get.
         /// </typeparam>
         /// <returns>
-        /// Return the instance of the given <see cref="IService"/> type if it has been registered;
+        /// Return the instance of the given service type if it has been registered;
         /// returns null otherwise.
         /// </returns>
-        public T GetService<T>() where T : IService
+        public T GetService<T>()
         {
             return ServiceRegistry.GetService<T>();
         }

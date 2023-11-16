@@ -24,6 +24,6 @@ namespace Unity.Services.Core
         /// </summary>
         /// <typeparam name="T">The type that was registered for the service</typeparam>
         /// <returns>The service if available, otherwise null</returns>
-        T GetService<T>() where T : IService;
+        T GetService<T>();
     }
 }

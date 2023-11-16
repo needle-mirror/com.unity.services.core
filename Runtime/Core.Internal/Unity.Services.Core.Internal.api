@@ -112,10 +112,10 @@ namespace Unity.Services.Core.Internal
     {
         public static CoreRegistry Instance { get; }
         public string InstanceId { get; }
-        public T GetService<T>() where T : IService;
+        public T GetService<T>();
         public TComponent GetServiceComponent<TComponent>() where TComponent : IServiceComponent;
         public CoreRegistration RegisterPackage<TPackage>([JetBrains.Annotations.NotNull] TPackage package) where TPackage : IInitializablePackage;
-        public void RegisterService<T>([JetBrains.Annotations.NotNull] T service) where T : IService;
+        public void RegisterService<T>([JetBrains.Annotations.NotNull] T service);
         public void RegisterServiceComponent<TComponent>([JetBrains.Annotations.NotNull] TComponent component) where TComponent : IServiceComponent;
         public bool TryGetServiceComponent<TComponent>(out TComponent component) where TComponent : IServiceComponent;
     }
