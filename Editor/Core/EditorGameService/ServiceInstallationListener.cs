@@ -29,6 +29,12 @@ namespace Unity.Services.Core.Editor
         [InitializeOnLoadMethod]
         static void RegisterToEvents()
         {
+            string[] arguments = Environment.GetCommandLineArgs();
+            // This flag prevents the Cloud Project Bind Popup to be opened
+            if (arguments.Contains("-no-cloud-project-bind-popup"))
+            {
+                return;
+            }
             Events.registeredPackages -= OnPackagesRegistered;
             Events.registeredPackages += OnPackagesRegistered;
         }

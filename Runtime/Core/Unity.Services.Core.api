@@ -46,13 +46,6 @@ namespace Unity.Services.Core
         public System.Threading.Tasks.Task InitializeAsync(InitializationOptions options = default(InitializationOptions));
     }
 
-    public interface IUnityServicesBuilder
-    {
-        public string InstanceId { get; }
-        public IUnityServices Build();
-        public IUnityServicesBuilder WithInstanceId(string instanceId);
-    }
-
     public class RequestFailedException : System.Exception
     {
         public int ErrorCode { get; }
@@ -81,11 +74,8 @@ namespace Unity.Services.Core
     public static class UnityServices
     {
         public static string ExternalUserId { get; set; }
-        public static System.Collections.Generic.Dictionary<string, IUnityServices> Instances { get; }
         public static ServicesInitializationState State { get; }
-        public static IUnityServices GetInstance(string instanceId);
         public static System.Threading.Tasks.Task InitializeAsync();
         public static System.Threading.Tasks.Task InitializeAsync(InitializationOptions options);
-        public static IUnityServicesBuilder SetupInstance();
     }
 }
