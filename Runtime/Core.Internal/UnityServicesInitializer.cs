@@ -10,16 +10,16 @@ namespace Unity.Services.Core.Internal
 
             var corePackageRegistry = new CorePackageRegistry();
             var coreRegistry = new CoreRegistry(corePackageRegistry.Registry);
-            var coreMetrics = new CoreMetrics();
-            var coreDiagnostics = new CoreDiagnostics();
 
             CorePackageRegistry.Instance = corePackageRegistry;
             CoreRegistry.Instance = coreRegistry;
-            CoreMetrics.Instance = coreMetrics;
-            CoreDiagnostics.Instance = coreDiagnostics;
+            var coreMetrics = new CoreMetrics();
+            var coreDiagnostics = new CoreDiagnostics();
 
             UnityServices.Instance = new UnityServicesInternal(coreRegistry, coreMetrics, coreDiagnostics);
             UnityServices.InstantiationCompletion?.TrySetResult(null);
+            CoreMetrics.Instance = coreMetrics;
+            CoreDiagnostics.Instance = coreDiagnostics;
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -28,6 +28,6 @@ namespace Unity.Services.Core.Internal
             var instance = (UnityServicesInternal)UnityServices.Instance;
             await instance.EnableInitializationAsync();
         }
-        
+
     }
 }

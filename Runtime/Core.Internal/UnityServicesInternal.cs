@@ -28,18 +28,19 @@ namespace Unity.Services.Core.Internal
 
         [NotNull]
         internal CoreRegistry Registry { get; }
-
         [NotNull]
-        CoreMetrics Metrics { get; }
-
+        internal CoreMetrics Metrics { get; }
         [NotNull]
-        CoreDiagnostics Diagnostics { get; }
+        internal CoreDiagnostics Diagnostics { get; }
 
-        public UnityServicesInternal([NotNull] CoreRegistry registry, [NotNull] CoreMetrics metrics, [NotNull] CoreDiagnostics diagnostics)
+        public UnityServicesInternal(
+            [NotNull] CoreRegistry registry,
+            [NotNull] CoreMetrics coreMetrics,
+            [NotNull] CoreDiagnostics coreDiagnostics)
         {
             Registry = registry;
-            Metrics = metrics;
-            Diagnostics = diagnostics;
+            Metrics = coreMetrics;
+            Diagnostics = coreDiagnostics;
         }
 
         /// <summary>
@@ -108,19 +109,16 @@ namespace Unity.Services.Core.Internal
 
             var sortedPackageTypeHashes = new List<int>(dependencyTree.PackageTypeHashToInstance.Count);
 
-            List<PackageInitializationInfo> packageInitInfos;
             try
             {
                 SortPackages();
-                packageInitInfos = await InitializePackagesAsync();
+                await InitializePackagesAsync();
             }
             catch (Exception reason)
             {
                 FailServicesInitialization(reason);
                 throw;
             }
-
-            SendInitializationMetrics(packageInitInfos);
 
             SucceedServicesInitialization();
 
@@ -130,10 +128,10 @@ namespace Unity.Services.Core.Internal
                 sorter.SortRegisteredPackagesIntoTarget();
             }
 
-            async Task<List<PackageInitializationInfo>> InitializePackagesAsync()
+            async Task InitializePackagesAsync()
             {
                 var initializer = new CoreRegistryInitializer(Registry, sortedPackageTypeHashes);
-                return await initializer.InitializeRegistryAsync();
+                await initializer.InitializeRegistryAsync();
             }
 
             void FailServicesInitialization(Exception reason)
@@ -141,15 +139,6 @@ namespace Unity.Services.Core.Internal
                 State = ServicesInitializationState.Uninitialized;
                 initStopwatch.Stop();
                 m_Initialization.TrySetException(reason);
-
-                if (reason is CircularDependencyException)
-                {
-                    Diagnostics.SendCircularDependencyDiagnostics(reason);
-                }
-                else
-                {
-                    Diagnostics.SendOperateServicesInitDiagnostics(reason);
-                }
             }
 
             void SucceedServicesInitialization()
@@ -159,9 +148,6 @@ namespace Unity.Services.Core.Internal
 
                 initStopwatch.Stop();
                 m_Initialization.TrySetResult(null);
-
-                Metrics.SendAllPackagesInitSuccessMetric();
-                Metrics.SendAllPackagesInitTimeMetric(initStopwatch.Elapsed.TotalSeconds);
             }
         }
 

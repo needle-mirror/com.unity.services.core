@@ -14,7 +14,7 @@ namespace Unity.Services.Core.Editor
 
         IGatewayTokens m_GatewayTokens;
         SemaphoreSlim m_Semaphore;
-        Task<string> m_GatewayTokenTask;
+        internal Task<string> GatewayTokenTask;
 
         internal AccessTokensSingleton(IGatewayTokens gatewayTokens)
         {
@@ -42,21 +42,21 @@ namespace Unity.Services.Core.Editor
 
         public async Task<string> GetServicesGatewayTokenAsync()
         {
-            if (m_GatewayTokenTask != null)
+            if (GatewayTokenTask != null)
             {
-                return await m_GatewayTokenTask;
+                return await GatewayTokenTask;
             }
 
             string token = null;
             try
             {
                 await m_Semaphore.WaitAsync();
-                m_GatewayTokenTask = m_GatewayTokens.GetGatewayTokenAsync(GetGenesisToken());
-                token = await m_GatewayTokenTask;
-                m_GatewayTokenTask = null;
+                GatewayTokenTask = m_GatewayTokens.GetGatewayTokenAsync(GetGenesisToken());
+                token = await GatewayTokenTask;
             }
             finally
             {
+                GatewayTokenTask = null;
                 m_Semaphore.Release();
             }
 

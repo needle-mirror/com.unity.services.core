@@ -129,12 +129,8 @@ namespace Unity.Services.Core.Registration
                     throw new UnityProjectNotLinkedException(ProjectUnlinkMessage);
                 }
 
-                InitializeDiagnostics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
-                CoreDiagnostics.Instance.Diagnostics = DiagnosticsFactory.Create(CorePackageName);
-                CoreDiagnostics.Instance.SetProjectConfiguration(ProjectConfig.ToJson());
-
-                InitializeMetrics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
-                CoreMetrics.Instance.Initialize(ProjectConfig, MetricsFactory, GetType());
+                InitializeMetrics();
+                InitializeDiagnostics();
 
                 InitializeUnityThreadUtils();
 
@@ -154,9 +150,9 @@ namespace Unity.Services.Core.Registration
                 m_Registry.RegisterServiceComponent<IActionScheduler>(ActionScheduler);
                 m_Registry.RegisterServiceComponent<IProjectConfiguration>(ProjectConfig);
                 m_Registry.RegisterServiceComponent<IEnvironments>(Environments);
-                m_Registry.RegisterServiceComponent<ICloudProjectId>(CloudProjectId);
-                m_Registry.RegisterServiceComponent<IDiagnosticsFactory>(DiagnosticsFactory);
                 m_Registry.RegisterServiceComponent<IMetricsFactory>(MetricsFactory);
+                m_Registry.RegisterServiceComponent<IDiagnosticsFactory>(DiagnosticsFactory);
+                m_Registry.RegisterServiceComponent<ICloudProjectId>(CloudProjectId);
                 m_Registry.RegisterServiceComponent<IUnityThreadUtils>(UnityThreadUtils);
                 m_Registry.RegisterServiceComponent<IExternalUserId>(ExternalUserId);
             }
@@ -164,7 +160,6 @@ namespace Unity.Services.Core.Registration
             // Fake predicate to avoid stack unwinding on rethrow.
             bool SendFailedInitDiagnostic(Exception reason)
             {
-                CoreDiagnostics.Instance.SendCorePackageInitDiagnostics(reason);
                 return false;
             }
         }
@@ -282,34 +277,32 @@ namespace Unity.Services.Core.Registration
             };
         }
 
+        internal void InitializeMetrics()
+        {
+            if (!(MetricsFactory is null))
+            {
+                return;
+            }
+
+            MetricsFactory = new MetricsFactory();
+        }
+
+        internal void InitializeDiagnostics()
+        {
+            if (!(DiagnosticsFactory is null))
+            {
+                return;
+            }
+
+            DiagnosticsFactory = new DiagnosticsFactory();
+        }
+
         internal void InitializeCloudProjectId(ICloudProjectId cloudProjectId = null)
         {
             if (!(CloudProjectId is null))
                 return;
 
             CloudProjectId = cloudProjectId ?? new CloudProjectId();
-        }
-
-        internal void InitializeDiagnostics(
-            IActionScheduler scheduler, IProjectConfiguration projectConfiguration, ICloudProjectId cloudProjectId,
-            IEnvironments environments)
-        {
-            if (!(DiagnosticsFactory is null))
-                return;
-
-            DiagnosticsFactory = TelemetryUtils.CreateDiagnosticsFactory(
-                scheduler, projectConfiguration, cloudProjectId, environments);
-        }
-
-        internal void InitializeMetrics(
-            IActionScheduler scheduler, IProjectConfiguration projectConfiguration, ICloudProjectId cloudProjectId,
-            IEnvironments environments)
-        {
-            if (!(MetricsFactory is null))
-                return;
-
-            MetricsFactory = TelemetryUtils.CreateMetricsFactory(
-                scheduler, projectConfiguration, cloudProjectId, environments);
         }
 
         internal void InitializeUnityThreadUtils()
@@ -331,7 +324,6 @@ namespace Unity.Services.Core.Registration
             await InitializeProjectConfigAsync(m_Registry.Options);
             InitializeEnvironments(ProjectConfig);
             InitializeCloudProjectId();
-            InitializeDiagnostics(ActionScheduler, ProjectConfig, CloudProjectId, Environments);
             return DiagnosticsFactory;
         }
 

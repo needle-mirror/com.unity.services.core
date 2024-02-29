@@ -93,6 +93,12 @@ namespace Unity.Services.Core.Editor
             }
 
             var tokenExchangeError = m_Serializer.DeserializeObject<TokenExchangeRequestError>(responseJson);
+
+            if (tokenExchangeError == null)
+            {
+                throw new RequestFailedException(503, "Request failed with an empty response.");
+            }
+
             throw new RequestFailedException(tokenExchangeError.Status, tokenExchangeError.Detail);
         }
 

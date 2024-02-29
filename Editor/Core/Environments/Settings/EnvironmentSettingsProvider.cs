@@ -54,8 +54,7 @@ namespace Unity.Services.Core.Editor.Settings
         /// <returns>The visual element added to the Settings Project page.</returns>
         protected override VisualElement GenerateServiceDetailUI()
         {
-            var environmentSelector = new EnvironmentSelector();
-            environmentSelector.Bind(m_EnvironmentService);
+            var environmentSelector = new EnvironmentSelector(m_EnvironmentService);
             return environmentSelector;
         }
 

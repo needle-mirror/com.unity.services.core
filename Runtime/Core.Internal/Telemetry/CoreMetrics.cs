@@ -28,82 +28,27 @@ namespace Unity.Services.Core.Internal
 
         public void SendAllPackagesInitSuccessMetric()
         {
-            if (Metrics is null)
-            {
-                CoreLogger.LogTelemetry("Can't send AllPackagesInitSuccess, Metrics is null.");
-            }
-            else
-            {
-                Metrics.SendSumMetric(AllPackagesInitSuccessMetricName);
-            }
+            // do nothing
         }
 
         public void SendAllPackagesInitTimeMetric(double initTimeSeconds)
         {
-            if (Metrics is null)
-            {
-                CoreLogger.LogTelemetry("Can't send AllPackagesInitTime, Metrics is null.");
-            }
-            else
-            {
-                Metrics.SendHistogramMetric(AllPackagesInitTimeMetricName, initTimeSeconds);
-            }
+            // do nothing
         }
 
         public void SendInitTimeMetricForPackage(Type packageType, double initTimeSeconds)
         {
-            if (AllPackageMetrics.TryGetValue(packageType, out var metric))
-            {
-                metric.SendHistogramMetric(PackageInitTimeMetricName, initTimeSeconds);
-            }
-            else
-            {
-                CoreLogger.LogTelemetry($"There are no metrics for {packageType.Name}.");
-            }
+            // do nothing
         }
 
         public void Initialize(IProjectConfiguration configuration, IMetricsFactory factory, Type corePackageType)
         {
-            AllPackageMetrics.Clear();
-            FindAndCacheAllPackageMetrics(configuration, factory);
-            if (AllPackageMetrics.TryGetValue(corePackageType, out var coreMetrics))
-            {
-                Metrics = coreMetrics;
-            }
-            else
-            {
-                CoreLogger.LogTelemetry("Metrics couldn't be created for Core package.");
-            }
+            // do nothing
         }
 
         internal void FindAndCacheAllPackageMetrics(IProjectConfiguration configuration, IMetricsFactory factory)
         {
-            var packageNames = configuration.GetString(AllPackageNamesKey, "");
-            var splitNames = packageNames?.Split(AllPackageNamesSeparator) ?? Array.Empty<string>();
-            foreach (var packageName in splitNames)
-            {
-                if (string.IsNullOrEmpty(packageName))
-                    continue;
-
-                var configKey = string.Format(PackageInitializerNamesKeyFormat, packageName);
-                var joinedInitializerFullNames = configuration.GetString(configKey, "");
-                if (string.IsNullOrEmpty(joinedInitializerFullNames))
-                    continue;
-
-                var initializerFullNames = joinedInitializerFullNames.Split(PackageInitializerNamesSeparator);
-                foreach (var initializerFullName in initializerFullNames)
-                {
-                    var packageType = Type.GetType(initializerFullName);
-                    if (packageType is null)
-                    {
-                        CoreLogger.LogTelemetry($"'{initializerFullName}' not found. It may have been stripped.");
-                        continue;
-                    }
-
-                    var metric = factory.Create(packageName);
-                    AllPackageMetrics[packageType] = metric;
-                }
-            }
+           // do nothing
         }
     }
 }

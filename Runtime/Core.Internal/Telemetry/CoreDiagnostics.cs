@@ -28,55 +28,42 @@ namespace Unity.Services.Core.Internal
 
         public void SetProjectConfiguration(string serializedProjectConfig)
         {
-            CoreTags[ProjectConfigTagName] = serializedProjectConfig;
+            // do nothing
         }
 
         public void SendCircularDependencyDiagnostics(Exception exception)
         {
-            var sendTask = SendCoreDiagnosticsAsync(CircularDependencyDiagnosticName, exception);
-            sendTask.ContinueWith(OnSendFailed, TaskContinuationOptions.OnlyOnFaulted);
+            // do nothing
         }
 
         public void SendCorePackageInitDiagnostics(Exception exception)
         {
-            var sendTask = SendCoreDiagnosticsAsync(CorePackageInitDiagnosticName, exception);
-            sendTask.ContinueWith(OnSendFailed, TaskContinuationOptions.OnlyOnFaulted);
+            // do nothing
         }
 
         public void SendOperateServicesInitDiagnostics(Exception exception)
         {
-            var sendTask = SendCoreDiagnosticsAsync(OperateServicesInitDiagnosticName, exception);
-            sendTask.ContinueWith(OnSendFailed, TaskContinuationOptions.OnlyOnFaulted);
+            // do nothing
         }
 
         internal async Task SendCoreDiagnosticsAsync(string diagnosticName, Exception exception)
         {
-            var diagnostics = await GetOrCreateDiagnosticsAsync();
-            diagnostics?.SendDiagnostic(diagnosticName, exception?.ToString(), CoreTags);
+            // do nothing
+            await Task.CompletedTask;
         }
 
         static void OnSendFailed(Task failedSendTask)
         {
-            CoreLogger.LogException(failedSendTask.Exception);
+            // do nothing
         }
 
         internal async Task<IDiagnostics> GetOrCreateDiagnosticsAsync()
         {
-            if (!(Diagnostics is null))
+            if (Diagnostics is null)
             {
-                return Diagnostics;
+                var factory = await DiagnosticsComponentProvider.CreateDiagnosticsComponents();
+                Diagnostics = factory.Create(CorePackageName);
             }
-
-            if (DiagnosticsComponentProvider is null)
-            {
-                CoreLogger.LogTelemetry(
-                    $"There is no {nameof(DiagnosticsComponentProvider)} set for {nameof(CoreDiagnostics)}.");
-                return null;
-            }
-
-            var diagnosticFactory = await DiagnosticsComponentProvider.CreateDiagnosticsComponents();
-            Diagnostics = diagnosticFactory.Create(CorePackageName);
-            SetProjectConfiguration(await DiagnosticsComponentProvider.GetSerializedProjectConfigurationAsync());
 
             return Diagnostics;
         }

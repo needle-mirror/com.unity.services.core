@@ -5,7 +5,8 @@
         "Unity.Services.Core.Internal",
         "Unity.Services.Core.Editor",
         "Unity.Services.Core.Configuration.Editor",
-        "Unity.Services.Core.Environments"
+        "Unity.Services.Core.Environments",
+        "Unity.Services.Core"
     ],
     "includePlatforms": [
         "Editor"

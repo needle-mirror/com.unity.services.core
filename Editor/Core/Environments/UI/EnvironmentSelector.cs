@@ -2,8 +2,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Unity.Services.Core.Editor.Shared.EditorUtils;
 using Unity.Services.Core.Editor.Shared.UI;
+using Unity.Services.Core.Environments.Client.Http;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -14,15 +16,21 @@ namespace Unity.Services.Core.Editor.Environments.UI
     class EnvironmentSelector : VisualElement
     {
         const string k_UxmlPath = "Packages/com.unity.services.core/Editor/Core/Environments/UI/Assets/EnvironmentSelectorUI.uxml";
+        const string k_UxmlPathNoConnection = "Packages/com.unity.services.core/Editor/Core/UiHelpers/UXML/Offline.uxml";
 #if UNITY_2021_3_OR_NEWER
         const string k_UxmlPathDropdown = "Packages/com.unity.services.core/Editor/Core/Environments/UI/Assets/EnvironmentDropdown.uxml";
 #endif
 
-        readonly ModelBinding<IEnvironmentService> m_EnvironmentBindings;
+        ModelBinding<IEnvironmentService> m_EnvironmentBindings;
+        readonly IEnvironmentService m_EnvironmentService;
+
+        TemplateContainer m_RegularUxmlContainer;
+        TemplateContainer m_NoConnectionUxmlContainer;
 
         VisualElement m_ContainerDropdown;
         VisualElement m_ContainerFetching;
         VisualElement m_ContainerWarning;
+        Button m_RefreshConnectionButton;
 
 #if UNITY_2021_3_OR_NEWER
         DropdownField m_DropdownControl;
@@ -30,21 +38,87 @@ namespace Unity.Services.Core.Editor.Environments.UI
         PopupField<string> m_DropdownControl;
 #endif
 
-
-        public EnvironmentSelector()
+        public EnvironmentSelector(IEnvironmentService environmentService)
         {
-            m_EnvironmentBindings = new ModelBinding<IEnvironmentService>(this);
-            m_EnvironmentBindings.BindProperty(nameof(IEnvironmentService.Environments), service =>
-            {
-                if (service.Environments == null)
-                {
-                    SetVisibleContainer(m_ContainerFetching);
-                }
-                else if (m_DropdownControl != null)
-                {
-                    var choices = service.Environments.Select(env => env.Name).ToList();
+            m_EnvironmentService = environmentService;
+            SetupRegularUxml();
+            SetupNoConnectionUxml();
+            Sync.SafeAsync(RefreshEnvironmentsAsync);
+        }
 
-                    // Unity Editor 2021.1 has `choices` set as internal
+        TemplateContainer AddUxmlToVisualElement(VisualElement containerElement, string uxmlPath)
+        {
+            var uxmlAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(uxmlPath);
+            if (uxmlAsset == null)
+            {
+                throw new MissingReferenceException("Could not find a uxml asset to load.");
+            }
+
+            var asset = uxmlAsset.Instantiate();
+            containerElement.Add(asset);
+            return asset;
+        }
+
+        void SetupRegularUxml()
+        {
+            m_RegularUxmlContainer = AddUxmlToVisualElement(this, k_UxmlPath);
+            SetupDropdown(m_RegularUxmlContainer);
+            SetupManageEnvironments(m_RegularUxmlContainer);
+            SetupWarning(m_RegularUxmlContainer);
+            BindEvents();
+        }
+
+        void SetupNoConnectionUxml()
+        {
+            m_NoConnectionUxmlContainer = AddUxmlToVisualElement(this, k_UxmlPathNoConnection);
+            m_NoConnectionUxmlContainer.style.display = DisplayStyle.None;
+            SetupRefreshConnectionButton(m_NoConnectionUxmlContainer);
+        }
+
+        async Task RefreshEnvironmentsAsync()
+        {
+            try
+            {
+                await m_EnvironmentService.RefreshAsync();
+                m_RegularUxmlContainer.style.display = DisplayStyle.Flex;
+                m_NoConnectionUxmlContainer.style.display = DisplayStyle.None;
+            }
+            catch (Exception e)
+                when (e is RequestFailedException || e is HttpException)
+            {
+                m_RegularUxmlContainer.style.display = DisplayStyle.None;
+                m_NoConnectionUxmlContainer.style.display = DisplayStyle.Flex;
+            }
+        }
+
+        void BindEvents()
+        {
+            m_EnvironmentBindings = new ModelBinding<IEnvironmentService>(this)
+            {
+                Source = m_EnvironmentService
+            };
+
+            m_EnvironmentBindings.BindProperty(nameof(IEnvironmentService.Environments), OnEnvironmentsRefreshed);
+
+            m_EnvironmentBindings.BindProperty(nameof(IEnvironmentService.ActiveEnvironmentId), service =>
+            {
+                OnEnvironmentChanged(service.ActiveEnvironmentInfo());
+            });
+
+            m_DropdownControl.RegisterValueChangedCallback(OnDropdownEnvironmentChanged);
+        }
+
+        void OnEnvironmentsRefreshed(IEnvironmentService service)
+        {
+            if (m_EnvironmentService.Environments == null)
+            {
+                SetVisibleContainer(m_ContainerFetching);
+            }
+            else if (m_DropdownControl != null)
+            {
+                var choices = m_EnvironmentService.Environments.Select(env => env.Name).ToList();
+
+                // Unity Editor 2021.1 has `choices` set as internal
 #if UNITY_2021_1_OR_NEWER && !UNITY_2021_2_OR_NEWER
                     m_DropdownControl
                         .GetType()
@@ -55,76 +129,52 @@ namespace Unity.Services.Core.Editor.Environments.UI
                             m_DropdownControl,
                             new object[] { choices });
 #else
-                    m_DropdownControl.choices = choices;
+                m_DropdownControl.choices = choices;
 #endif
 
-                    var currentEnvInfo = service.ActiveEnvironmentInfo();
-                    if (currentEnvInfo != null)
-                    {
-                        m_DropdownControl.SetValueWithoutNotify(currentEnvInfo.Value.Name);
-                    }
-
-                    SetVisibleContainer(m_ContainerDropdown);
-                }
-                else
+                var currentEnvInfo = m_EnvironmentService.ActiveEnvironmentInfo();
+                if (currentEnvInfo != null)
                 {
-                    throw new Exception("Dropdown field of the Environment Selector has not been set.");
+                    m_DropdownControl.SetValueWithoutNotify(currentEnvInfo.Value.Name);
                 }
 
-                OnEnvironmentChanged(service.ActiveEnvironmentInfo());
-            });
-            m_EnvironmentBindings.BindProperty(nameof(IEnvironmentService.ActiveEnvironmentId), service =>
-            {
-                OnEnvironmentChanged(service.ActiveEnvironmentInfo());
-            });
-        }
-
-        public void Bind(IEnvironmentService environmentService)
-        {
-            m_EnvironmentBindings.Source = environmentService;
-
-            Setup();
-
-            m_DropdownControl.RegisterValueChangedCallback(v =>
-            {
-                var info = environmentService.EnvironmentInfoFromName(v.newValue);
-                if (info != null)
-                {
-                    environmentService.SetActiveEnvironment(info.Value);
-                }
-            });
-
-            Sync.SafeAsync(async() =>
-            {
-                await environmentService.RefreshAsync();
-            });
-        }
-
-        void Setup()
-        {
-            LoadUxml(this);
-            SetupDropdown(this);
-            SetupManageEnvironments(this);
-            SetupWarning(this);
-        }
-
-        static void LoadUxml(VisualElement containerElement)
-        {
-            var uxmlAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(k_UxmlPath);
-            if (uxmlAsset != null)
-            {
-                uxmlAsset.CloneTree(containerElement);
+                SetVisibleContainer(m_ContainerDropdown);
             }
             else
             {
-                throw new MissingReferenceException("Could not find a uxml asset to load.");
+                throw new Exception("Dropdown field of the Environment Selector has not been set.");
             }
+
+            OnEnvironmentChanged(m_EnvironmentService.ActiveEnvironmentInfo());
+        }
+
+        void OnDropdownEnvironmentChanged(ChangeEvent<string> changeEvent)
+        {
+            var info = m_EnvironmentService.EnvironmentInfoFromName(changeEvent.newValue);
+            if (info != null)
+            {
+                m_EnvironmentService.SetActiveEnvironment(info.Value);
+            }
+        }
+
+        void SetupRefreshConnectionButton(VisualElement containerElement)
+        {
+            m_RefreshConnectionButton = containerElement.Q<Button>("RefreshBtn");
+
+            if (m_RefreshConnectionButton == null)
+            {
+                return;
+            }
+
+            m_RefreshConnectionButton.clicked += () => Sync.SafeAsync(RefreshEnvironmentsAsync);
         }
 
         void SetupDropdown(VisualElement containerElement)
         {
             m_ContainerDropdown = containerElement.Q(UxmlNames.ContainerDropdown);
             m_ContainerFetching = containerElement.Q(UxmlNames.ContainerFetching);
+
+            m_ContainerDropdown.style.display = DisplayStyle.None;
 
 #if UNITY_2021_3_OR_NEWER
             var uxmlAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(k_UxmlPathDropdown);

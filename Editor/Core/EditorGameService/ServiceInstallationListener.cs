@@ -12,6 +12,9 @@ namespace Unity.Services.Core.Editor
     static class ServiceInstallationListener
     {
         static IEditorGameServiceAnalyticsSender s_EditorGameServiceAnalyticsSender;
+#if UNITY_2022_1_OR_NEWER
+        const string k_CloudProjectSettingsReadySessionStateKey = "Services_Core_CloudProjectSettingsReady";
+#endif
 
         static IEditorGameServiceAnalyticsSender EditorGameServiceAnalyticsSender
         {
@@ -35,9 +38,20 @@ namespace Unity.Services.Core.Editor
             {
                 return;
             }
+#if UNITY_2022_1_OR_NEWER
+            CloudProjectSettingsEventManager.instance.projectStateChanged -= MarkCloudProjectSettingsAsReady;
+            CloudProjectSettingsEventManager.instance.projectStateChanged += MarkCloudProjectSettingsAsReady;
+            CloudProjectSettingsEventManager.instance.projectRefreshed -= MarkCloudProjectSettingsAsReady;
+            CloudProjectSettingsEventManager.instance.projectRefreshed += MarkCloudProjectSettingsAsReady;
+#endif
             Events.registeredPackages -= OnPackagesRegistered;
             Events.registeredPackages += OnPackagesRegistered;
         }
+
+#if UNITY_2022_1_OR_NEWER
+        static void MarkCloudProjectSettingsAsReady()
+            => SessionState.SetBool(k_CloudProjectSettingsReadySessionStateKey, true);
+#endif
 
         static void OnPackagesRegistered(PackageRegistrationEventArgs args)
         {
@@ -55,7 +69,12 @@ namespace Unity.Services.Core.Editor
             {
                 return;
             }
-
+#if UNITY_2022_1_OR_NEWER
+            if (!SessionState.GetBool(k_CloudProjectSettingsReadySessionStateKey, false))
+            {
+                return;
+            }
+#endif
             var request = new ProjectStateRequest();
             var projectState = request.GetProjectState();
             if (!ShouldShowRedirect(projectState))

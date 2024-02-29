@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Unity.Services.Core.Configuration.Editor;
 using Unity.Services.Core.Internal;
-using Unity.Services.Core.Telemetry.Internal;
 using UnityEditor;
 using UnityEditor.Build;
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
@@ -13,6 +12,12 @@ namespace Unity.Services.Core.Editor
 {
     class OperatePackageVersionConfigProvider : IConfigurationProvider
     {
+        internal const string PackageVersionKeyFormat = "{0}.version";
+        internal const string PackageInitializerNamesKeyFormat = "{0}.initializer-assembly-qualified-names";
+        internal const char PackageInitializerNamesSeparator = ';';
+        internal const string AllPackageNamesKey = "com.unity.services.core.all-package-names";
+        internal const char AllPackageNamesSeparator = ';';
+
         static readonly OperatePackageVersionConfigProvider k_EditorInstance = new OperatePackageVersionConfigProvider
         {
             m_OperatePackages = CreateOperatePackagesConfigsForProject()
@@ -68,14 +73,14 @@ namespace Unity.Services.Core.Editor
             {
                 if (allPackageNameBuilder.Length > 0)
                 {
-                    allPackageNameBuilder.Append(CoreMetrics.AllPackageNamesSeparator);
+                    allPackageNameBuilder.Append(AllPackageNamesSeparator);
                 }
 
                 allPackageNameBuilder.Append(packageInfo.Name);
-                CreatePackageConfig(FactoryUtils.PackageVersionKeyFormat, packageInfo.Version);
+                CreatePackageConfig(PackageVersionKeyFormat, packageInfo.Version);
                 var joinedPackageInitializerNames = string.Join(
-                    CoreMetrics.PackageInitializerNamesSeparator.ToString(), packageInfo.InitializerNames);
-                CreatePackageConfig(CoreMetrics.PackageInitializerNamesKeyFormat, joinedPackageInitializerNames);
+                    PackageInitializerNamesSeparator.ToString(), packageInfo.InitializerNames);
+                CreatePackageConfig(PackageInitializerNamesKeyFormat, joinedPackageInitializerNames);
 
                 void CreatePackageConfig(string keyFormat, string value)
                 {
@@ -84,7 +89,7 @@ namespace Unity.Services.Core.Editor
                 }
             }
 
-            builder.SetString(CoreMetrics.AllPackageNamesKey, allPackageNameBuilder.ToString());
+            builder.SetString(AllPackageNamesKey, allPackageNameBuilder.ToString());
         }
     }
 }

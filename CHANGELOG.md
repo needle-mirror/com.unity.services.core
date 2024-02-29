@@ -5,10 +5,19 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.12.4] - 2024-02-29
+
+### Fixed
+- Fixed a bug where the project linking popup window would appear on Editor start after reimporting packages, even if the user's project was linked.
+- Fixed issue with .NET Standard target.
+
 ## [1.12.2] - 2024-01-10
 
 ### Added
 - Added support to -no-cloud-project-bind-popup flag, to prevent the popup from showing.
+
+### Fixed
+- The Environment Selector no longer throws exceptions when there is no network connection, instead it displays a different offline UI 
 
 ## [1.12.1] - 2023-11-16
 

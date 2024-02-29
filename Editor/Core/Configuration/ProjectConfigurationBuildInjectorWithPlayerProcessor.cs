@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using System.Security;
-using System.Security.Permissions;
 using Unity.Services.Core.Internal.Serialization;
 using UnityEditor.Build;
 using UnityEngine;
@@ -47,9 +46,8 @@ namespace Unity.Services.Core.Configuration.Editor
                 var serializedConfig = m_Serializer.SerializeObject(config);
                 File.WriteAllText(ConfigCachePath, serializedConfig);
             }
-            catch (SecurityException e)
-                when (e.PermissionType == typeof(FileIOPermission)
-                      && FakePredicateLogError())
+            catch (SecurityException)
+                when(FakePredicateLogError())
             {
                 // Never reached to avoid stack unwind.
             }
