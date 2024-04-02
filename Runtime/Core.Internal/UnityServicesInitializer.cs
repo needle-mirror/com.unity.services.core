@@ -7,6 +7,9 @@ namespace Unity.Services.Core.Internal
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         static void CreateStaticInstance()
         {
+#if FEATURE_SERVICES_INSTANCES
+            UnityServicesBuilder.InstanceCreationDelegate = CreateInstance;
+#endif
 
             var corePackageRegistry = new CorePackageRegistry();
             var coreRegistry = new CoreRegistry(corePackageRegistry.Registry);
@@ -29,5 +32,14 @@ namespace Unity.Services.Core.Internal
             await instance.EnableInitializationAsync();
         }
 
+#if FEATURE_SERVICES_INSTANCES
+        internal static IUnityServices CreateInstance(UnityServicesBuilder builder)
+        {
+            var registry = new CoreRegistry(CorePackageRegistry.Instance.Registry, ServicesType.Instance, builder.InstanceId);
+            var instance = new UnityServicesInternal(registry, CoreMetrics.Instance, CoreDiagnostics.Instance);
+            instance.EnableInitialization();
+            return instance;
+        }
+#endif
     }
 }

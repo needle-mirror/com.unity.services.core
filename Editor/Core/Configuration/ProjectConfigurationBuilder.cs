@@ -37,6 +37,13 @@ namespace Unity.Services.Core.Configuration.Editor
             InitializeConfiguration();
         }
 
+#if FEATURE_SERVICES_INSTANCES
+        [InitializeOnLoadMethod]
+        static void InitializeOnLoad()
+        {
+            InitializeConfiguration();
+        }
+#endif
 
         internal static void InitializeConfiguration()
         {

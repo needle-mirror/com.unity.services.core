@@ -1,7 +1,7 @@
 {
   "name": "com.unity.services.core",
   "displayName": "Services Core",
-  "version": "1.12.4",
+  "version": "1.12.5",
   "unity": "2019.4",
   "description": "This package defines common components used by multiple Game Service packages.\nThese are standardized and aim to unify the overall experience of working with Game Services SDK.",
   "dependencies": {
@@ -10,18 +10,18 @@
     "com.unity.modules.androidjni": "1.0.0"
   },
   "relatedPackages": {
-    "com.unity.services.core.tests": "1.12.4"
+    "com.unity.services.core.tests": "1.12.5"
   },
   "_upm": {
-    "changelog": "### Fixed\n- Fixed a bug where the project linking popup window would appear on Editor start after reimporting packages, even if the user's project was linked.\n- Fixed issue with .NET Standard target."
+    "changelog": "### Added\n\n- Apple privacy manifest file (PrivacyInfo.xcprivacy)\n\n### Fixed\n\n- Fixed an issue with the optional `FEATURE_SERVICES_INSTANCES` preprocessor define."
   },
   "upmCi": {
-    "footprint": "bf3b101a61e2af123c1f39381dd41b62f2b1196b"
+    "footprint": "5c0a191266db224a06ca6acaef3ea0e40d28fe59"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.services.core@1.12/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/operate-services-sdk.git",
     "type": "git",
-    "revision": "eb2251fee83c079acd305e4d0f6fd279ca5e118a"
+    "revision": "85f4cc67cb1ec043a92990cbe34002037e9948e4"
   }
 }

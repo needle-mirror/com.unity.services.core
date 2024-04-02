@@ -15,6 +15,9 @@ namespace Unity.Services.Core
         /// </summary>
         internal static IUnityServices Instance { get; set; }
 
+#if FEATURE_SERVICES_INSTANCES
+        public static Dictionary<string, IUnityServices> Instances { get; } = new Dictionary<string, IUnityServices>();
+#endif
         internal static TaskCompletionSource<object> InstantiationCompletion { get; set; }
         internal static ExternalUserIdProperty ExternalUserIdProperty = new ExternalUserIdProperty();
 
@@ -110,5 +113,22 @@ namespace Unity.Services.Core
             await Instance.InitializeAsync(options);
         }
 
+#if FEATURE_SERVICES_INSTANCES
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        static void Reset()
+        {
+            Instances.Clear();
+        }
+
+        public static IUnityServicesBuilder SetupInstance()
+        {
+            return new UnityServicesBuilder();
+        }
+
+        public static IUnityServices GetInstance(string instanceId)
+        {
+            return Instances[instanceId];
+        }
+#endif
     }
 }

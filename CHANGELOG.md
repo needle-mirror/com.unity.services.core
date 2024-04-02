@@ -2,33 +2,50 @@
 
 All notable changes to this package will be documented in this file.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+
+## [1.12.5] - 2024-04-02
+
+### Added
+
+- Apple privacy manifest file (PrivacyInfo.xcprivacy)
+
+### Fixed
+
+- Fixed an issue with the optional `FEATURE_SERVICES_INSTANCES` preprocessor define.
 
 ## [1.12.4] - 2024-02-29
 
 ### Fixed
+
 - Fixed a bug where the project linking popup window would appear on Editor start after reimporting packages, even if the user's project was linked.
 - Fixed issue with .NET Standard target.
 
 ## [1.12.2] - 2024-01-10
 
 ### Added
+
 - Added support to -no-cloud-project-bind-popup flag, to prevent the popup from showing.
 
 ### Fixed
+
 - The Environment Selector no longer throws exceptions when there is no network connection, instead it displays a different offline UI 
 
 ## [1.12.1] - 2023-11-16
 
 ### Changed
+
 - Rolling back interface constraint in service registry due to unforeseen breaking change with transitive dependencies.
 
 ## [1.12.0] - 2023-10-20
+
 ### Added
+
 - Added service registry and new package initialization interface for enabling instances and editor-time services.
 
 ### Fixed
+
 - Resolved issue with `IAccessTokens` reaching rate limit.
 
 ## [1.11.0] - 2023-07-31
@@ -39,11 +56,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Adding `IAccessTokenObserver` component for packages to be notified of changes to the `IAccessToken` value.
 
 ### Fixed
+
 - Implement JsonConverters to prevent NotImplementedException when converters are invoked by reflection
 
 ## [1.10.2-pre.2] - 2023-06-14
 
 ### Added
+
 - Added support for the environments UI to Unity Editor 2020.3
 
 ## [1.10.1] - 2023-05-31
