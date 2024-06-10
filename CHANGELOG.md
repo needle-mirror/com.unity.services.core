@@ -5,6 +5,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2024-06-10
+
+### Added
+
+- Added initialization success and failure events to UnityServices.
+
 ## [1.12.5] - 2024-04-02
 
 ### Added

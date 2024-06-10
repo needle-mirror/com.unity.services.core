@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -11,13 +11,28 @@ namespace Unity.Services.Core
     public static class UnityServices
     {
         /// <summary>
+        /// Invoked when initialization completes successfully.
+        /// </summary>
+        public static event Action Initialized
+        {
+            add { if (Instance != null) { Instance.Initialized += value; } }
+            remove { if (Instance != null) { Instance.Initialized -= value; } }
+        }
+
+        /// <summary>
+        /// Invoked when initialization fails.
+        /// </summary>
+        public static event Action<Exception> InitializeFailed
+        {
+            add { if (Instance != null) { Instance.InitializeFailed += value; } }
+            remove { if (Instance != null) { Instance.InitializeFailed -= value; } }
+        }
+
+        /// <summary>
         /// The main runtime instance of unity services.
         /// </summary>
-        internal static IUnityServices Instance { get; set; }
+        public static IUnityServices Instance { get; set; }
 
-#if FEATURE_SERVICES_INSTANCES
-        public static Dictionary<string, IUnityServices> Instances { get; } = new Dictionary<string, IUnityServices>();
-#endif
         internal static TaskCompletionSource<object> InstantiationCompletion { get; set; }
         internal static ExternalUserIdProperty ExternalUserIdProperty = new ExternalUserIdProperty();
 
@@ -113,22 +128,13 @@ namespace Unity.Services.Core
             await Instance.InitializeAsync(options);
         }
 
-#if FEATURE_SERVICES_INSTANCES
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        static void Reset()
+        /// <summary>
+        /// Create a new services registry.
+        /// </summary>
+        /// <returns>The services registry instance</returns>
+        public static IUnityServices CreateServices()
         {
-            Instances.Clear();
+            return UnityServicesBuilder.Create();
         }
-
-        public static IUnityServicesBuilder SetupInstance()
-        {
-            return new UnityServicesBuilder();
-        }
-
-        public static IUnityServices GetInstance(string instanceId)
-        {
-            return Instances[instanceId];
-        }
-#endif
     }
 }

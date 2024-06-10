@@ -3,7 +3,7 @@ using System;
 namespace Unity.Services.Core
 {
     /// <summary>
-    /// Represents an error during services initialization
+    /// Represents an error during services creation
     /// </summary>
     public sealed class ServicesCreationException : Exception
     {

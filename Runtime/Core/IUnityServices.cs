@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 namespace Unity.Services.Core
@@ -7,6 +8,16 @@ namespace Unity.Services.Core
     /// </summary>
     public interface IUnityServices
     {
+        /// <summary>
+        /// Invoked when initialization completes successfully.
+        /// </summary>
+        event Action Initialized;
+
+        /// <summary>
+        /// Invoked when initialization fails.
+        /// </summary>
+        event Action<Exception> InitializeFailed;
+
         /// <summary>
         /// The initialization state of the services instance.
         /// </summary>

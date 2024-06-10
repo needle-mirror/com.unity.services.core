@@ -1,20 +1,18 @@
 #if UNITY_EDITOR
-#if FEATURE_SERVICES_INSTANCES
+#if FEATURE_SERVICES_EDITOR_EXPERIMENTAL
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
-
-using Debug = UnityEngine.Debug;
 
 namespace Unity.Services.Core.Internal
 {
     static class UnityServicesEditorInitializer
     {
         [InitializeOnLoadMethod]
-        static void CreateStaticInstance()
+        static void SetupForEditorInitialization()
         {
-            UnityServicesBuilder.InstanceCreationDelegate = CreateInstance;
+            UnityServicesBuilder.InstanceCreationDelegate = UnityServicesInitializer.CreateInstance;
 
             var corePackageRegistry = new CorePackageRegistry();
             var coreRegistry = new CoreRegistry(corePackageRegistry.Registry);
@@ -42,13 +40,13 @@ namespace Unity.Services.Core.Internal
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError(e.Message);
+                        CoreLogger.LogError(e.Message);
                     }
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError(e.Message);
+                CoreLogger.LogError(e.Message);
             }
         }
 
@@ -58,14 +56,6 @@ namespace Unity.Services.Core.Internal
 
             return packages.Where(type => !type.IsAbstract && typeof(IInitializablePackageV2).IsAssignableFrom(type))
                 .Select(type => (IInitializablePackageV2)Activator.CreateInstance(type));
-        }
-
-        internal static IUnityServices CreateInstance(UnityServicesBuilder builder)
-        {
-            var registry = new CoreRegistry(CorePackageRegistry.Instance.Registry, ServicesType.Instance, builder.InstanceId);
-            var instance = new UnityServicesInternal(registry, CoreMetrics.Instance, CoreDiagnostics.Instance);
-            instance.EnableInitialization();
-            return instance;
         }
     }
 }

@@ -10,7 +10,10 @@ namespace Unity.Services.Core.Editor.Environments.UI
     /// <summary>
     /// The <see cref="VisualElement"/> that displays the currently selected environment
     /// </summary>
-    public class EnvironmentView : VisualElement
+#if UNITY_2023_3_OR_NEWER
+    [UxmlElement]
+#endif
+    public partial class EnvironmentView : VisualElement
     {
         const string k_TemplatePath = "Packages/com.unity.services.core/Editor/Core/Environments/UI/Assets/EnvironmentView.uxml";
         const string k_StylePath = "Packages/com.unity.services.core/Editor/Core/Environments/UI/Assets/EnvironmentView_style.uss";
@@ -100,6 +103,8 @@ namespace Unity.Services.Core.Editor.Environments.UI
             return SettingsService.OpenProjectSettings(EnvironmentsConstants.SettingsLocation);
         }
 
+#if !UNITY_2023_3_OR_NEWER
         new class UxmlFactory : UxmlFactory<EnvironmentView> {} // NOSONAR
+#endif
     }
 }

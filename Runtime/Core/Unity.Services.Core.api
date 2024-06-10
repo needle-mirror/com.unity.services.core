@@ -41,6 +41,8 @@ namespace Unity.Services.Core
 
     public interface IUnityServices
     {
+        public event System.Action Initialized;
+        public event System.Action<System.Exception> InitializeFailed;
         public ServicesInitializationState State { get; }
         public T GetService<T>();
         public System.Threading.Tasks.Task InitializeAsync(InitializationOptions options = default(InitializationOptions));
@@ -73,8 +75,12 @@ namespace Unity.Services.Core
 
     public static class UnityServices
     {
+        public static event System.Action Initialized;
+        public static event System.Action<System.Exception> InitializeFailed;
         public static string ExternalUserId { get; set; }
+        public static IUnityServices Instance { get; set; }
         public static ServicesInitializationState State { get; }
+        public static IUnityServices CreateServices();
         public static System.Threading.Tasks.Task InitializeAsync();
         public static System.Threading.Tasks.Task InitializeAsync(InitializationOptions options);
     }

@@ -111,7 +111,6 @@ namespace Unity.Services.Core.Internal
     public sealed class CoreRegistry
     {
         public static CoreRegistry Instance { get; }
-        public string InstanceId { get; }
         public T GetService<T>();
         public TComponent GetServiceComponent<TComponent>() where TComponent : IServiceComponent;
         public CoreRegistration RegisterPackage<TPackage>([JetBrains.Annotations.NotNull] TPackage package) where TPackage : IInitializablePackage;

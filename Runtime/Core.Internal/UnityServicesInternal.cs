@@ -11,9 +11,11 @@ namespace Unity.Services.Core.Internal
     /// </summary>
     class UnityServicesInternal : IUnityServices
     {
-        /// <summary>
-        /// Initialization state.
-        /// </summary>
+        internal const string InitSuccessEventInvocationError = "Exception in services initialization success event handler: ";
+        internal const string InitFailureEventInvocationError = "Exception in services initialization failure event handler: ";
+
+        public event Action Initialized;
+        public event Action<Exception> InitializeFailed;
         public ServicesInitializationState State { get; private set; }
 
         public InitializationOptions Options
@@ -54,32 +56,66 @@ namespace Unity.Services.Core.Internal
         /// </returns>
         public async Task InitializeAsync(InitializationOptions options)
         {
-            if (options is null)
+            try
             {
-                options = new InitializationOptions();
-            }
+                if (options is null)
+                {
+                    options = new InitializationOptions();
+                }
 
-            if (!HasRequestedInitialization()
-                || HasInitializationFailed())
-            {
-                Registry.Options = options;
-                m_Initialization = new TaskCompletionSource<object>();
-            }
+                if (!HasRequestedInitialization()
+                    || HasInitializationFailed())
+                {
+                    Registry.Options = options;
+                    m_Initialization = new TaskCompletionSource<object>();
+                }
 
-            if (!CanInitialize
-                || State != ServicesInitializationState.Uninitialized)
-            {
-                await m_Initialization.Task;
-            }
-            else
-            {
-                await InitializeServicesAsync();
-            }
+                if (!CanInitialize
+                    || State != ServicesInitializationState.Uninitialized)
+                {
+                    await m_Initialization.Task;
+                }
+                else
+                {
+                    await InitializeServicesAsync();
+                }
 
-            bool HasInitializationFailed()
+                bool HasInitializationFailed()
+                {
+                    return m_Initialization.Task.IsCompleted
+                        && m_Initialization.Task.Status != TaskStatus.RanToCompletion;
+                }
+
+                TriggerInitializeSuccess();
+            }
+            catch (Exception e)
             {
-                return m_Initialization.Task.IsCompleted
-                    && m_Initialization.Task.Status != TaskStatus.RanToCompletion;
+                TriggerInitializeFailed(e);
+                throw;
+            }
+        }
+
+        void TriggerInitializeSuccess()
+        {
+            try
+            {
+                Initialized?.Invoke();
+            }
+            catch (Exception e)
+            {
+                CoreLogger.LogError($"{InitSuccessEventInvocationError} {e}");
+            }
+        }
+
+        void TriggerInitializeFailed(Exception initException)
+        {
+            try
+            {
+                InitializeFailed?.Invoke(initException);
+            }
+            catch (Exception e)
+            {
+                CoreLogger.LogError($"{InitFailureEventInvocationError} {e}");
             }
         }
 

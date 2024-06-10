@@ -25,7 +25,7 @@ namespace Unity.Services.Core.Configuration.Editor
             IEnumerable<Type> providerTypes)
         {
             return providerTypes.Where(
-                    type => !type.IsAbstract && typeof(IConfigurationProvider).IsAssignableFrom(type))
+                type => !type.IsAbstract && typeof(IConfigurationProvider).IsAssignableFrom(type))
                 .Select(type => (IConfigurationProvider)Activator.CreateInstance(type))
                 .OrderBy(prefs => prefs.callbackOrder)
                 .ToArray();
@@ -37,12 +37,13 @@ namespace Unity.Services.Core.Configuration.Editor
             InitializeConfiguration();
         }
 
-#if FEATURE_SERVICES_INSTANCES
+#if FEATURE_SERVICES_EDITOR_EXPERIMENTAL
         [InitializeOnLoadMethod]
         static void InitializeOnLoad()
         {
             InitializeConfiguration();
         }
+
 #endif
 
         internal static void InitializeConfiguration()
