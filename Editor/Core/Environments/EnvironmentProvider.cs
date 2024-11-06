@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Unity.Services.Core.Editor.Environments.Save;
+using Unity.Services.Core.Editor.Settings;
 using Unity.Services.Core.Editor.Shared.EditorUtils;
 using UnityEditor;
 
@@ -12,8 +13,7 @@ namespace Unity.Services.Core.Editor.Environments
         readonly IEnvironmentSaveSystem m_EnvironmentSaveSystem;
         readonly EditorValueTracker<string> m_ProjectIdTracker;
 
-        public EnvironmentProvider(
-            IEnvironmentSaveSystem environmentSaveSystem)
+        public EnvironmentProvider(IEnvironmentSaveSystem environmentSaveSystem)
         {
             var projectHasBeenSetPreviously = !string.IsNullOrEmpty(CloudProjectSettings.projectId);
             m_ProjectIdTracker = new EditorValueTracker<string>(() => CloudProjectSettings.projectId);
@@ -21,26 +21,23 @@ namespace Unity.Services.Core.Editor.Environments
             {
                 if (projectHasBeenSetPreviously)
                 {
-                    ActiveEnvironmentName = string.Empty;
+                    ActiveEnvironment = new EnvironmentSettings();
                 }
 
-                if (!string.IsNullOrEmpty(CloudProjectSettings.projectId))
-                {
-                    projectHasBeenSetPreviously = true;
-                }
+                projectHasBeenSetPreviously = projectHasBeenSetPreviously || !string.IsNullOrEmpty(CloudProjectSettings.projectId);
             };
 
             m_EnvironmentSaveSystem = environmentSaveSystem;
         }
 
-        public string ActiveEnvironmentName
+        public EnvironmentSettings ActiveEnvironment
         {
             get => m_EnvironmentSaveSystem.LoadEnvironment();
             set
             {
                 m_EnvironmentSaveSystem.SaveEnvironment(value);
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(ActiveEnvironmentName));
+                OnPropertyChanged(nameof(ActiveEnvironment));
             }
         }
 

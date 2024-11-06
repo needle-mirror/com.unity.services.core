@@ -1,5 +1,6 @@
 using System;
 using Unity.Services.Core.Internal;
+using Unity.Services.Core.Internal.Serialization;
 using UnityEditor;
 
 namespace Unity.Services.Core.Editor
@@ -92,7 +93,12 @@ namespace Unity.Services.Core.Editor
             CloudProjectSettingsEventManager.instance.projectStateChanged -= TrySendUserRoleRequest;
 #endif
 
-            m_CurrentUserRoleOperation = new UserRoleRequest().GetUserRole();
+            m_CurrentUserRoleOperation = new UserRoleRequest(
+                new AccessTokens(),
+                new UserRoleClient(
+                    new ServiceUrlBuilder(new CloudEnvironmentConfigProvider()),
+                    new NewtonsoftSerializer()))
+                    .GetUserRole();
             m_CurrentUserRoleOperation.Completed += OnUserRoleRequestOperationCompleted;
         }
 

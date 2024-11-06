@@ -44,9 +44,14 @@ namespace Unity.Services.Core.Editor.Environments
 
 namespace Unity.Services.Core.Editor.Environments.UI
 {
-    public class EnvironmentView : UnityEngine.UIElements.VisualElement
+    [UnityEngine.UIElements.UxmlElement] public class EnvironmentView : UnityEngine.UIElements.VisualElement
     {
         public EnvironmentView() {}
         public void Bind(IEnvironmentsApi environmentService);
+        public class UxmlSerializedData : UnityEngine.UIElements.VisualElement.UxmlSerializedData
+        {
+            public UxmlSerializedData() {}
+            public override object CreateInstance();
+        }
     }
 }

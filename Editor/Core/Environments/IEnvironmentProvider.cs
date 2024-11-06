@@ -1,4 +1,6 @@
+using System;
 using System.ComponentModel;
+using Unity.Services.Core.Editor.Settings;
 
 namespace Unity.Services.Core.Editor.Environments
 {
@@ -8,8 +10,8 @@ namespace Unity.Services.Core.Editor.Environments
     interface IEnvironmentProvider : INotifyPropertyChanged
     {
         /// <summary>
-        /// Environment Id of a currently selected environment.
+        /// The currently selected environment.
         /// </summary>
-        string ActiveEnvironmentName { get; set; }
+        EnvironmentSettings ActiveEnvironment { get; set; }
     }
 }

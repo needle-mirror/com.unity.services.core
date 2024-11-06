@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -33,8 +34,14 @@ namespace Unity.Services.Core
         /// </summary>
         public static IUnityServices Instance { get; set; }
 
+        /// <summary>
+        /// The custom instances of unity services.
+        /// </summary>
+        public static IReadOnlyDictionary<string, IUnityServices> Services => s_Services;
         internal static TaskCompletionSource<object> InstantiationCompletion { get; set; }
         internal static ExternalUserIdProperty ExternalUserIdProperty = new ExternalUserIdProperty();
+
+        static Dictionary<string, IUnityServices> s_Services { get; } = new Dictionary<string, IUnityServices>();
 
         /// <summary>
         /// Initialization state.
@@ -129,12 +136,48 @@ namespace Unity.Services.Core
         }
 
         /// <summary>
-        /// Create a new services registry.
+        /// Create a new services registry. Uses a Guid as identifier.
         /// </summary>
+        /// <exception cref="ServicesCreationException">
+        /// Thrown when the services registry could not be created.
+        /// </exception>
         /// <returns>The services registry instance</returns>
         public static IUnityServices CreateServices()
         {
-            return UnityServicesBuilder.Create();
+            return CreateServices(Guid.NewGuid().ToString());
+        }
+
+        /// <summary>
+        /// Create a new services registry.
+        /// </summary>
+        /// <param name="servicesId">Unique identifier for the services registry. Defaults to a GUID.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the services identifier is invalid.
+        /// </exception>
+        /// <exception cref="ServicesCreationException">
+        /// Thrown when the services registry could not be created.
+        /// </exception>
+        /// <returns>The services registry instance</returns>
+        public static IUnityServices CreateServices(string servicesId)
+        {
+            if (string.IsNullOrEmpty(servicesId))
+            {
+                throw new ArgumentException($"The services identifier cannot be null or empty");
+            }
+
+            if (s_Services.ContainsKey(servicesId))
+            {
+                throw new ServicesCreationException($"The services identifier '{servicesId}' is already registered.");
+            }
+
+            var services = UnityServicesBuilder.Create(servicesId);
+            s_Services[servicesId] = services;
+            return services;
+        }
+
+        internal static void ClearServices()
+        {
+            s_Services.Clear();
         }
     }
 }

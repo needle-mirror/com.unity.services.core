@@ -4,9 +4,9 @@ namespace Unity.Services.Core.Editor
 {
     enum UserRole
     {
-        Unknown,
-        User,
-        Manager,
-        Owner
+        Unknown = 0,
+        User = 1,
+        Manager = 2,
+        Owner = 3
     }
 }

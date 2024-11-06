@@ -6,7 +6,7 @@ using UnityEditor.Build;
 
 namespace Unity.Services.Core.Editor
 {
-    class CloudEnvironmentConfigProvider : IConfigurationProvider
+    class CloudEnvironmentConfigProvider : ICloudEnvironmentConfigurationProvider
     {
         const string k_CloudEnvironmentArg = "-cloudEnvironment";
         const string k_CloudEnvironmentKey = "com.unity.services.core.cloud-environment";
@@ -19,12 +19,12 @@ namespace Unity.Services.Core.Editor
             SetCloudEnvironment(builder, GetCloudEnvironment());
         }
 
-        internal string GetCloudEnvironment()
+        string GetCloudEnvironment()
         {
             return GetCloudEnvironment(Environment.GetCommandLineArgs());
         }
 
-        internal bool IsStaging()
+        public bool IsStaging()
         {
             return GetCloudEnvironment() == k_StagingEnv;
         }

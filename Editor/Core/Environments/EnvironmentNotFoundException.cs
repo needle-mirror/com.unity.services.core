@@ -10,7 +10,7 @@ namespace Unity.Services.Core.Editor.Environments
         /// <summary>
         /// Constructor for <see cref="EnvironmentNotFoundException"/>
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">Exception message</param>
         public EnvironmentNotFoundException(string message)
             : base(message) {}
     }

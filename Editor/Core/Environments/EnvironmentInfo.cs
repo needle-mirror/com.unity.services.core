@@ -26,7 +26,7 @@ namespace Unity.Services.Core.Editor.Environments
         public readonly bool IsDefault;
 
         /// <summary>
-        ///
+        /// Creates a new EnvironmentInfo instance
         /// </summary>
         /// <param name="name">The name of the environment.</param>
         /// <param name="id">The guid of the environment.</param>

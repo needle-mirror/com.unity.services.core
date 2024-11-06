@@ -111,6 +111,7 @@ namespace Unity.Services.Core.Internal
     public sealed class CoreRegistry
     {
         public static CoreRegistry Instance { get; }
+        public string InstanceId { get; }
         public T GetService<T>();
         public TComponent GetServiceComponent<TComponent>() where TComponent : IServiceComponent;
         public CoreRegistration RegisterPackage<TPackage>([JetBrains.Annotations.NotNull] TPackage package) where TPackage : IInitializablePackage;
@@ -132,6 +133,13 @@ namespace Unity.Services.Core.Internal
 
     public interface IServiceComponent
     {
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Field|System.AttributeTargets.Property, AllowMultiple = true)] public class VisibilityAttribute : UnityEngine.PropertyAttribute
+    {
+        public string PropertyName { get; }
+        public object Value { get; }
+        public VisibilityAttribute(string propertyName, object value) {}
     }
 }
 

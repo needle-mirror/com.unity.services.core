@@ -20,7 +20,7 @@ namespace Unity.Services.Core.Editor
         protected abstract string FlagName { get; }
 
         /// <summary>
-        /// <inheritdoc cref="IEditorGameServiceEnabler.Enable"/>
+        /// Enables the service.
         /// Also sends an API request to disable the service on the dashboard.
         /// </summary>
         public void Enable()
@@ -30,7 +30,7 @@ namespace Unity.Services.Core.Editor
         }
 
         /// <summary>
-        /// <inheritdoc cref="IEditorGameServiceEnabler.Disable"/>
+        /// Disables the Service.
         /// Also sends an API request to disable the service on the dashboard.
         /// </summary>
         public void Disable()
@@ -62,7 +62,7 @@ namespace Unity.Services.Core.Editor
         /// The event fired when the web request that handles setting the service flag is complete
         /// </summary>
         /// <remarks>
-        /// This event is only raised when the constant <code>ENABLE_EDITOR_GAME_SERVICES</code> is defined.
+        /// This event is only raised when the constant <c>ENABLE_EDITOR_GAME_SERVICES</c> is defined.
         /// Kept outside of this define to avoid an API breaking change.
         /// </remarks>
 #if !ENABLE_EDITOR_GAME_SERVICES

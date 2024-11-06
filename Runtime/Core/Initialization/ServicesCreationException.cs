@@ -13,7 +13,7 @@ namespace Unity.Services.Core
         /// <param name="message">
         /// The error message that explains the reason for the exception.
         /// </param>
-        internal ServicesCreationException(string message)
+        public ServicesCreationException(string message)
             : base(message) {}
     }
 }

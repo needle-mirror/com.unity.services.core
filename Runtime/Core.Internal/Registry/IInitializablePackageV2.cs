@@ -17,7 +17,7 @@ namespace Unity.Services.Core.Internal
         /// Initializes an instance of the service.
         /// </summary>
         /// <param name="registry">The core registry to retrieve from and register to.</param>
-        /// <returns></returns>
+        /// <returns>Return a handle to the asynchronous initialization process.</returns>
         Task InitializeInstanceAsync(CoreRegistry registry);
     }
 }

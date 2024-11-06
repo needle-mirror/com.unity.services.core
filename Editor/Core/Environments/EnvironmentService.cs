@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Unity.Services.Core.Editor.Environments.Analytics;
+using Unity.Services.Core.Editor.Settings;
 using Unity.Services.Core.Editor.Shared.EditorUtils;
 using UnityEditor;
 
@@ -17,10 +18,10 @@ namespace Unity.Services.Core.Editor.Environments
         {
             get
             {
-                var environmentInfo = this.EnvironmentInfoFromName(m_EnvironmentProvider.ActiveEnvironmentName);
-                if (environmentInfo != null && Guid.TryParse(environmentInfo.Value.Id.ToString(), out var envId))
+                var activeEnv = m_EnvironmentProvider.ActiveEnvironment;
+                if (activeEnv.EnvironmentId != Guid.Empty)
                 {
-                    return envId;
+                    return activeEnv.EnvironmentId;
                 }
                 return null;
             }
@@ -97,7 +98,7 @@ namespace Unity.Services.Core.Editor.Environments
 
         void SetActiveEnvironmentInternal(EnvironmentInfo environment)
         {
-            m_EnvironmentProvider.ActiveEnvironmentName = environment.Name;
+            m_EnvironmentProvider.ActiveEnvironment = new EnvironmentSettings(environment.Name, environment.Id);
             m_EnvironmentAnalytics.SendEnvironmentChangedEvent(ActiveEnvironmentId.ToString());
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ActiveEnvironmentId)));
         }

@@ -38,9 +38,9 @@ namespace Unity.Services.Core.Internal
         /// <summary>
         /// Register a package initializer to be executed during services initialization.
         /// </summary>
-        /// <typeparam name="TPackage"></typeparam>
-        /// <param name="package"></param>
-        /// <returns></returns>
+        /// <typeparam name="TPackage">Type of package</typeparam>
+        /// <param name="package">The package</param>
+        /// <returns>Fluent interface on registration</returns>
         public CoreRegistration Register<TPackage>(
             [NotNull] TPackage package)
             where TPackage : IInitializablePackage

@@ -8,8 +8,8 @@ namespace Unity.Services.Core.Editor.Environments
     class EnvironmentsApiInternal : IEnvironmentsApi
     {
         public IReadOnlyCollection<EnvironmentInfo> Environments => m_EnvironmentService.Environments;
-        public string ActiveEnvironmentName => m_EnvironmentProvider.ActiveEnvironmentName;
-        public Guid? ActiveEnvironmentId => m_EnvironmentService.ActiveEnvironmentId;
+        public string ActiveEnvironmentName => m_EnvironmentProvider.ActiveEnvironment.EnvironmentName;
+        public Guid? ActiveEnvironmentId => m_EnvironmentProvider.ActiveEnvironment.EnvironmentId;
         public event PropertyChangedEventHandler PropertyChanged;
 
         readonly IEnvironmentProvider m_EnvironmentProvider;
@@ -63,14 +63,12 @@ namespace Unity.Services.Core.Editor.Environments
 
             switch (args.PropertyName)
             {
-                case nameof(m_EnvironmentService.ActiveEnvironmentId):
-                    PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(ActiveEnvironmentId)));
-                    break;
                 case nameof(m_EnvironmentService.Environments):
                     PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(Environments)));
                     break;
-                case nameof(m_EnvironmentProvider.ActiveEnvironmentName):
+                case nameof(m_EnvironmentProvider.ActiveEnvironment):
                     PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(ActiveEnvironmentName)));
+                    PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(ActiveEnvironmentId)));
                     break;
             }
         }

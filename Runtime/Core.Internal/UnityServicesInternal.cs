@@ -95,6 +95,11 @@ namespace Unity.Services.Core.Internal
             }
         }
 
+        public string GetIdentifier()
+        {
+            return Registry.InstanceId;
+        }
+
         void TriggerInitializeSuccess()
         {
             try

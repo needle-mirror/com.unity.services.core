@@ -47,7 +47,7 @@ namespace Unity.Services.Wire.Internal
         /// * 23008 -> "AlreadySubscribed"
         /// </summary>
         /// <returns>An awaitable task.</returns>
-        /// <exception cref="RequestFailedException"/>
+        /// <exception cref="RequestFailedException">RequestFailedException</exception>
         Task SubscribeAsync();
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Unity.Services.Wire.Internal
         /// * 23009 -> "AlreadyUnsubscribed"
         /// </summary>
         /// <returns>An awaitable task.</returns>
-        /// <exception cref="RequestFailedException"/>
+        /// <exception cref="RequestFailedException">RequestFailedException</exception>
         Task UnsubscribeAsync();
     }
 }

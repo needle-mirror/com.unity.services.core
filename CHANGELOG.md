@@ -5,6 +5,36 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2024-11-06
+
+### Added
+
+- Added `ServicesInitialization` monobehaviour to manage services in the scene authoring.
+- Added `ServicesBehaviour` abstract monobehaviour as a base for behaviours built on top of services.
+- Added unique identifier for custom service registry creation (`UnityServices.CreateServices`).
+- Added custom services registries dictionary in `UnityServices.Services`.
+- Added `GetIdentifier()` method to `IUnityServices` interface with a default implementation.
+
+### Changed
+
+- Updated the minimum supported Editor version to 2021.3.
+
+## [1.13.1] - 2024-10-17
+
+### Added
+
+- Refresh button for Environment dropdown in Project Settings > Services > Environments menu.
+
+### Fixed
+
+- Fixed user permissions fetching for cloud projects where the user has the 'inherited from organization' role.
+
+### Changed
+
+- The EnvironmentProvider, EnvironmentSaveSystem, EnvironmentService, and related interfaces have
+  been updated to support an object representing the environment (name and id) instead of a string
+  representing the environment name.
+
 ## [1.13.0] - 2024-06-10
 
 ### Added

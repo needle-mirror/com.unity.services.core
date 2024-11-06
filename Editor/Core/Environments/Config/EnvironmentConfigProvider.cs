@@ -1,7 +1,6 @@
 using Unity.Services.Core.Configuration.Editor;
 using Unity.Services.Core.Editor.Environments.Save;
 using Unity.Services.Core.Environments;
-using Unity.Services.Core.Internal.Serialization;
 
 namespace Unity.Services.Core.Editor.Environments.Config
 {
@@ -33,7 +32,7 @@ namespace Unity.Services.Core.Editor.Environments.Config
         {
             var loadedEnv = m_EnvironmentSaveSystem.LoadEnvironment();
 
-            return string.IsNullOrEmpty(loadedEnv) ? EnvironmentsOptionsExtensions.EnvironmentDefaultNameValue : loadedEnv;
+            return string.IsNullOrEmpty(loadedEnv.EnvironmentName) ? EnvironmentsOptionsExtensions.EnvironmentDefaultNameValue : loadedEnv.EnvironmentName;
         }
     }
 }

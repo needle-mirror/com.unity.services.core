@@ -126,13 +126,13 @@ namespace Unity.Services.Core.Editor
             var coreAssemblyNames = AssetDatabase.FindAssets(
                 $"t:{nameof(AssemblyDefinitionAsset)}",
                 new[] { corePackage.assetPath })
+                .Select(AssetDatabase.GUIDToAssetPath)
                 .Select(GetAssemblyNameFrom)
                 .ToList();
             return coreAssemblyNames.ToList();
 
-            string GetAssemblyNameFrom(string assetGuid)
+            string GetAssemblyNameFrom(string assetPath)
             {
-                var assetPath = AssetDatabase.GUIDToAssetPath(assetGuid);
                 var assemblyDefinition = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(assetPath);
                 return assemblyDefinition.name;
             }

@@ -1,94 +1,70 @@
 using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Unity.Services.Core.Internal;
-using Unity.Services.Core.Internal.Serialization;
-using UnityEditor;
+using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Unity.Services.Core.Editor
 {
     class UserRoleRequest : IUserRoleRequest
     {
-        readonly IJsonSerializer m_Serializer;
+        readonly IAccessTokens m_AccessTokens;
+        readonly IServiceUrlBuilder m_ServiceUrlBuilder;
+        readonly IUserRoleClient m_UserRoleClient;
 
-        public UserRoleRequest()
-            : this(new NewtonsoftSerializer()) {}
-
-        internal UserRoleRequest(IJsonSerializer serializer) => m_Serializer = serializer;
+        public UserRoleRequest(
+            IAccessTokens accessTokens,
+            IUserRoleClient userRoleClient)
+        {
+            m_AccessTokens = accessTokens;
+            m_UserRoleClient = userRoleClient;
+        }
 
         public IAsyncOperation<UserRole> GetUserRole()
         {
             var resultAsyncOp = new AsyncOperation<UserRole>();
-            try
+            resultAsyncOp.SetInProgress();
+
+            var serviceToken = m_AccessTokens.GetServicesGatewayTokenAsync();
+            serviceToken.ContinueWith(tokenOperation =>
             {
-                resultAsyncOp.SetInProgress();
-                var cdnEndpoint = new DefaultCdnConfiguredEndpoint();
-                var configurationRequestTask = cdnEndpoint.GetConfiguration();
-                configurationRequestTask.Completed += configOperation => QueryProjectUsers(configOperation, resultAsyncOp);
-            }
-            catch (Exception ex)
-            {
-                resultAsyncOp.Fail(ex);
-            }
+                ThreadingUtility.RunNextUpdateOnMain(() => OnTokenReceived(tokenOperation, resultAsyncOp));
+            });
 
             return resultAsyncOp;
         }
 
-        void QueryProjectUsers(IAsyncOperation<DefaultCdnEndpointConfiguration> configurationRequestTask, AsyncOperation<UserRole> resultAsyncOp)
+        void OnTokenReceived(Task<string> tokenOperation, AsyncOperation<UserRole> resultAsyncOp)
         {
-            try
+            if (string.IsNullOrEmpty(tokenOperation.Result))
             {
-#if ENABLE_EDITOR_GAME_SERVICES
-                var organizationKey = CloudProjectSettings.organizationKey;
-#else
-                var organizationKey = CloudProjectSettings.organizationId;
-#endif
-                var usersUrl = configurationRequestTask.Result.BuildUsersUrl(organizationKey, CloudProjectSettings.projectId);
-                var getProjectUsersRequest = new UnityWebRequest(
-                    usersUrl,
-                    UnityWebRequest.kHttpVerbGET)
-                {
-                    downloadHandler = new DownloadHandlerBuffer()
-                };
-                getProjectUsersRequest.SetRequestHeader("AUTHORIZATION", $"Bearer {CloudProjectSettings.accessToken}");
-                var operation = getProjectUsersRequest.SendWebRequest();
-                operation.completed += op => FindUserRoleToFinishAsyncOperation(getProjectUsersRequest, resultAsyncOp);
+                resultAsyncOp.Fail(tokenOperation.Exception);
             }
-            catch (Exception ex)
-            {
-                resultAsyncOp.Fail(ex);
-            }
+
+            QueryProjectUsers(resultAsyncOp, tokenOperation.Result);
         }
 
-        void FindUserRoleToFinishAsyncOperation(UnityWebRequest getProjectUsersRequest, AsyncOperation<UserRole> resultAsyncOp)
+        void QueryProjectUsers(
+            AsyncOperation<UserRole> resultAsyncOp,
+            string serviceToken)
         {
-            const int requestNotAuthorizedCode = 401;
+            m_UserRoleClient.QueryProjectUsers(
+                resultAsyncOp,
+                FindUserRoleToFinishAsyncOperation,
+                serviceToken);
+        }
+
+        internal static void FindUserRoleToFinishAsyncOperation(User user, AsyncOperation<UserRole> resultAsyncOp)
+        {
             try
             {
-                if (getProjectUsersRequest.responseCode == requestNotAuthorizedCode)
+                if (user == null)
                 {
-                    throw new RequestNotAuthorizedException();
+                    throw new CurrentUserNotFoundException();
                 }
 
-                UserRole currentUserRole;
-                var userList = ExtractUserListFromUnityWebRequest(getProjectUsersRequest);
-                if (userList != null)
-                {
-                    var currentUser = FindCurrentUserInList(CloudProjectSettings.userId, userList.Users);
-                    if (currentUser != null)
-                    {
-                        currentUserRole = currentUser.Role;
-                    }
-                    else
-                    {
-                        throw new CurrentUserNotFoundException();
-                    }
-                }
-                else
-                {
-                    throw new UserListNotFoundException();
-                }
+                var currentUserRole = GetUserRoleFromUser(user);
 
                 resultAsyncOp.Succeed(currentUserRole);
             }
@@ -96,66 +72,74 @@ namespace Unity.Services.Core.Editor
             {
                 resultAsyncOp.Fail(ex);
             }
-            finally
-            {
-                getProjectUsersRequest.Dispose();
-            }
         }
 
-        UserList ExtractUserListFromUnityWebRequest(UnityWebRequest unityWebRequest)
+        internal static UserRole GetUserRoleFromUser(User user)
         {
-            if (!UnityWebRequestHelper.IsUnityWebRequestReadyForTextExtract(unityWebRequest, out var jsonContent))
-            {
-                return null;
-            }
+            var currentRole = UserRole.Unknown;
 
-            m_Serializer.TryJsonDeserialize<UserList>(jsonContent, out var userList);
-            return userList;
-        }
-
-        static User FindCurrentUserInList(string currentUserId, IEnumerable<User> users)
-        {
-            foreach (var user in users)
+            foreach (var role in user.Roles)
             {
-                if (user.ForeignKey.Equals(currentUserId))
+                if (!role.IsLegacy)
                 {
-                    return user;
+                    continue;
                 }
+
+                var iterationRole = UserRole.Unknown;
+
+                if (string.Equals("user", role.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    iterationRole = UserRole.User;
+                }
+                else if (string.Equals("manager", role.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    iterationRole = UserRole.Manager;
+                }
+                else if (string.Equals("owner", role.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    iterationRole = UserRole.Owner;
+                }
+
+                currentRole = iterationRole > currentRole ? iterationRole : currentRole;
             }
 
-            return null;
+            return currentRole;
         }
 
         [Serializable]
-        class UserList
+        internal class User
         {
-            [JsonProperty("users")]
-            public User[] Users { get; set; }
+            [JsonProperty("id")]
+            public string Id;
+            [JsonProperty("genesisId")]
+            public string GenesisId;
+            [JsonProperty("email")]
+            public string Email;
+            [JsonProperty("name")]
+            public string Name;
+            [JsonProperty("roles")]
+            public Role[] Roles;
         }
 
         [Serializable]
-        class User
+        internal class Role
         {
-            [JsonProperty("foreign_key")]
-            public string ForeignKey { get; set; }
-
+            [JsonProperty("id")]
+            public string Id { get; set; }
             [JsonProperty("name")]
             public string Name { get; set; }
-
-            [JsonProperty("email")]
-            public string Email { get; set; }
-
-            [JsonProperty("access_granted_by")]
-            public string AccessGrantedBy { get; set; }
-
-            [JsonProperty("role")]
-            public UserRole Role { get; set; }
+            [JsonProperty("entityType")]
+            public string EntityType { get; set; }
+            [JsonProperty("isLegacy")]
+            public bool IsLegacy { get; set; }
+            [JsonProperty("policyId")]
+            public string PolicyId { get; set; }
+            [JsonProperty("legacyRoleType")]
+            public string LegacyRoleType { get; set; }
         }
 
         internal class RequestNotAuthorizedException : Exception {}
 
-        class CurrentUserNotFoundException : Exception {}
-
-        class UserListNotFoundException : Exception {}
+        internal class CurrentUserNotFoundException : Exception {}
     }
 }

@@ -27,8 +27,14 @@ namespace Unity.Services.Core
         /// Initialize the services
         /// </summary>
         /// <param name="options">The options for the services</param>
-        /// <returns></returns>
+        /// <returns>Return a handle to the asynchronous initialization process.</returns>
         Task InitializeAsync(InitializationOptions options = null);
+
+        /// <summary>
+        /// Provides the unique identifier for the services registry or null for the main services.
+        /// </summary>
+        /// <returns>The unique identifier for the services registry</returns>
+        string GetIdentifier() { return null; }
 
         /// <summary>
         /// Retrieve a service from the service registry

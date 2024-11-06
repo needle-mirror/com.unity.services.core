@@ -56,9 +56,7 @@ namespace Unity.Services.Core.Editor
         /// NB: Newly constructed instances of this class will use SessionState if it's available before calling
         /// out to the server.
         /// </summary>
-        /// <param name="onGetConfigurationCompleted">
-        ///     Callback action to retrieve the configuration.
-        /// </param>>
+        /// <param name="onGetConfigurationCompleted">Callback action to retrieve the configuration.</param>
         public void GetConfiguration(Action<T> onGetConfigurationCompleted)
         {
             var configAsyncOp = GetConfiguration();
