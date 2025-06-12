@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Unity.Services.Core.Internal.Serialization;
 
 namespace Unity.Services.Core.Editor
@@ -23,7 +24,7 @@ namespace Unity.Services.Core.Editor
             return new NewtonsoftSerializer().SerializeObject(this);
         }
 
-        public static JsonWebToken Decode(string token)
+        public static string DecodePayload(string token, bool format = false)
         {
             var parts = token.Split(k_JwtSeparator);
             if (parts.Length != 3)
@@ -33,6 +34,12 @@ namespace Unity.Services.Core.Editor
 
             var payload = parts[1];
             var payloadJson = Encoding.UTF8.GetString(Base64UrlDecode(payload));
+            return format ? Format(payloadJson) : payloadJson;
+        }
+
+        public static JsonWebToken Decode(string token)
+        {
+            var payloadJson = DecodePayload(token, false);
             return new NewtonsoftSerializer().DeserializeObject<JsonWebToken>(payloadJson);
         }
 
@@ -49,6 +56,18 @@ namespace Unity.Services.Core.Editor
             }
 
             return Convert.FromBase64String(output);
+        }
+
+        static string Format(string payload)
+        {
+            try
+            {
+                return JToken.Parse(payload).ToString(Formatting.Indented);
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

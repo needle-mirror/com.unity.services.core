@@ -56,6 +56,15 @@ namespace Unity.Services.Core
         public RequestFailedException(int errorCode, string message, System.Exception innerException) {}
     }
 
+    public class ServiceObserver<T> : System.IDisposable
+    {
+        public event System.Action<T> Initialized;
+        public T Service { get; }
+        public ServiceObserver() {}
+        public ServiceObserver(IUnityServices registry) {}
+        public void Dispose();
+    }
+
     public sealed class ServicesCreationException : System.Exception
     {
         public ServicesCreationException(string message) {}

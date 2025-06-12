@@ -23,6 +23,13 @@ namespace Unity.Services.Authentication.Internal
         public event System.Action<string> PlayerIdChanged;
         public string PlayerId { get; }
     }
+
+    [UnityEngine.Scripting.RequireImplementors] public interface IPlayerNameComponent : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public event System.Action<string> PlayerNameChanged;
+        public string PlayerName { get; }
+    }
+
 }
 
 namespace Unity.Services.Authentication.Server.Internal

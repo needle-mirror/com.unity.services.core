@@ -11,10 +11,6 @@ namespace Unity.Services.Core.Environments.Internal
             internal set
             {
                 m_Current = value;
-
-#if ENABLE_CLOUD_SERVICES_IDENTIFIERS
-                UnityEngine.Connect.Identifiers.SetEnvironmentName(value);
-#endif
             }
         }
     }

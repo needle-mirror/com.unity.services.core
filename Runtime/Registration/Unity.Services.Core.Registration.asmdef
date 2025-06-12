@@ -5,6 +5,8 @@
         "Unity.Services.Core.Device",
         "Unity.Services.Core.Environments",
         "Unity.Services.Core.Environments.Internal",
+        "Unity.Services.Core.Releases",
+        "Unity.Services.Core.Releases.Internal",
         "Unity.Services.Core.Configuration",
         "Unity.Services.Core",
         "Unity.Services.Core.Telemetry",

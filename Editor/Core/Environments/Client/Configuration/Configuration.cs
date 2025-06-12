@@ -29,9 +29,6 @@ namespace Unity.Services.Core.Environments.Client
         /// <summary>Headers for the operation.</summary>
         public IDictionary<string, string> Headers;
 
-        #region authdata
-        #endregion
-
         /// <summary>
         /// Configuration constructor.
         /// </summary>

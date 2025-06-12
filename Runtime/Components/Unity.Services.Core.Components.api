@@ -5,8 +5,8 @@ namespace Unity.Services.Core.Components
 {
     public abstract class ServicesBehaviour : UnityEngine.MonoBehaviour
     {
-        [Unity.Services.Core.Internal.Visibility(@"UseCustomServices", true)] [UnityEngine.SerializeField] [UnityEngine.Tooltip(@"Unique local identifier for the custom set of services. Used as the key in the registries dictionary.")] public string ServicesIdentifier;
-        [UnityEngine.Header(@"Services Registry")] [UnityEngine.SerializeField] [UnityEngine.Tooltip(@"Use this to setup a custom services registry. All services in a registry are unique.")] public bool UseCustomServices;
+        [Unity.Services.Core.Internal.Visibility(@"ShowAdvancedFeatures", true)] [UnityEngine.SerializeField] [UnityEngine.Tooltip(@"Unique local identifier for the custom set of services. Used as the key in the registries dictionary.")] public string ServicesIdentifier;
+        [Unity.Services.Core.Internal.Visibility(@"ShowAdvancedFeatures", true)] [UnityEngine.SerializeField] [UnityEngine.Tooltip(@"Use this to setup a custom services registry. All services in a registry are unique.")] public bool UseCustomServices;
         public IUnityServices Services { get; }
         protected ServicesBehaviour() {}
         protected abstract void Cleanup();

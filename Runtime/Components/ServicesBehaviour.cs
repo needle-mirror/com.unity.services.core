@@ -1,4 +1,3 @@
-using System;
 using Unity.Services.Core.Internal;
 using UnityEngine;
 
@@ -21,9 +20,9 @@ namespace Unity.Services.Core.Components
         /// <summary>
         /// Use this to setup a custom services registry. All services in a registry are unique.
         /// </summary>
-        [Header("Services Registry")]
-        [Tooltip("Use this to setup a custom services registry. All services in a registry are unique.")]
         [SerializeField]
+        [Tooltip("Use this to setup a custom services registry. All services in a registry are unique.")]
+        [Visibility(nameof(ShowAdvancedFeatures), true)]
         public bool UseCustomServices;
 
         /// <summary>
@@ -31,8 +30,15 @@ namespace Unity.Services.Core.Components
         /// </summary>
         [SerializeField]
         [Tooltip("Unique local identifier for the custom set of services. Used as the key in the registries dictionary.")]
-        [Visibility(nameof(UseCustomServices), true)]
+        [Visibility(nameof(ShowAdvancedFeatures), true)]
         public string ServicesIdentifier;
+
+        /// <summary>
+        /// Determines if the custom services and services identifier fields are shown.
+        /// </summary>
+        [SerializeField]
+        [HideInInspector]
+        internal bool ShowAdvancedFeatures;
 
         internal virtual void Start()
         {

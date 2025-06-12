@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace Unity.Services.Core.Environments
 {
@@ -24,6 +25,10 @@ namespace Unity.Services.Core.Environments
         {
             if (string.IsNullOrEmpty(environmentName))
                 throw new ArgumentException("Environment name cannot be null or empty.", nameof(environmentName));
+
+#if UNITY_EDITOR
+            Debug.Log($"Overriding environment to '{environmentName}' through InitializationOptions");
+#endif
 
             self.SetOption(EnvironmentNameKey, environmentName);
             return self;

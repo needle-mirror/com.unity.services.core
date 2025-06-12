@@ -37,6 +37,7 @@ namespace Unity.Services.Core.Registration
 
         internal Environments.Internal.Environments Environments { get; private set; }
 
+
         internal ExternalUserId ExternalUserId { get; private set; }
 
         internal ICloudProjectId CloudProjectId { get; private set; }
@@ -276,6 +277,7 @@ namespace Unity.Services.Core.Registration
                 Current = currentEnvironment,
             };
         }
+
 
         internal void InitializeMetrics()
         {

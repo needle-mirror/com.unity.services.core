@@ -311,7 +311,7 @@ namespace Unity.Services.Core.Editor.Environments.UI
         static class UxmlLabels
         {
             public const string Refresh = "Refresh";
-            public const string EditorEnvironment = "Editor Environment";
+            public const string EditorEnvironment = "Environment";
         }
     }
 }
