@@ -28,7 +28,6 @@ namespace Unity.Services.Core.Editor.Environments.Save
         public void SaveEnvironment(EnvironmentSettings settings)
         {
             var fileContent = m_JsonSerializer.SerializeObject(settings);
-
             m_FileSystem.SaveFile(k_EnvironmentSettingsPath, fileContent);
             m_CachedEnvironmentSettings = new EnvironmentSettings(settings);
             m_IsDirty = false;
@@ -38,11 +37,13 @@ namespace Unity.Services.Core.Editor.Environments.Save
         {
             if (m_IsDirty)
             {
-                var fileContent = m_FileSystem.GetOrCreateFileContent(k_EnvironmentSettingsPath);
-                m_CachedEnvironmentSettings = m_JsonSerializer.DeserializeObject<EnvironmentSettings>(fileContent) ?? new EnvironmentSettings();
+                var fileContent = m_FileSystem.GetFileContent(k_EnvironmentSettingsPath);
+
+                m_CachedEnvironmentSettings = !string.IsNullOrEmpty(fileContent)
+                    ? m_JsonSerializer.DeserializeObject<EnvironmentSettings>(fileContent) ?? new EnvironmentSettings()
+                    : new EnvironmentSettings();
                 m_IsDirty = false;
             }
-
 
             // let's sanitize this in case we are in the upgrade path where an old settings.json
             // is being accessed and has only the environment name field:
@@ -53,7 +54,6 @@ namespace Unity.Services.Core.Editor.Environments.Save
                 // the lesser evil is to reset the current config and pretend the environment is not setup.
                 m_CachedEnvironmentSettings = new EnvironmentSettings();
                 SaveEnvironment(m_CachedEnvironmentSettings);
-                return m_CachedEnvironmentSettings;
             }
 
             return m_CachedEnvironmentSettings;

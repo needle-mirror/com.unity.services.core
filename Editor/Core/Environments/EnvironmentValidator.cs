@@ -31,7 +31,7 @@ namespace Unity.Services.Core.Editor.Environments
             string errorMessage = null;
             if (string.IsNullOrEmpty(environmentId))
             {
-                errorMessage = "Environment is not set! Please set it through the Environment Selector at Edit -> Project Settings -> Deployment";
+                errorMessage = "The environment has not been set. Please use the Environment Selector, found under Edit → Project Settings → Services → Environments, to set it.";
             }
             else if (string.IsNullOrEmpty(projectId))
             {

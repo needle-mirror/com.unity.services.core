@@ -1,13 +1,20 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Unity.Services.Core.Internal
 {
     static class UnityServicesInitializer
     {
+        static bool s_CreatedServices;
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         static void CreateStaticInstance()
         {
+            if (s_CreatedServices)
+            {
+                // Reset flag for next domain reload
+                s_CreatedServices = false;
+                return;
+            }
+
             UnityServices.ClearServices();
             UnityServicesBuilder.InstanceCreationDelegate = CreateInstance;
 
@@ -24,6 +31,18 @@ namespace Unity.Services.Core.Internal
             CoreMetrics.Instance = coreMetrics;
             CoreDiagnostics.Instance = coreDiagnostics;
         }
+
+        #if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+        static void AssemblyReloadSupport()
+        {
+            if (UnityServices.Instance == null)
+            {
+                CreateStaticInstance();
+                s_CreatedServices = true;
+            }
+        }
+        #endif
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static async void EnableServicesInitializationAsync()

@@ -30,6 +30,12 @@ namespace Unity.Services.Authentication.Internal
         public string PlayerName { get; }
     }
 
+    public interface IReleaseContext : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public string ReleaseId { get; }
+        public string ReleaseName { get; }
+        public string[] VariantTags { get; }
+    }
 }
 
 namespace Unity.Services.Authentication.Server.Internal
@@ -147,6 +153,14 @@ namespace Unity.Services.Core.Internal
         public string PropertyName { get; }
         public object Value { get; }
         public VisibilityAttribute(string propertyName, object value) {}
+    }
+}
+
+namespace Unity.Services.Core.Releases.Internal
+{
+    public interface IReleases : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public string Pointer { get; }
     }
 }
 

@@ -49,6 +49,7 @@ namespace Unity.Services.Core.Editor.Environments.UI
             SetupRegularUxml();
             SetupNoConnectionUxml();
             Sync.SafeAsync(RefreshEnvironmentsAsync);
+            environmentService.PropertyChanged += (_, _) => OnEnvironmentsRefreshed(environmentService);
         }
 
         TemplateContainer AddUxmlToVisualElement(VisualElement containerElement, string uxmlPath)

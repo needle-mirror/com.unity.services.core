@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace Unity.Services.Core
 {
@@ -24,7 +25,13 @@ namespace Unity.Services.Core
         /// Create an observer for a specific service interface to be notified when a service is initialized.
         /// This observes the global service registry.
         /// </summary>
-        public ServiceObserver() : this(UnityServices.Instance) {}
+        public ServiceObserver() : this(UnityServices.Instance)
+        {
+            if (!Application.isPlaying)
+                return;
+            m_Registry = UnityServices.Instance; //always null in edit-time
+            Init();
+        }
 
         /// <summary>
         /// Create an observer for a specific service interface to be notified when a service is initialized
@@ -34,7 +41,11 @@ namespace Unity.Services.Core
         public ServiceObserver(IUnityServices registry)
         {
             m_Registry = registry ?? throw new ArgumentNullException(nameof(registry));
+            Init();
+        }
 
+        void Init()
+        {
             if (m_Registry.State == ServicesInitializationState.Initialized)
             {
                 AssignService();

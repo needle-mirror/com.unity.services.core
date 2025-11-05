@@ -108,7 +108,6 @@ namespace Unity.Services.Core.Editor.ProjectBindRedirect
             }
 
             SettingsService.OpenProjectSettings(k_ProjectSettingsPath);
-            m_OnCloseButtonFired?.Invoke();
         }
 
         internal void ClickSignUpLinkAction()

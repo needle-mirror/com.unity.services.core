@@ -14,7 +14,10 @@ namespace Unity.Services.Core.Editor.Settings
         }
 
         public EnvironmentSettings(EnvironmentSettings env)
-            : this(env.EnvironmentName, env.EnvironmentId) {}
+        {
+            EnvironmentName = env == null ? "" : env.EnvironmentName;
+            EnvironmentId = env == null ? Guid.Empty : env.EnvironmentId;
+        }
 
         public EnvironmentSettings(string environmentName, Guid environmentId)
         {

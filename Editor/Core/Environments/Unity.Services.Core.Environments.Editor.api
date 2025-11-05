@@ -52,6 +52,7 @@ namespace Unity.Services.Core.Editor.Environments.UI
         {
             public UxmlSerializedData() {}
             public override object CreateInstance();
+            public static void Register();
         }
     }
 }

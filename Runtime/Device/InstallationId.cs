@@ -12,11 +12,13 @@ namespace Unity.Services.Core.Device
 
         internal IUserIdentifierProvider UnityAdsIdentifierProvider;
         internal IUserIdentifierProvider UnityAnalyticsIdentifierProvider;
+        internal IUserIdentifierProvider UnityEngineIdentifierProvider;
 
         public InstallationId()
         {
             UnityAdsIdentifierProvider = new UnityAdsIdentifier();
             UnityAnalyticsIdentifierProvider = new UnityAnalyticsIdentifier();
+            UnityEngineIdentifierProvider = new UnityEngineIdentifier();
         }
 
         public string GetOrCreateIdentifier()
@@ -31,7 +33,17 @@ namespace Unity.Services.Core.Device
         {
             Identifier = ReadIdentifierFromFile();
             if (!string.IsNullOrEmpty(Identifier))
+            {
                 return;
+            }
+
+            var engineId = UnityEngineIdentifierProvider.UserId;
+            if (!string.IsNullOrEmpty(engineId))
+            {
+                Identifier = engineId;
+                WriteIdentifierToFile(Identifier);
+                return;
+            }
 
             var analyticsId = UnityAnalyticsIdentifierProvider.UserId;
             var adsId = UnityAdsIdentifierProvider.UserId;

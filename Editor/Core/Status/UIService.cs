@@ -1099,7 +1099,9 @@ namespace Unity.Services.Core.Editor
         /// <inheritdoc cref="ScrollView.mouseWheelScrollSize" />
         public UIScrollView SetMouseWheelScrollSize(float value)
         {
+#if UNITY_2021_3 || UNITY_2022_3_OR_NEWER
             Element.mouseWheelScrollSize = value;
+#endif
             return this;
         }
 
@@ -1119,7 +1121,7 @@ namespace Unity.Services.Core.Editor
 
 #endif
 
-#if UNITY_2022_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
         /// <inheritdoc cref="ScrollView.elasticAnimationIntervalMs" />
         public UIScrollView SetElasticAnimationIntervalMs(long value)
         {

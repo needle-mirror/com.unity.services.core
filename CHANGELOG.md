@@ -5,6 +5,20 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.16.0] - 2025-11-05
+
+### Changed
+* Upgrading base unity version support to 2022.3
+
+### Added
+- Adding environment button in the main toolbar for Unity 6.3. Right-click the main toolbar and select `Services/Environment` to activate.
+
+### Fixed
+
+- Fixed an issue where errors would continuously be logged when unlinking a project in the Services tab
+- Fixed an issue where the Popup for Project Linking would close when chooisng the `Open Project Settings` option
+- Fixed compilation issue in 2022.3.10f1 and lower
+
 ## [1.15.1] - 2025-06-12
 
 ### Added
