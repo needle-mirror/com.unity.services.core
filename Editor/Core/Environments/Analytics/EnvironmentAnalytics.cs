@@ -21,5 +21,6 @@ namespace Unity.Services.Core.Editor.Environments.Analytics
                 package = "Core.Environments",
             });
         }
+
     }
 }

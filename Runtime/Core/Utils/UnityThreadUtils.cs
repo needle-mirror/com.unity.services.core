@@ -13,8 +13,7 @@ namespace Unity.Services.Core
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
 #endif
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void CaptureUnityThreadInfo()
+        internal static void CaptureUnityThreadInfo()
         {
             s_UnityThreadId = Thread.CurrentThread.ManagedThreadId;
             UnityThreadScheduler = TaskScheduler.FromCurrentSynchronizationContext();

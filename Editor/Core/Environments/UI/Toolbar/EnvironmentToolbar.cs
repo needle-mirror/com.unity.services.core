@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Unity.Services.Core.Editor.Environments.UI
 {
-    static class EnvironmenToolbar
+    static class EnvironmentToolbar
     {
         const string k_EnvironmentDropdownElement = "Services/Environment";
         const string k_DefaultLabel = "[No Environment]";

@@ -22,6 +22,12 @@ namespace Unity.Services.Core
         public const int Unknown = 0;
     }
 
+    public static class CoreResetter
+    {
+        public static event System.Action OnResetComplete;
+        public static void Register(System.Action resetCallback);
+    }
+
     public class InitializationOptions
     {
         public InitializationOptions() {}
@@ -79,9 +85,9 @@ namespace Unity.Services.Core
 
     public enum ServicesInitializationState
     {
-        Initialized = 2,
-        Initializing = 1,
         Uninitialized = 0,
+        Initializing = 1,
+        Initialized = 2,
     }
 
     public static class UnityServices
@@ -95,6 +101,6 @@ namespace Unity.Services.Core
         public static IUnityServices CreateServices();
         public static IUnityServices CreateServices(string servicesId);
         public static System.Threading.Tasks.Task InitializeAsync();
-        public static System.Threading.Tasks.Task InitializeAsync(InitializationOptions options);
+        public static async System.Threading.Tasks.Task InitializeAsync(InitializationOptions options);
     }
 }

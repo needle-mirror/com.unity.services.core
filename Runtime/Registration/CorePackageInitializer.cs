@@ -33,6 +33,8 @@ namespace Unity.Services.Core.Registration
 
         internal InstallationId InstallationId { get; private set; }
 
+        internal EngineInstallationId EngineInstallationId { get; private set; }
+
         internal ProjectConfiguration ProjectConfig { get; private set; }
 
         internal Environments.Internal.Environments Environments { get; private set; }
@@ -48,7 +50,6 @@ namespace Unity.Services.Core.Registration
 
         internal UnityThreadUtilsInternal UnityThreadUtils { get; private set; }
 
-        CoreRegistry m_Registry;
         readonly IJsonSerializer m_Serializer;
 
         InitializationOptions m_CurrentInitializationOptions;
@@ -65,6 +66,7 @@ namespace Unity.Services.Core.Registration
             CoreDiagnostics.Instance.DiagnosticsComponentProvider = this;
             registry.Register(this)
                 .ProvidesComponent<IInstallationId>()
+                .ProvidesComponent<IEngineInstallationId>()
                 .ProvidesComponent<ICloudProjectId>()
                 .ProvidesComponent<IActionScheduler>()
                 .ProvidesComponent<IEnvironments>()
@@ -94,21 +96,19 @@ namespace Unity.Services.Core.Registration
         /// </returns>
         public Task Initialize(CoreRegistry registry)
         {
-            m_Registry = registry;
-            return InitializeComponents();
+            return InitializeComponents(registry);
         }
 
         public Task InitializeInstanceAsync(CoreRegistry registry)
         {
-            m_Registry = registry;
-            return InitializeComponents();
+            return InitializeComponents(registry);
         }
 
-        async Task InitializeComponents()
+        async Task InitializeComponents(CoreRegistry registry)
         {
             try
             {
-                if (HaveInitOptionsChanged())
+                if (HaveInitOptionsChanged(registry.Options))
                 {
                     FreeOptionsDependantComponents();
                 }
@@ -119,7 +119,7 @@ namespace Unity.Services.Core.Registration
 
                 InitializeActionScheduler();
 
-                await InitializeProjectConfigAsync(m_Registry.Options);
+                await InitializeProjectConfigAsync(registry.Options);
 
                 InitializeExternalUserId(ProjectConfig);
 
@@ -147,15 +147,16 @@ namespace Unity.Services.Core.Registration
 
             void RegisterProvidedComponents()
             {
-                m_Registry.RegisterServiceComponent<IInstallationId>(InstallationId);
-                m_Registry.RegisterServiceComponent<IActionScheduler>(ActionScheduler);
-                m_Registry.RegisterServiceComponent<IProjectConfiguration>(ProjectConfig);
-                m_Registry.RegisterServiceComponent<IEnvironments>(Environments);
-                m_Registry.RegisterServiceComponent<IMetricsFactory>(MetricsFactory);
-                m_Registry.RegisterServiceComponent<IDiagnosticsFactory>(DiagnosticsFactory);
-                m_Registry.RegisterServiceComponent<ICloudProjectId>(CloudProjectId);
-                m_Registry.RegisterServiceComponent<IUnityThreadUtils>(UnityThreadUtils);
-                m_Registry.RegisterServiceComponent<IExternalUserId>(ExternalUserId);
+                registry.RegisterServiceComponent<IInstallationId>(InstallationId);
+                registry.RegisterServiceComponent<IEngineInstallationId>(EngineInstallationId);
+                registry.RegisterServiceComponent<IActionScheduler>(ActionScheduler);
+                registry.RegisterServiceComponent<IProjectConfiguration>(ProjectConfig);
+                registry.RegisterServiceComponent<IEnvironments>(Environments);
+                registry.RegisterServiceComponent<IMetricsFactory>(MetricsFactory);
+                registry.RegisterServiceComponent<IDiagnosticsFactory>(DiagnosticsFactory);
+                registry.RegisterServiceComponent<ICloudProjectId>(CloudProjectId);
+                registry.RegisterServiceComponent<IUnityThreadUtils>(UnityThreadUtils);
+                registry.RegisterServiceComponent<IExternalUserId>(ExternalUserId);
             }
 
             // Fake predicate to avoid stack unwinding on rethrow.
@@ -165,10 +166,10 @@ namespace Unity.Services.Core.Registration
             }
         }
 
-        bool HaveInitOptionsChanged()
+        bool HaveInitOptionsChanged(InitializationOptions options)
         {
             return !(m_CurrentInitializationOptions is null)
-                && !m_CurrentInitializationOptions.Values.ValueEquals(m_Registry.Options.Values);
+                && !m_CurrentInitializationOptions.Values.ValueEquals(options.Values);
         }
 
         void FreeOptionsDependantComponents()
@@ -184,7 +185,8 @@ namespace Unity.Services.Core.Registration
             if (!(InstallationId is null))
                 return;
 
-            var installationId = new InstallationId();
+            EngineInstallationId = new EngineInstallationId();
+            var installationId = new InstallationId(EngineInstallationId);
             installationId.CreateIdentifier();
             InstallationId = installationId;
         }
@@ -315,15 +317,15 @@ namespace Unity.Services.Core.Registration
             UnityThreadUtils = new UnityThreadUtilsInternal();
         }
 
-        public async Task<IDiagnosticsFactory> CreateDiagnosticsComponents()
+        public async Task<IDiagnosticsFactory> CreateDiagnosticsComponents(CoreRegistry registry)
         {
-            if (HaveInitOptionsChanged())
+            if (HaveInitOptionsChanged(registry.Options))
             {
                 FreeOptionsDependantComponents();
             }
 
             InitializeActionScheduler();
-            await InitializeProjectConfigAsync(m_Registry.Options);
+            await InitializeProjectConfigAsync(registry.Options);
             InitializeEnvironments(ProjectConfig);
             InitializeCloudProjectId();
             return DiagnosticsFactory;
@@ -353,9 +355,9 @@ namespace Unity.Services.Core.Registration
             CoreLogger.LogVerbose(result.ToString());
         }
 
-        public async Task<string> GetSerializedProjectConfigurationAsync()
+        public async Task<string> GetSerializedProjectConfigurationAsync(CoreRegistry registry)
         {
-            await InitializeProjectConfigAsync(m_Registry.Options);
+            await InitializeProjectConfigAsync(registry.Options);
             return ProjectConfig.ToJson();
         }
     }

@@ -36,5 +36,6 @@ namespace Unity.Services.Core.Editor.Environments
                 .Cast<EnvironmentInfo?>() // ensure FirstOrDefault will return null instead of default(EnvironmentInfo)
                 .FirstOrDefault();
         }
+
     }
 }

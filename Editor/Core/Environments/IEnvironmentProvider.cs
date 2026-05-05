@@ -1,11 +1,10 @@
-using System;
 using System.ComponentModel;
 using Unity.Services.Core.Editor.Settings;
 
 namespace Unity.Services.Core.Editor.Environments
 {
     /// <summary>
-    /// This interface represents a container for the current selected environment.
+    /// This interface represents a container for the current selected environment, release, and release pointer.
     /// </summary>
     interface IEnvironmentProvider : INotifyPropertyChanged
     {

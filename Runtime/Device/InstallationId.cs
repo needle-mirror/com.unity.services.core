@@ -14,11 +14,11 @@ namespace Unity.Services.Core.Device
         internal IUserIdentifierProvider UnityAnalyticsIdentifierProvider;
         internal IUserIdentifierProvider UnityEngineIdentifierProvider;
 
-        public InstallationId()
+        public InstallationId(IEngineInstallationId engineInstallationId)
         {
             UnityAdsIdentifierProvider = new UnityAdsIdentifier();
             UnityAnalyticsIdentifierProvider = new UnityAnalyticsIdentifier();
-            UnityEngineIdentifierProvider = new UnityEngineIdentifier();
+            UnityEngineIdentifierProvider = new UnityEngineIdentifier(engineInstallationId);
         }
 
         public string GetOrCreateIdentifier()

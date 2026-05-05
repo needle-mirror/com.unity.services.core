@@ -6,6 +6,7 @@ namespace Unity.Services.Core.Networking.Internal
     /// <remarks>
     /// More options will be added based on common needs.
     /// </remarks>
+    [System.Serializable]
     struct HttpOptions
     {
         /// <summary>

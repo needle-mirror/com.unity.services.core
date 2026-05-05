@@ -1,23 +1,20 @@
-using System;
-using UnityEngine;
+using Unity.Services.Core.Device.Internal;
 
 namespace Unity.Services.Core.Device
 {
     class UnityEngineIdentifier : IUserIdentifierProvider
     {
+        internal IEngineInstallationId EngineInstallationId;
+
         public string UserId
         {
-            get
-            {
-#if ENABLE_UNITY_CLOUD_IDENTIFIERS
-                return UnityEngine.Identifiers.Identifiers.installationId;
-#else
-                return null;
-#endif
-            }
-            set
-            {
-            }
+            get => EngineInstallationId.GetOrCreateIdentifier();
+            set { }
+        }
+
+        public UnityEngineIdentifier(IEngineInstallationId engineInstallationId)
+        {
+            EngineInstallationId = engineInstallationId;
         }
     }
 }

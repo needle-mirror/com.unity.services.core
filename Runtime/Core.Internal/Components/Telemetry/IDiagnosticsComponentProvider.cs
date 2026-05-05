@@ -5,8 +5,8 @@ namespace Unity.Services.Core.Telemetry.Internal
 {
     interface IDiagnosticsComponentProvider
     {
-        Task<IDiagnosticsFactory> CreateDiagnosticsComponents();
+        Task<IDiagnosticsFactory> CreateDiagnosticsComponents(CoreRegistry registry);
 
-        Task<string> GetSerializedProjectConfigurationAsync();
+        Task<string> GetSerializedProjectConfigurationAsync(CoreRegistry registry);
     }
 }

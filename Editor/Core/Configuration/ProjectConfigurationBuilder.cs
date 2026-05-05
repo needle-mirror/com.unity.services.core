@@ -31,20 +31,12 @@ namespace Unity.Services.Core.Configuration.Editor
                 .ToArray();
         }
 
-        [InitializeOnEnterPlayMode]
-        static void SetUpPlayModeConfigOnEnteringPlayMode(EnterPlayModeOptions _)
-        {
-            InitializeConfiguration();
-        }
-
-#if FEATURE_SERVICES_EDITOR_EXPERIMENTAL
         [InitializeOnLoadMethod]
-        static void InitializeOnLoad()
+        static void SubscribeToResetComplete()
         {
-            InitializeConfiguration();
+            CoreResetter.OnResetComplete -= InitializeConfiguration;
+            CoreResetter.OnResetComplete += InitializeConfiguration;
         }
-
-#endif
 
         internal static void InitializeConfiguration()
         {

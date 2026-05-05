@@ -23,6 +23,7 @@ namespace Unity.Services.Core.Editor.Environments
                 {
                     return activeEnv.EnvironmentId;
                 }
+
                 return null;
             }
         }
@@ -51,19 +52,21 @@ namespace Unity.Services.Core.Editor.Environments
                     return;
                 }
 
-                RefreshAsync();
+                RefreshEnvironmentsAsync();
             };
         }
 
-        public Task RefreshAsync()
+        public Task RefreshEnvironmentsAsync()
         {
             if (m_RefreshTask == null || m_RefreshTask.IsCompleted)
             {
-                m_RefreshTask = RefreshInternal();
+                m_RefreshTask = RefreshEnvironmentsInternal();
             }
 
             return m_RefreshTask;
         }
+
+        #region Environments
 
         public void SetActiveEnvironment(EnvironmentInfo environmentInfo)
         {
@@ -103,12 +106,16 @@ namespace Unity.Services.Core.Editor.Environments
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ActiveEnvironmentId)));
         }
 
-        async Task RefreshInternal()
+        #endregion
+
+
+        async Task RefreshEnvironmentsInternal()
         {
             Environments = null;
             Environments = await m_EnvironmentFetcher.FetchEnvironments();
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Environments)));
         }
+
 
         public void Dispose()
         {

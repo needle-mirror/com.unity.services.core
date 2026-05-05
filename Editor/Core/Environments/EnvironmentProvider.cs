@@ -37,7 +37,6 @@ namespace Unity.Services.Core.Editor.Environments
             {
                 m_EnvironmentSaveSystem.SaveEnvironment(value);
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(ActiveEnvironment));
             }
         }
 
@@ -52,5 +51,6 @@ namespace Unity.Services.Core.Editor.Environments
         {
             m_ProjectIdTracker?.Dispose();
         }
+
     }
 }

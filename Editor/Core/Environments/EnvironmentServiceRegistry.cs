@@ -17,7 +17,6 @@ namespace Unity.Services.Core.Editor.Environments
             collection.RegisterSingleton(Factories.Default<IEnvironmentSaveSystem, EnvironmentSaveSystem>);
             collection.RegisterSingleton(Factories.Default<IEnvironmentService, EnvironmentService>);
             collection.RegisterSingleton(Factories.Default<IEnvironmentProvider, EnvironmentProvider>);
-
             collection.Register(_ => new AccessTokens());
             collection.Register(Factories.Default<IAccessTokens, AccessTokens>);
             collection.Register(Factories.Default<IFileSystem, FileSystem>);

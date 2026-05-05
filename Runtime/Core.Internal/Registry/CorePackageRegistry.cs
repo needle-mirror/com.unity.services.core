@@ -1,3 +1,4 @@
+using UnityEngine;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Unity.Services.Core.Internal
@@ -33,6 +34,11 @@ namespace Unity.Services.Core.Internal
         internal CorePackageRegistry(IPackageRegistry registry)
         {
             Registry = registry;
+        }
+
+        internal static void ResetStaticsOnLoad()
+        {
+            Instance = null;
         }
 
         /// <summary>

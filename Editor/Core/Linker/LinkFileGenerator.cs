@@ -111,7 +111,7 @@ namespace Unity.Services.Core.Editor
                     x =>
                     {
                         var package = PackageInfo.FindForAssembly(x.Assembly);
-                        return eligibleProviderPackageNames.Contains(package.name);
+                        return eligibleProviderPackageNames.Contains(package?.name);
                     })
                 .GroupBy(x => x.Assembly)
                 .Select(x => x.Key)

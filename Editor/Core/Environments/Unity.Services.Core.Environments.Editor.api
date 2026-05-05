@@ -48,11 +48,11 @@ namespace Unity.Services.Core.Editor.Environments.UI
     {
         public EnvironmentView() {}
         public void Bind(IEnvironmentsApi environmentService);
-        public class UxmlSerializedData : UnityEngine.UIElements.VisualElement.UxmlSerializedData
+        [System.Runtime.CompilerServices.CompilerGenerated] public class UxmlSerializedData : UnityEngine.UIElements.VisualElement.UxmlSerializedData
         {
             public UxmlSerializedData() {}
             public override object CreateInstance();
-            public static void Register();
+            [System.Diagnostics.Conditional(@"UNITY_EDITOR")] public static void Register();
         }
     }
 }

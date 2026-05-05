@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 using SuppressMessage = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 
@@ -50,6 +51,11 @@ namespace Unity.Services.Core.Internal
             PackageRegistry = packageRegistry;
             ComponentRegistry = new ComponentRegistry();
             ServiceRegistry = new ServiceRegistry();
+        }
+
+        internal static void ResetStaticsOnLoad()
+        {
+            Instance = null;
         }
 
         /// <summary>

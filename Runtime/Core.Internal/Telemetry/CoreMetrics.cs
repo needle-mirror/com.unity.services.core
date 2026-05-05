@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Telemetry.Internal;
+using UnityEngine;
 
 namespace Unity.Services.Core.Internal
 {
@@ -25,6 +26,11 @@ namespace Unity.Services.Core.Internal
 
         internal IDictionary<Type, IMetrics> AllPackageMetrics { get; }
             = new Dictionary<Type, IMetrics>();
+
+        internal static void ResetStaticsOnLoad()
+        {
+            Instance = null;
+        }
 
         public void SendAllPackagesInitSuccessMetric()
         {

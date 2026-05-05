@@ -34,5 +34,6 @@ namespace Unity.Services.Core.Editor.Environments.Config
 
             return string.IsNullOrEmpty(loadedEnv.EnvironmentName) ? EnvironmentsOptionsExtensions.EnvironmentDefaultNameValue : loadedEnv.EnvironmentName;
         }
+
     }
 }

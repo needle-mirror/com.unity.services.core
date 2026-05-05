@@ -9,7 +9,7 @@ namespace Unity.Services.Core.Editor.Environments
     {
         IReadOnlyCollection<EnvironmentInfo> Environments { get; }
         Guid? ActiveEnvironmentId { get; }
-        Task RefreshAsync();
+        Task RefreshEnvironmentsAsync();
         void SetActiveEnvironment(EnvironmentInfo environmentInfo);
         void SetActiveEnvironment(string environmentName);
         void SetActiveEnvironment(Guid environmentGuid);

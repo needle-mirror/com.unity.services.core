@@ -17,18 +17,18 @@ namespace Unity.Services.Core.Components
     [UnityEngine.AddComponentMenu(@"Services/Services Initialization")] public class ServicesInitialization : ServicesBehaviour
     {
         [Unity.Services.Core.Internal.Visibility(@"UseCustomEnvironment", true)] [UnityEngine.SerializeField] [UnityEngine.Tooltip(@"Choose the environment name to pass in the initialization options. You can configure environments in the unity dashboard.")] public string EnvironmentName = @"production";
-        [UnityEngine.Header(@"Events")] [UnityEngine.SerializeField] public ServicesInitializationEvents Events;
+        [UnityEngine.Header(@"Events")] [UnityEngine.SerializeField] public ServicesInitializationEvents Events = new();
         [UnityEngine.Header(@"Automation")] [UnityEngine.SerializeField] [UnityEngine.Tooltip(@"This will attempt to initialize the services in Start().")] public bool InitializeOnStart;
         [Unity.Services.Core.Internal.Visibility(@"InitializeOnStart", true)] [UnityEngine.SerializeField] [UnityEngine.Tooltip(@"Use this to set a custom environment in the initialization options. Defaults to the environment defined in the project settings or production.")] public bool UseCustomEnvironment;
         protected override void Cleanup();
         protected override void OnServicesInitialized();
-        protected override void OnServicesReady();
+        protected override async void OnServicesReady();
     }
 
     public class ServicesInitializationEvents
     {
-        [UnityEngine.SerializeField] public UnityEngine.Events.UnityEvent Initialized;
-        [UnityEngine.SerializeField] public UnityEngine.Events.UnityEvent<System.Exception> InitializeFailed;
+        [UnityEngine.SerializeField] public UnityEngine.Events.UnityEvent Initialized = new();
+        [UnityEngine.SerializeField] public UnityEngine.Events.UnityEvent<System.Exception> InitializeFailed = new();
         public ServicesInitializationEvents() {}
     }
 }

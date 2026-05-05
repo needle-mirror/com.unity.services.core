@@ -80,6 +80,15 @@ namespace Unity.Services.Core
             set => ExternalUserIdProperty.UserId = value;
         }
 
+        internal static void ResetStaticsOnLoad()
+        {
+            InstantiationCompletion = null;
+            if (ExternalUserIdProperty != null && ExternalUserId != null)
+                ExternalUserId = null;
+            ExternalUserIdProperty = new ExternalUserIdProperty();
+            Instance = null;
+        }
+
         /// <inheritdoc cref="InitializeAsync(InitializationOptions)"/>
         public static Task InitializeAsync()
         {

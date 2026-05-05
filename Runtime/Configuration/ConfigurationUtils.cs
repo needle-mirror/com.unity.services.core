@@ -1,4 +1,5 @@
 using Unity.Services.Core.Internal.Serialization;
+using UnityEngine;
 
 namespace Unity.Services.Core.Configuration
 {
@@ -8,5 +9,10 @@ namespace Unity.Services.Core.Configuration
 
         public static IConfigurationLoader ConfigurationLoader { get; internal set; }
             = new StreamingAssetsConfigurationLoader(new NewtonsoftSerializer());
+
+        internal static void ResetStaticsOnLoad()
+        {
+            ConfigurationLoader = new StreamingAssetsConfigurationLoader(new NewtonsoftSerializer());
+        }
     }
 }

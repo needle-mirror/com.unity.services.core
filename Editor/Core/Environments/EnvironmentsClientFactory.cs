@@ -42,6 +42,7 @@ namespace Unity.Services.Core.Editor.Environments
             return await environmentsApi.GetEnvironment(environmentId);
         }
 
+
         async Task<EnvironmentsClient> Build()
         {
             var projectId = CloudProjectSettings.projectId;

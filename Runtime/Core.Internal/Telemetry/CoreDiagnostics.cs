@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Services.Core.Telemetry.Internal;
+using UnityEngine;
 
 namespace Unity.Services.Core.Internal
 {
@@ -25,6 +26,11 @@ namespace Unity.Services.Core.Internal
         internal IDiagnosticsComponentProvider DiagnosticsComponentProvider { get; set; }
 
         internal IDiagnostics Diagnostics { get; set; }
+
+        internal static void ResetStaticsOnLoad()
+        {
+            Instance = null;
+        }
 
         public void SetProjectConfiguration(string serializedProjectConfig)
         {
@@ -57,11 +63,11 @@ namespace Unity.Services.Core.Internal
             // do nothing
         }
 
-        internal async Task<IDiagnostics> GetOrCreateDiagnosticsAsync()
+        internal async Task<IDiagnostics> GetOrCreateDiagnosticsAsync(CoreRegistry registry)
         {
             if (Diagnostics is null)
             {
-                var factory = await DiagnosticsComponentProvider.CreateDiagnosticsComponents();
+                var factory = await DiagnosticsComponentProvider.CreateDiagnosticsComponents(registry);
                 Diagnostics = factory.Create(CorePackageName);
             }
 
