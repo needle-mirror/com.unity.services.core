@@ -20,6 +20,7 @@ namespace Unity.Services.Core.Editor.Environments.UI
 
         ModelBinding<IEnvironmentService> m_EnvironmentBindings;
         readonly IEnvironmentService m_EnvironmentService;
+        readonly IEnvironmentDashboardUrlResolver m_DashboardUrlResolver;
 
         TemplateContainer m_RegularUxmlContainer;
         TemplateContainer m_NoConnectionUxmlContainer;
@@ -39,9 +40,10 @@ namespace Unity.Services.Core.Editor.Environments.UI
         VisualElement m_DropdownControlContainer;
 #endif
 
-        public EnvironmentSelector(IEnvironmentService environmentService)
+        public EnvironmentSelector(IEnvironmentService environmentService, IEnvironmentDashboardUrlResolver dashboardUrlResolver = null)
         {
             m_EnvironmentService = environmentService;
+            m_DashboardUrlResolver = dashboardUrlResolver ?? new EnvironmentDashboardUrlResolver();
             SetupRegularUxml();
             SetupNoConnectionUxml();
             Sync.SafeAsync(RefreshEnvironmentsAsync);
@@ -104,10 +106,7 @@ namespace Unity.Services.Core.Editor.Environments.UI
 
         void BindEvents()
         {
-            m_EnvironmentBindings = new ModelBinding<IEnvironmentService>(this)
-            {
-                Source = m_EnvironmentService
-            };
+            m_EnvironmentBindings = new ModelBinding<IEnvironmentService>(this) { Source = m_EnvironmentService };
 
             m_EnvironmentBindings.BindProperty(nameof(IEnvironmentService.Environments), OnEnvironmentsRefreshed);
             m_EnvironmentBindings.BindProperty(nameof(IEnvironmentService.ActiveEnvironmentId), service =>
@@ -258,19 +257,20 @@ namespace Unity.Services.Core.Editor.Environments.UI
         }
 
 
-        static void SetupManageEnvironments(VisualElement containerElement)
+        void SetupManageEnvironments(VisualElement containerElement)
         {
             var containerManageEnvironments = containerElement.Q(UxmlNames.EnvironmentContainerManageEnvironments);
 #if ENABLE_EDITOR_GAME_SERVICES
             var clickable = new Clickable(() =>
             {
-                Application.OpenURL($"https://dashboard.unity3d.com/organizations/{CloudProjectSettings.organizationKey}/projects/{CloudProjectSettings.projectId}/settings/environments");
+                Application.OpenURL(m_DashboardUrlResolver.ManageEnvironments());
             });
             containerManageEnvironments.AddManipulator(clickable);
 #else
             containerManageEnvironments.style.display = DisplayStyle.None;
 #endif
         }
+
 
         void SetupEnvironmentWarning(VisualElement containerElement)
         {
@@ -291,12 +291,12 @@ namespace Unity.Services.Core.Editor.Environments.UI
         {
             m_EnvironmentContainerDropdownSection.style.display =
                 containerElement == m_EnvironmentContainerDropdownSection
-                ? DisplayStyle.Flex
-                : DisplayStyle.None;
+                    ? DisplayStyle.Flex
+                    : DisplayStyle.None;
             m_EnvironmentContainerFetching.style.display =
                 containerElement == m_EnvironmentContainerFetching
-                ? DisplayStyle.Flex
-                : DisplayStyle.None;
+                    ? DisplayStyle.Flex
+                    : DisplayStyle.None;
         }
 
 
