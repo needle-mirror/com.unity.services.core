@@ -26,6 +26,8 @@ namespace Unity.Services.Core.Editor.Environments
         public System.Nullable<System.Guid> ActiveEnvironmentId { get; }
         public string ActiveEnvironmentName { get; }
         public System.Collections.Generic.IReadOnlyCollection<EnvironmentInfo> Environments { get; }
+        public System.Threading.Tasks.Task<EnvironmentInfo> CreateEnvironmentAsync(string name);
+        public System.Threading.Tasks.Task DeleteEnvironmentAsync(string name);
         public System.Threading.Tasks.Task RefreshAsync();
         public void SetActiveEnvironment(System.Guid environmentGuid);
         public void SetActiveEnvironment(string environmentName);
@@ -52,7 +54,7 @@ namespace Unity.Services.Core.Editor.Environments.UI
         {
             public UxmlSerializedData() {}
             public override object CreateInstance();
-            [System.Diagnostics.Conditional(@"UNITY_EDITOR")] public static void Register();
+            [System.Diagnostics.Conditional(@"UNITY_EDITOR")] [UnityEngine.UIElements.RegisterUxmlCache] public static void Register();
         }
     }
 }

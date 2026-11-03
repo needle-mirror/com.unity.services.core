@@ -1,4 +1,7 @@
 using System;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using UnityEngine;
 
 namespace Unity.Services.Core.Editor
@@ -6,6 +9,9 @@ namespace Unity.Services.Core.Editor
     /// <summary>
     /// Used by <see cref="IEditorGameService"/> to simplify operations related to the dashboard
     /// </summary>
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public static class EditorGameServiceDashboardHelper
     {
         static IEditorGameServiceAnalyticsSender s_DefaultEditorGameServiceAnalyticsSender = new EditorGameServiceAnalyticsSender();

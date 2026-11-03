@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Unity.Services.Core.Registration")]
 [assembly: InternalsVisibleTo("Unity.Services.Core.Editor")]
 [assembly: InternalsVisibleTo("Unity.Services.Core.Environments.Editor")]
+[assembly: InternalsVisibleTo("Unity.Services.Core.Releases.Editor")]
 
 #if UNITY_INCLUDE_TESTS
 [assembly: InternalsVisibleTo("Unity.Services.Core.Tests")]

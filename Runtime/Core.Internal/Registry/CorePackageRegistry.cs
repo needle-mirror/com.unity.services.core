@@ -1,3 +1,6 @@
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using UnityEngine;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 
@@ -6,6 +9,9 @@ namespace Unity.Services.Core.Internal
     /// <summary>
     /// A container to store all available <see cref="IInitializablePackage"/> in the project.
     /// </summary>
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public sealed class CorePackageRegistry
     {
         /// <summary>

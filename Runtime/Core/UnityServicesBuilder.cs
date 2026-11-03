@@ -1,7 +1,13 @@
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using UnityEngine;
 
 namespace Unity.Services.Core
 {
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     static class UnityServicesBuilder
     {
         internal delegate IUnityServices CreationDelegate(string servicesId);

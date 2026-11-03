@@ -1,5 +1,8 @@
 using System;
 using System.Threading.Tasks;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -8,6 +11,9 @@ namespace Unity.Services.Core.Editor
     /// <summary>
     /// Custom controls on top of base offering
     /// </summary>
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     static class UIServiceExtensions
     {
         public static Color TitleBackground = new Color(0f, 0f, 0f, 0.2f);

@@ -1,8 +1,14 @@
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using Unity.Services.Core.Internal.Serialization;
 using UnityEngine;
 
 namespace Unity.Services.Core.Configuration
 {
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     static class ConfigurationUtils
     {
         public const string ConfigFileName = "UnityServicesProjectConfiguration.json";

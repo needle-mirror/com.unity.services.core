@@ -12,6 +12,7 @@ namespace Unity.Services.Core.Editor.Environments
     {
         readonly IEnvironmentSaveSystem m_EnvironmentSaveSystem;
         readonly EditorValueTracker<string> m_ProjectIdTracker;
+        readonly EditorValueTracker<DateTime> m_SettingsFileTracker;
 
         public EnvironmentProvider(IEnvironmentSaveSystem environmentSaveSystem)
         {
@@ -28,6 +29,13 @@ namespace Unity.Services.Core.Editor.Environments
             };
 
             m_EnvironmentSaveSystem = environmentSaveSystem;
+
+            m_SettingsFileTracker = new EditorValueTracker<DateTime>(
+                () => m_EnvironmentSaveSystem.GetSettingsFileWriteTime());
+            m_SettingsFileTracker.ValueChanged += (_, __) =>
+            {
+                OnPropertyChanged(nameof(ActiveEnvironment));
+            };
         }
 
         public EnvironmentSettings ActiveEnvironment
@@ -50,7 +58,7 @@ namespace Unity.Services.Core.Editor.Environments
         public void Dispose()
         {
             m_ProjectIdTracker?.Dispose();
+            m_SettingsFileTracker?.Dispose();
         }
-
     }
 }

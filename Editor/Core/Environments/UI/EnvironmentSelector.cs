@@ -29,7 +29,6 @@ namespace Unity.Services.Core.Editor.Environments.UI
         VisualElement m_EnvironmentContainerFetching;
         VisualElement m_EnvironmentContainerWarning;
 
-
         Button m_RefreshEnvironmentButton;
         Button m_RetryConnectionButton;
 
@@ -75,7 +74,7 @@ namespace Unity.Services.Core.Editor.Environments.UI
         {
             m_RegularUxmlContainer = AddUxmlToVisualElement(this, k_UxmlPath);
             SetupEnvironmentDropdown(m_RegularUxmlContainer);
-            m_RegularUxmlContainer.Q("Release Pointers Section").style.display = DisplayStyle.None;
+            m_RegularUxmlContainer.Q("Releases Section").style.display = DisplayStyle.None;
             SetupManageEnvironments(m_RegularUxmlContainer);
             SetupEnvironmentWarning(m_RegularUxmlContainer);
             BindEvents();
@@ -114,7 +113,6 @@ namespace Unity.Services.Core.Editor.Environments.UI
                 OnEnvironmentChanged(service.ActiveEnvironmentInfo());
             });
             m_EnvironmentDropdownControl.RegisterValueChangedCallback(OnDropdownEnvironmentChanged);
-
         }
 
         void OnEnvironmentsRefreshed(IEnvironmentService service)
@@ -158,10 +156,8 @@ namespace Unity.Services.Core.Editor.Environments.UI
                 throw new Exception("Dropdown field of the Environment Selector has not been set.");
             }
 
-
             OnEnvironmentChanged(m_EnvironmentService.ActiveEnvironmentInfo());
         }
-
 
         void OnDropdownEnvironmentChanged(ChangeEvent<string> changeEvent)
         {
@@ -171,7 +167,6 @@ namespace Unity.Services.Core.Editor.Environments.UI
                 m_EnvironmentService.SetActiveEnvironment(info.Value);
             }
         }
-
 
         void SetupRetryConnectionButton(VisualElement containerElement, string buttonName)
         {
@@ -203,7 +198,6 @@ namespace Unity.Services.Core.Editor.Environments.UI
                 Sync.SafeAsync(RefreshEnvironmentsAsync, OnDoneRefreshingEnvironments);
             };
         }
-
 
         void OnDoneRefreshingEnvironments(Task refreshTask)
         {
@@ -256,7 +250,6 @@ namespace Unity.Services.Core.Editor.Environments.UI
 #endif
         }
 
-
         void SetupManageEnvironments(VisualElement containerElement)
         {
             var containerManageEnvironments = containerElement.Q(UxmlNames.EnvironmentContainerManageEnvironments);
@@ -271,13 +264,11 @@ namespace Unity.Services.Core.Editor.Environments.UI
 #endif
         }
 
-
         void SetupEnvironmentWarning(VisualElement containerElement)
         {
             m_EnvironmentContainerWarning = containerElement.Q(UxmlNames.EnvironmentContainerWarning);
             m_EnvironmentContainerWarning.style.display = DisplayStyle.None;
         }
-
 
         void OnEnvironmentChanged(EnvironmentInfo? environmentInfo)
         {
@@ -285,7 +276,6 @@ namespace Unity.Services.Core.Editor.Environments.UI
                 ? DisplayStyle.Flex
                 : DisplayStyle.None;
         }
-
 
         void SetVisibleEnvironmentContainer(VisualElement containerElement)
         {
@@ -299,6 +289,7 @@ namespace Unity.Services.Core.Editor.Environments.UI
                     : DisplayStyle.None;
         }
 
+        internal VisualElement RegularUxmlContainer => m_RegularUxmlContainer;
 
         static class UxmlNames
         {
@@ -307,22 +298,9 @@ namespace Unity.Services.Core.Editor.Environments.UI
             public const string EnvironmentContainerManageEnvironments = "Manage Environments Container";
             public const string EnvironmentContainerWarning = "Default Environment Section";
             public const string EnvironmentButtonRefreshEnvList = "RefreshEnvironmentDropdownButton";
-            public const string EnvironmentContainerDropdownControl = "EnvironmentDropdownContainer";
-            public const string EnvironmentDropdownControl = "EnvironmentDropdownControl";
+            public const string ContainerDropdownControl = "EnvironmentDropdownContainer";
+            public const string DropdownControl = "EnvironmentDropdownControl";
             public const string EnvironmentRetryConnectionButton = "EnvironmentRefreshBtn";
-
-            public const string UseLiveReleasesToggle = "UseLiveReleasesToggle";
-            public const string ReleasePointerContainerDropdownSection = "Release Pointer Dropdown Section";
-            public const string ReleasePointerContainerFetching = "Fetching Release Pointers Section";
-            public const string ReleasePointerContainerManageEnvironments = "Manage Release Pointers Container";
-            public const string ReleasePointerContainerWarning = "Default Release Pointer Section";
-            public const string ReleasePointerTargetSection = "Release Pointer Target Section";
-            public const string ReleasePointerTargetInfo = "ReleasePointerTargetInfo";
-            public const string ReleasePointerUnassignedSection = "Release Pointer Unassigned Section";
-            public const string ReleasePointerButtonRefreshPointerList = "RefreshReleasePointerDropdownButton";
-            public const string ReleasePointerContainerDropdownControl = "ReleasePointerDropdownContainer";
-            public const string ReleasePointerDropdownControl = "ReleasePointerDropdownControl";
-            public const string ReleasePointerRetryConnectionButton = "ReleasePointerRefreshBtn";
         }
 
         static class UxmlClasses

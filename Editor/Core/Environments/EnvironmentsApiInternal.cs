@@ -34,6 +34,16 @@ namespace Unity.Services.Core.Editor.Environments
             return m_EnvironmentService.RefreshEnvironmentsAsync();
         }
 
+        public Task<EnvironmentInfo> CreateEnvironmentAsync(string name)
+        {
+            return m_EnvironmentService.CreateEnvironmentAsync(name);
+        }
+
+        public Task DeleteEnvironmentAsync(string name)
+        {
+            return m_EnvironmentService.DeleteEnvironmentAsync(name);
+        }
+
         public void SetActiveEnvironment(EnvironmentInfo environmentInfo)
         {
             m_EnvironmentService.SetActiveEnvironment(environmentInfo);

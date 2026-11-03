@@ -1,3 +1,5 @@
+using System;
+
 namespace Unity.Services.Core.Editor
 {
     interface IFileSystem
@@ -9,5 +11,7 @@ namespace Unity.Services.Core.Editor
         void SaveFile(string path , string fileContent);
 
         bool FileExists(string path);
+
+        DateTime GetLastWriteTime(string path);
     }
 }

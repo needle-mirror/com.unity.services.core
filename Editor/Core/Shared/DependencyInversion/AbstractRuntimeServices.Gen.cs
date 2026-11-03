@@ -1,8 +1,14 @@
 // WARNING: Auto generated code. Modifications will be lost!
 using System;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace Unity.Services.Core.Editor.Shared.DependencyInversion
 {
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     abstract class AbstractRuntimeServices<T> where T : AbstractRuntimeServices<T>, new()
     {
         IScopedServiceProvider m_ServiceProvider;
@@ -42,6 +48,11 @@ namespace Unity.Services.Core.Editor.Shared.DependencyInversion
             }
 
             m_ServiceProvider = Collection.Build();
+        }
+
+        public static void DisposeInstance()
+        {
+            s_Instance?.m_ServiceProvider?.Dispose();
         }
 
         public IScopedServiceProvider CreateScope()

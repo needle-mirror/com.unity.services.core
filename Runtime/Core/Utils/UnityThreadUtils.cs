@@ -1,9 +1,15 @@
 using System.Threading;
 using System.Threading.Tasks;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using UnityEngine;
 
 namespace Unity.Services.Core
 {
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     static class UnityThreadUtils
     {
         static int s_UnityThreadId;

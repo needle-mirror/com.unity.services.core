@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Unity.Services.Core.Environments.Client.Apis.Default;
 using Unity.Services.Core.Environments.Client.Default;
 
@@ -29,9 +27,22 @@ namespace Unity.Services.Core.Editor.Environments
         public async Task<EnvironmentInfo> GetEnvironment(string environmentId)
         {
             var request = new UnityGetEnvironmentRequest(m_ProjectId, environmentId);
-            var response = await  m_EnvironmentClient.UnityGetEnvironmentAsync(request);
+            var response = await m_EnvironmentClient.UnityGetEnvironmentAsync(request);
             return new EnvironmentInfo(response.Result);
         }
 
+        public async Task<EnvironmentInfo> CreateEnvironment(string name)
+        {
+            var body = new Unity.Services.Core.Environments.Client.Models.UnityCreateEnvironmentRequest(name);
+            var request = new UnityCreateEnvironmentRequest(m_ProjectId, body);
+            var response = await m_EnvironmentClient.UnityCreateEnvironmentAsync(request);
+            return new EnvironmentInfo(response.Result);
+        }
+
+        public async Task DeleteEnvironment(string environmentId)
+        {
+            var request = new UnityDeleteEnvironmentRequest(m_ProjectId, environmentId);
+            await m_EnvironmentClient.UnityDeleteEnvironmentAsync(request);
+        }
     }
 }

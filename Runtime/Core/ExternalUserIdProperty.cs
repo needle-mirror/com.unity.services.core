@@ -1,13 +1,46 @@
 using System;
-using UnityEngine;
+#if ENABLE_UNITY_CLOUD_IDENTIFIERS && UNITY_SUPPORTS_IDENTIFIERS_USER_ID
+using UnityEngine.Identifiers;
+#endif
 
 namespace Unity.Services.Core
 {
-    class ExternalUserIdProperty
+    class ExternalUserIdProperty : IDisposable
     {
+#if ENABLE_UNITY_CLOUD_IDENTIFIERS && UNITY_SUPPORTS_IDENTIFIERS_USER_ID
+        public event Action<string> UserIdChanged;
+
+        public ExternalUserIdProperty()
+        {
+            Identifiers.userIdChanged += OnEngineUserIdChanged;
+        }
+
+        public void Dispose()
+        {
+            Identifiers.userIdChanged -= OnEngineUserIdChanged;
+            UserIdChanged = null;
+        }
+
+        void OnEngineUserIdChanged(string newId)
+        {
+            UserIdChanged?.Invoke(newId);
+        }
+
+        public string UserId
+        {
+            get => Identifiers.userId;
+            set => Identifiers.userId = value;
+        }
+#else
         public event Action<string> UserIdChanged;
 
         string m_UserId;
+
+        public void Dispose()
+        {
+            UserIdChanged = null;
+            m_UserId = null;
+        }
 
         public string UserId
         {
@@ -18,5 +51,6 @@ namespace Unity.Services.Core
                 UserIdChanged?.Invoke(m_UserId);
             }
         }
+#endif
     }
 }

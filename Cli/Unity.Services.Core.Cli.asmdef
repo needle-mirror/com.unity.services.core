@@ -1,0 +1,29 @@
+{
+    "name": "Unity.Services.Core.Cli",
+    "rootNamespace": "Unity.Services.Core.Cli",
+    "references": [
+        "Unity.Services.Core",
+        "Unity.Services.Core.Components",
+        "Unity.Services.Core.Internal",
+        "Unity.Services.Core.Environments.Editor",
+        "Unity.Pipeline",
+        "Unity.Pipeline.Attributes"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_PIPELINE_AVAILABLE"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.pipeline",
+            "expression": "0.9.0-exp.1",
+            "define": "UNITY_PIPELINE_AVAILABLE"
+        }
+    ],
+    "noEngineReferences": false
+}

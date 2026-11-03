@@ -1,12 +1,18 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using Unity.Services.Core.Internal.Serialization;
 using Unity.Services.Core.Scheduler.Internal;
 using UnityEditor;
 
 namespace Unity.Services.Core.Editor
 {
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     class AccessTokensSingleton : IAccessTokens
     {
         static IAccessTokens s_Instance;

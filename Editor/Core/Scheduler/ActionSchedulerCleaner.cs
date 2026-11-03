@@ -1,10 +1,16 @@
 using System.Collections.Generic;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using UnityEditor;
 using Unity.Services.Core.Scheduler.Internal;
 using UnityEngine.LowLevel;
 
 namespace Unity.Services.Core.Editor
 {
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     class ActionSchedulerCleaner
     {
         static ActionSchedulerCleaner s_EditorInstance;

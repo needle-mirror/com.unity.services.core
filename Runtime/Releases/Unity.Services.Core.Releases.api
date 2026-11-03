@@ -1,0 +1,11 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace Unity.Services.Core.Releases
+{
+    public static class ReleasesOptionsExtensions
+    {
+        public const string ReleasePointerKey = @"com.unity.services.core.release-pointer";
+        public static InitializationOptions SetReleasePointer(this InitializationOptions self, string releasePointer);
+    }
+}

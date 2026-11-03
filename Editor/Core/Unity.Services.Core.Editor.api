@@ -15,7 +15,7 @@ namespace Unity.Services.Core.Editor
         public CdnConfiguredEndpoint() {}
     }
 
-    public static class EditorGameServiceDashboardHelper
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup] public static class EditorGameServiceDashboardHelper
     {
         public static void OpenDashboard(this IEditorGameService editorGameService);
     }
@@ -32,7 +32,7 @@ namespace Unity.Services.Core.Editor
         public abstract bool IsEnabled();
     }
 
-    public sealed class EditorGameServiceRegistry : IEditorGameServiceRegistry
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup] public sealed class EditorGameServiceRegistry : IEditorGameServiceRegistry
     {
         public static EditorGameServiceRegistry Instance { get; }
         protected override void Finalize();
@@ -110,7 +110,7 @@ namespace Unity.Services.Core.Editor.OrganizationHandler
         public string Key { get; }
     }
 
-    public static class OrganizationProvider
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup] public static class OrganizationProvider
     {
         public static IOrganizationHandler Organization { get; set; }
     }

@@ -33,6 +33,12 @@ namespace Unity.Services.Core.Internal
         /// </summary>
         public readonly Dictionary<int, IServiceComponent> ComponentTypeHashToInstance;
 
+        /// <summary>
+        /// Key: Hash code of the <see cref="IInitializablePackage"/> type.
+        /// Value: Hash codes of the <see cref="IServiceComponent"/> types the package can't initialize without.
+        /// </summary>
+        public readonly Dictionary<int, HashSet<int>> PackageTypeHashToRequiredComponentTypeHashes;
+
         internal DependencyTree()
             : this(
                 new Dictionary<int, IInitializablePackage>(),
@@ -50,6 +56,7 @@ namespace Unity.Services.Core.Internal
             ComponentTypeHashToPackageTypeHash = componentToPackage;
             PackageTypeHashToComponentTypeHashDependencies = packageToComponentDependencies;
             ComponentTypeHashToInstance = componentToInstance;
+            PackageTypeHashToRequiredComponentTypeHashes = new Dictionary<int, HashSet<int>>();
         }
     }
 }

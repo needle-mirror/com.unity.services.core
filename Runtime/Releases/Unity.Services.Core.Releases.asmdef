@@ -1,0 +1,17 @@
+{
+    "name": "Unity.Services.Core.Releases",
+    "rootNamespace": "",
+    "references": [
+        "Unity.Services.Core.Internal",
+        "Unity.Services.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

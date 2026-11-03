@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using UnityEngine;
 
 namespace Unity.Services.Core
@@ -9,6 +12,9 @@ namespace Unity.Services.Core
     /// <summary>
     /// Utility to initialize all Unity services from a single endpoint.
     /// </summary>
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public static class UnityServices
     {
         /// <summary>
@@ -72,8 +78,19 @@ namespace Unity.Services.Core
 
         /// <summary>
         /// ExternalUserId.
-        /// Use this property to pass a user ID from a 3rd party identity provider to Unity Gaming Services
+        /// Use this property to pass a user ID from a 3rd party identity provider to Unity Gaming Services.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// On Unity versions that expose <c>UnityEngine.Identifiers.Identifiers.userId</c>, this
+        /// property is backed by it and persists across game sessions. On engines without that API, the value is held in memory only.
+        /// </para>
+        /// <para>
+        /// For new code targeting engines that expose it, prefer setting
+        /// <c>UnityEngine.Identifiers.Identifiers.userId</c> directly — it is the canonical owner
+        /// of the value.
+        /// </para>
+        /// </remarks>
         public static string ExternalUserId
         {
             get => ExternalUserIdProperty.UserId;
@@ -83,8 +100,7 @@ namespace Unity.Services.Core
         internal static void ResetStaticsOnLoad()
         {
             InstantiationCompletion = null;
-            if (ExternalUserIdProperty != null && ExternalUserId != null)
-                ExternalUserId = null;
+            ExternalUserIdProperty?.Dispose();
             ExternalUserIdProperty = new ExternalUserIdProperty();
             Instance = null;
         }

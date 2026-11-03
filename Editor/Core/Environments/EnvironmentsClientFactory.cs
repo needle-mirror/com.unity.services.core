@@ -42,6 +42,30 @@ namespace Unity.Services.Core.Editor.Environments
             return await environmentsApi.GetEnvironment(environmentId);
         }
 
+        public async Task<EnvironmentInfo?> CreateEnvironment(string name)
+        {
+            var environmentsApi = await Build();
+
+            if (environmentsApi == null)
+            {
+                return null;
+            }
+
+            return await environmentsApi.CreateEnvironment(name);
+        }
+
+        public async Task<bool> DeleteEnvironment(string environmentId)
+        {
+            var environmentsApi = await Build();
+
+            if (environmentsApi == null)
+            {
+                return false;
+            }
+
+            await environmentsApi.DeleteEnvironment(environmentId);
+            return true;
+        }
 
         async Task<EnvironmentsClient> Build()
         {
@@ -55,7 +79,8 @@ namespace Unity.Services.Core.Editor.Environments
 
             string baseUrl = null;
             var env = new CloudEnvironmentConfigProvider();
-            if (env.IsStaging())
+            var isStaging = env.IsStaging();
+            if (isStaging)
             {
                 baseUrl = k_StagingUrl;
             }

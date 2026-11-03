@@ -10,6 +10,8 @@ namespace Unity.Services.Core.Editor.Environments
         IReadOnlyCollection<EnvironmentInfo> Environments { get; }
         Guid? ActiveEnvironmentId { get; }
         Task RefreshEnvironmentsAsync();
+        Task<EnvironmentInfo> CreateEnvironmentAsync(string name);
+        Task DeleteEnvironmentAsync(string name);
         void SetActiveEnvironment(EnvironmentInfo environmentInfo);
         void SetActiveEnvironment(string environmentName);
         void SetActiveEnvironment(Guid environmentGuid);

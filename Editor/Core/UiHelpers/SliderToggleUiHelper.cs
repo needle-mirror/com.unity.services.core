@@ -1,9 +1,15 @@
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Unity.Services.Core.Editor
 {
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     static class SliderToggleUiHelper
     {
         static Texture2D s_ToggleOffTexture;

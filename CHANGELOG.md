@@ -5,6 +5,28 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.19.0] - 2026-11-03
+
+### Added
+- Services CLI commands for Core (`Cli/`, compiled only when `com.unity.pipeline` is installed) now ship with the package.
+- Live Releases: choose a release for each environment in Project Settings > Services > Environments, or set a release pointer at runtime with `InitializationOptions.SetReleasePointer`. On Unity 6000.4 and newer, build profiles can also select a release pointer. The selected release is exposed to other Unity Gaming Services packages through Core.
+- Live Releases: the active release selection is now saved per environment, so switching environments restores each environment's previously chosen release.
+
+### Changed
+- When no active environment is set after refreshing the environment list, the editor now automatically selects 'production' as the default.
+- `UnityServices.ExternalUserId` now delegates to the engine's
+  `UnityEngine.Identifiers.Identifiers.userId` API when the engine
+  supports it.
+- Added newly required `[NoAutoStaticsCleanup]` for support on Unity 6.7+
+
+### Fixed
+- Fixed a compilation error on .NET 8+ (`SYSLIB0051`) caused by `InvalidJwtException`'s legacy serialization constructor; the constructor is now marked obsolete on those runtimes.
+- Packages that require components from a package that failed to initialize are no longer
+  initialized, so a failure such as an unlinked project ID is no longer accompanied by misleading
+  "There is no component registered. Are you missing a package?" errors.
+- Live Releases: the Editor no longer requests release pointers or releases before the project ID is available (early in a session before the project link resolves, or in a headless Editor). These requests logged a misleading 'Failed to fetch release pointers (404)' warning. The lists are fetched once the project ID arrives. Release fetch warnings now include the request path, and HTTP failures fetching releases are now logged.
+- Fixed `DependencyTreeSortFailedException` on Unity 7000.x macOS Player builds with High Managed Stripping Level.
+
 ## [1.18.0] - 2026-05-28
 
 ### Added

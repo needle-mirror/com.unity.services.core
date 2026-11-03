@@ -1,0 +1,65 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace Unity.Services.Core.Editor.Releases
+{
+    public interface IReleasesApi : System.ComponentModel.INotifyPropertyChanged
+    {
+        public string ActiveReleaseId { get; }
+        public string ActiveReleaseName { get; }
+        public bool LiveReleasesEnabled { get; }
+        public System.Collections.Generic.IReadOnlyCollection<ReleasePointerInfo> ReleasePointers { get; }
+        public System.Collections.Generic.IReadOnlyCollection<ReleaseInfo> Releases { get; }
+        public void SetActiveRelease(ReleaseInfo releaseInfo);
+    }
+
+    public static class ReleaseConfigurationStatus
+    {
+        public static bool IsReleaseConfiguredForCurrentEnvironment();
+    }
+
+    public struct ReleaseInfo
+    {
+        [Newtonsoft.Json.JsonProperty(@"description")] public readonly string Description;
+        [Newtonsoft.Json.JsonProperty(@"id")] public readonly string Id;
+        [Newtonsoft.Json.JsonProperty(@"name")] public readonly string Name;
+        public ReleaseInfo(string name, string id, string description = default(string)) {}
+    }
+
+    public struct ReleasePointerInfo
+    {
+        [Newtonsoft.Json.JsonProperty(@"id")] public readonly System.Guid Id;
+        [Newtonsoft.Json.JsonProperty(@"isDefault")] public readonly bool IsDefault;
+        [Newtonsoft.Json.JsonProperty(@"name")] public readonly string Name;
+        [Newtonsoft.Json.JsonProperty(@"releaseName")] public readonly string ReleaseName;
+        public ReleasePointerInfo(string name, System.Guid id, bool isDefault, string releaseName = default(string)) {}
+    }
+
+    public static class ReleasesApi
+    {
+        public static IReleasesApi Instance { get; }
+    }
+
+    [UnityEngine.CreateAssetMenu(fileName = @"ReleasesBuildProfileSettings", menuName = @"Scriptable Objects/BuildProfile")] public class ReleasesBuildProfileSettings : UnityEngine.ScriptableObject
+    {
+        public string selectedEnvironmentName;
+        public string selectedReleasePointerName;
+        public ReleasesBuildProfileSettings() {}
+        [UnityEditor.Build.Profile.BuildProfileSettingsProvider(typeof(ReleasesBuildProfileSettings))] public static UnityEditor.Build.Profile.BuildProfileSettingsProvider createProvider();
+    }
+}
+
+namespace Unity.Services.Core.Editor.Releases.UI
+{
+    [UnityEngine.UIElements.UxmlElement] public class ReleaseView : UnityEngine.UIElements.VisualElement
+    {
+        public ReleaseView() {}
+        public void Bind(IReleasesApi releasesApi);
+        [System.Runtime.CompilerServices.CompilerGenerated] public class UxmlSerializedData : UnityEngine.UIElements.VisualElement.UxmlSerializedData
+        {
+            public UxmlSerializedData() {}
+            public override object CreateInstance();
+            [System.Diagnostics.Conditional(@"UNITY_EDITOR")] [UnityEngine.UIElements.RegisterUxmlCache] public static void Register();
+        }
+    }
+}

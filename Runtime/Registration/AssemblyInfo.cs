@@ -1,5 +1,7 @@
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
+[assembly: AlwaysLinkAssembly]
 [assembly: InternalsVisibleTo("Unity.Services.Core.Editor")]
 [assembly: InternalsVisibleTo("Unity.Services.Core.TestUtils")]
 

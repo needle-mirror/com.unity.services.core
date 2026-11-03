@@ -32,6 +32,20 @@ namespace Unity.Services.Core.Editor.Environments
         Task RefreshAsync();
 
         /// <summary>
+        /// Creates a new environment for the active project and refreshes the environment list.
+        /// </summary>
+        /// <param name="name">The name of the environment to create.</param>
+        /// <returns>The created <see cref="EnvironmentInfo"/>.</returns>
+        Task<EnvironmentInfo> CreateEnvironmentAsync(string name);
+
+        /// <summary>
+        /// Deletes the environment with the given name for the active project and refreshes the environment list.
+        /// </summary>
+        /// <param name="name">The name of the environment to delete.</param>
+        /// <returns>The <see cref="Task"/> for the delete operation.</returns>
+        Task DeleteEnvironmentAsync(string name);
+
+        /// <summary>
         /// Set the active environment.
         /// </summary>
         /// <param name="environmentInfo">The <see cref="EnvironmentInfo"/> to set as active</param>

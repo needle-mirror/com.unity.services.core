@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using UnityEngine;
 
 namespace Unity.Services.Core
@@ -9,6 +12,9 @@ namespace Unity.Services.Core
     /// All assemblies register their reset callbacks during SubsystemRegistration,
     /// and execution is triggered by UnityServicesInitializer at AfterAssembliesLoaded.
     /// </summary>
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public static class CoreResetter
     {
         static readonly List<Action> s_ResetCallbacks = new List<Action>();

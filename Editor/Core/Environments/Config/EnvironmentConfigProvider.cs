@@ -7,6 +7,7 @@ namespace Unity.Services.Core.Editor.Environments.Config
     class EnvironmentConfigProvider : IConfigurationProvider
     {
         readonly IEnvironmentSaveSystem m_EnvironmentSaveSystem;
+
         public int callbackOrder { get; }
 
         public EnvironmentConfigProvider() : this(new FileSystem()) {}
@@ -34,6 +35,5 @@ namespace Unity.Services.Core.Editor.Environments.Config
 
             return string.IsNullOrEmpty(loadedEnv.EnvironmentName) ? EnvironmentsOptionsExtensions.EnvironmentDefaultNameValue : loadedEnv.EnvironmentName;
         }
-
     }
 }

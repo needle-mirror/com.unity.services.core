@@ -34,6 +34,15 @@ namespace Unity.Services.Authentication.Internal
     {
         public string ReleaseId { get; }
         public string ReleaseName { get; }
+    }
+
+    [UnityEngine.Scripting.RequireImplementors] public interface ITargetingActivation : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public void RegisterConsumer(string consumerName);
+    }
+
+    public interface ITargetingContext : Unity.Services.Core.Internal.IServiceComponent
+    {
         public string[] VariantTags { get; }
     }
 }
@@ -86,6 +95,11 @@ namespace Unity.Services.Core.Configuration.Internal
 
 namespace Unity.Services.Core.Device.Internal
 {
+    public interface IEngineInstallationId : Unity.Services.Core.Internal.IServiceComponent
+    {
+        public string GetOrCreateIdentifier();
+    }
+
     public interface IInstallationId : Unity.Services.Core.Internal.IServiceComponent
     {
         public string GetOrCreateIdentifier();
@@ -108,7 +122,7 @@ namespace Unity.Services.Core.Internal
         public CircularDependencyException(string message) {}
     }
 
-    public sealed class CorePackageRegistry
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup] public sealed class CorePackageRegistry
     {
         public static CorePackageRegistry Instance { get; }
         public CoreRegistration Register<TPackage>([JetBrains.Annotations.NotNull] TPackage package) where TPackage : IInitializablePackage;
@@ -121,7 +135,7 @@ namespace Unity.Services.Core.Internal
         public CoreRegistration ProvidesComponent<T>() where T : IServiceComponent;
     }
 
-    public sealed class CoreRegistry
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup] public sealed class CoreRegistry
     {
         public static CoreRegistry Instance { get; }
         public string InstanceId { get; }
@@ -161,6 +175,7 @@ namespace Unity.Services.Core.Releases.Internal
     public interface IReleases : Unity.Services.Core.Internal.IServiceComponent
     {
         public string Pointer { get; }
+        public string ReleaseName { get; }
     }
 }
 

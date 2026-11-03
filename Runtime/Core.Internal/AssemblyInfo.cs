@@ -1,4 +1,7 @@
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
+
+[assembly: AlwaysLinkAssembly]
 
 // Access to AsyncOperation (deprecated)
 [assembly: InternalsVisibleTo("Unity.Services.Authentication")]
@@ -22,6 +25,7 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Unity.Services.Core.Telemetry")]
 [assembly: InternalsVisibleTo("Unity.Services.Core.Threading")]
 [assembly: InternalsVisibleTo("Unity.Services.Core.Environments.Editor")]
+[assembly: InternalsVisibleTo("Unity.Services.Core.Releases.Editor")]
 
 // Test assemblies
 #if UNITY_INCLUDE_TESTS

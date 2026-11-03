@@ -19,6 +19,7 @@ namespace Unity.Services.Core.Internal
             var packageTypeHash = typeof(TPackage).GetHashCode();
             Tree.PackageTypeHashToInstance[packageTypeHash] = package;
             Tree.PackageTypeHashToComponentTypeHashDependencies[packageTypeHash] = new List<int>();
+            Tree.PackageTypeHashToRequiredComponentTypeHashes.Remove(packageTypeHash);
 
             return new CoreRegistration(this, packageTypeHash);
         }
@@ -30,6 +31,13 @@ namespace Unity.Services.Core.Internal
             var componentTypeHash = intendedType.GetHashCode();
             Tree.ComponentTypeHashToInstance[componentTypeHash] = new MissingComponent(intendedType);
 
+            if (!Tree.PackageTypeHashToRequiredComponentTypeHashes.TryGetValue(packageTypeHash, out var requiredTypeHashes))
+            {
+                requiredTypeHashes = new HashSet<int>();
+                Tree.PackageTypeHashToRequiredComponentTypeHashes[packageTypeHash] = requiredTypeHashes;
+            }
+
+            requiredTypeHashes.Add(componentTypeHash);
             AddComponentDependencyToPackage(componentTypeHash, packageTypeHash);
         }
 

@@ -41,11 +41,25 @@ namespace Unity.Services.Core.Internal
 
             m_Registry.ComponentRegistry.ResetProvidedComponents(dependencyTree.ComponentTypeHashToInstance);
             var failureReasons = new List<Exception>(m_SortedPackageTypeHashes.Count);
+            var failedPackageTypeHashes = new HashSet<int>();
             var stopwatch = new Stopwatch();
             for (var i = 0; i < m_SortedPackageTypeHashes.Count; i++)
             {
-                var package = GetPackageAt(i);
-                await TryInitializePackageAsync(package);
+                var packageTypeHash = m_SortedPackageTypeHashes[i];
+
+                // Initializing a package whose required components weren't provided would only
+                // report misleading missing component errors on top of the actual failure.
+                if (DependsOnFailedPackage(packageTypeHash))
+                {
+                    failedPackageTypeHashes.Add(packageTypeHash);
+                    continue;
+                }
+
+                var package = dependencyTree.PackageTypeHashToInstance[packageTypeHash];
+                if (!await TryInitializePackageAsync(package))
+                {
+                    failedPackageTypeHashes.Add(packageTypeHash);
+                }
             }
 
             if (failureReasons.Count > 0)
@@ -55,7 +69,7 @@ namespace Unity.Services.Core.Internal
 
             return packagesInitInfos;
 
-            async Task TryInitializePackageAsync(IInitializablePackage package)
+            async Task<bool> TryInitializePackageAsync(IInitializablePackage package)
             {
                 try
                 {
@@ -69,18 +83,36 @@ namespace Unity.Services.Core.Internal
                         InitializationTimeInSeconds = stopwatch.Elapsed.TotalSeconds,
                     };
                     packagesInitInfos.Add(initializationInfo);
+                    return true;
                 }
                 catch (Exception e)
                 {
                     stopwatch.Stop();
                     failureReasons.Add(e);
+                    return false;
                 }
             }
 
-            IInitializablePackage GetPackageAt(int index)
+            bool DependsOnFailedPackage(int packageTypeHash)
             {
-                var packageTypeHash = m_SortedPackageTypeHashes[index];
-                return dependencyTree.PackageTypeHashToInstance[packageTypeHash];
+                if (failedPackageTypeHashes.Count == 0
+                    || !dependencyTree.PackageTypeHashToRequiredComponentTypeHashes.TryGetValue(
+                        packageTypeHash, out var requiredTypeHashes))
+                {
+                    return false;
+                }
+
+                foreach (var componentTypeHash in requiredTypeHashes)
+                {
+                    if (dependencyTree.ComponentTypeHashToPackageTypeHash.TryGetValue(
+                            componentTypeHash, out var providerTypeHash)
+                        && failedPackageTypeHashes.Contains(providerTypeHash))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
 
             async Task InitializePackageAsync(IInitializablePackage package)

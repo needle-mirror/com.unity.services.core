@@ -43,6 +43,9 @@ namespace Unity.Services.Core.Editor
         /// <param name="context">
         /// The <see cref="StreamingContext"/> that contains contextual information about the source or destination.
         /// </param>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         protected InvalidJwtException(SerializationInfo info, StreamingContext context)
             : base(info, context) {}
     }

@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using UnityEngine;
 using NotNull = JetBrains.Annotations.NotNullAttribute;
 using SuppressMessage = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
@@ -8,6 +11,9 @@ namespace Unity.Services.Core.Internal
     /// <summary>
     /// A container to store all available <see cref="IServiceComponent"/> and services in the project.
     /// </summary>
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public sealed class CoreRegistry
     {
         /// <summary>

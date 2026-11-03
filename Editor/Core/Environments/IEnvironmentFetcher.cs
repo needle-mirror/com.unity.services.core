@@ -7,5 +7,7 @@ namespace Unity.Services.Core.Editor.Environments
     {
         Task<List<EnvironmentInfo>> FetchEnvironments();
         Task<EnvironmentInfo?> FetchEnvironment(string environmentId);
+        Task<EnvironmentInfo?> CreateEnvironment(string name);
+        Task<bool> DeleteEnvironment(string environmentId);
     }
 }

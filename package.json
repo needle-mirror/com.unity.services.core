@@ -1,7 +1,7 @@
 {
   "name": "com.unity.services.core",
   "displayName": "Services Core",
-  "version": "1.18.0",
+  "version": "1.19.0",
   "unity": "2022.3",
   "description": "This package defines common components used by multiple Game Service packages.\nThese are standardized and aim to unify the overall experience of working with Game Services SDK.",
   "dependencies": {
@@ -13,15 +13,15 @@
     "com.unity.services.core.tests": "0.0.0"
   },
   "_upm": {
-    "changelog": "### Added\n- Added support for targeting"
+    "changelog": "### Added\n- Services CLI commands for Core (`Cli/`, compiled only when `com.unity.pipeline` is installed) now ship with the package.\n- Live Releases: choose a release for each environment in Project Settings > Services > Environments, or set a release pointer at runtime with `InitializationOptions.SetReleasePointer`. On Unity 6000.4 and newer, build profiles can also select a release pointer. The selected release is exposed to other Unity Gaming Services packages through Core.\n- Live Releases: the active release selection is now saved per environment, so switching environments restores each environment's previously chosen release.\n\n### Changed\n- When no active environment is set after refreshing the environment list, the editor now automatically selects 'production' as the default.\n- `UnityServices.ExternalUserId` now delegates to the engine's\n  `UnityEngine.Identifiers.Identifiers.userId` API when the engine\n  supports it.\n- Added newly required `[NoAutoStaticsCleanup]` for support on Unity 6.7+\n\n### Fixed\n- Fixed a compilation error on .NET 8+ (`SYSLIB0051`) caused by `InvalidJwtException`'s legacy serialization constructor; the constructor is now marked obsolete on those runtimes.\n- Packages that require components from a package that failed to initialize are no longer\n  initialized, so a failure such as an unlinked project ID is no longer accompanied by misleading\n  \"There is no component registered. Are you missing a package?\" errors.\n- Live Releases: the Editor no longer requests release pointers or releases before the project ID is available (early in a session before the project link resolves, or in a headless Editor). These requests logged a misleading 'Failed to fetch release pointers (404)' warning. The lists are fetched once the project ID arrives. Release fetch warnings now include the request path, and HTTP failures fetching releases are now logged.\n- Fixed `DependencyTreeSortFailedException` on Unity 7000.x macOS Player builds with High Managed Stripping Level."
   },
   "upmCi": {
-    "footprint": "695ddd93402a72f6a91c6c39b4706403d4727d53"
+    "footprint": "cfa6c607ca3d7eb24769e005f50f28f9ce55f9ab"
   },
-  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.services.core@1.18/manual/index.html",
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.services.core@1.19/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/operate-services-sdk.git",
     "type": "git",
-    "revision": "8136ca127c21ec2f6e9d3ed29681c3db65908ec4"
+    "revision": "443b95915b8edec95606cd1ea0ceaffb4c442615"
   }
 }

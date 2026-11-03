@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using Unity.Services.Core.Configuration.Editor;
 using Unity.Services.Core.Internal;
 using UnityEditor;
@@ -10,6 +13,9 @@ using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace Unity.Services.Core.Editor
 {
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     class OperatePackageVersionConfigProvider : IConfigurationProvider
     {
         internal const string PackageVersionKeyFormat = "{0}.version";

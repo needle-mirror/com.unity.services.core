@@ -1,7 +1,13 @@
 using System.Collections.Generic;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace Unity.Services.Core.Editor
 {
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     class ServiceUrlBuilder : IServiceUrlBuilder
     {
         ICloudEnvironmentConfigurationProvider m_ConfigurationProvider;

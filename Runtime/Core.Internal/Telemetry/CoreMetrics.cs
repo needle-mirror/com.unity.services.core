@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Telemetry.Internal;
 using UnityEngine;
@@ -9,6 +12,9 @@ namespace Unity.Services.Core.Internal
     /// <summary>
     /// This object sends all metric events for the Services Core package.
     /// </summary>
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     class CoreMetrics
     {
         internal const string PackageInitTimeMetricName = "package_init_time";

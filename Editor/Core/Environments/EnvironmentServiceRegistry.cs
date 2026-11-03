@@ -1,6 +1,11 @@
 using Unity.Services.Core.Editor.Environments.Analytics;
 using Unity.Services.Core.Editor.Environments.Save;
 using Unity.Services.Core.Editor.Shared.DependencyInversion;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#else
+using UnityEditor;
+#endif
 
 namespace Unity.Services.Core.Editor.Environments
 {
@@ -9,6 +14,21 @@ namespace Unity.Services.Core.Editor.Environments
         public EnvironmentServiceRegistry()
         {
             Initialize(new ServiceCollection());
+        }
+
+#if LIFECYCLE_APIS_AVAILABLE
+        [OnCodeDeinitializing]
+#else
+        [InitializeOnLoadMethod]
+        static void SubscribeToReload()
+        {
+            AssemblyReloadEvents.beforeAssemblyReload += DisposeServices;
+        }
+
+#endif
+        static void DisposeServices()
+        {
+            DisposeInstance();
         }
 
         public override void Register(ServiceCollection collection)

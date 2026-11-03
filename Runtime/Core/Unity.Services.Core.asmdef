@@ -8,6 +8,27 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "Unity",
+            "expression": "[6000.0.78f1,6000.1.0a1)",
+            "define": "UNITY_SUPPORTS_IDENTIFIERS_USER_ID"
+        },
+        {
+            "name": "Unity",
+            "expression": "[6000.3.18f1,6000.4.0a1)",
+            "define": "UNITY_SUPPORTS_IDENTIFIERS_USER_ID"
+        },
+        {
+            "name": "Unity",
+            "expression": "[6000.5.2f1,6000.6.0a1)",
+            "define": "UNITY_SUPPORTS_IDENTIFIERS_USER_ID"
+        },
+        {
+            "name": "Unity",
+            "expression": "6000.6.0a8",
+            "define": "UNITY_SUPPORTS_IDENTIFIERS_USER_ID"
+        }
+    ],
     "noEngineReferences": false
 }

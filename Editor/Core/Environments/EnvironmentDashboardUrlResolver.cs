@@ -1,4 +1,3 @@
-using System;
 using Unity.Services.Core.Editor.OrganizationHandler;
 
 namespace Unity.Services.Core.Editor.Environments
@@ -35,12 +34,6 @@ namespace Unity.Services.Core.Editor.Environments
         {
             var host = GetHost();
             return $"{host}/home/organizations/{m_OrganizationHandler.Key}/projects/{m_ProjectInfo.ProjectId}/settings/environments";
-        }
-
-        public string ManageReleasePointers(Guid environmentId)
-        {
-            var host = GetHost();
-            return $"{host}/home/organizations/{m_OrganizationHandler.Key}/projects/{m_ProjectInfo.ProjectId}/environments/{environmentId}/releases/overview?tab=releasePointers";
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Unity.Services.Core
         public const int Unknown = 0;
     }
 
-    public static class CoreResetter
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup] public static class CoreResetter
     {
         public static event System.Action OnResetComplete;
         public static void Register(System.Action resetCallback);
@@ -90,7 +90,7 @@ namespace Unity.Services.Core
         Initialized = 2,
     }
 
-    public static class UnityServices
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup] public static class UnityServices
     {
         public static event System.Action Initialized;
         public static event System.Action<System.Exception> InitializeFailed;

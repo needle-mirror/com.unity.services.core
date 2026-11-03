@@ -14,6 +14,7 @@ namespace Unity.Services.Core.Editor.Environments.Save
 
         SettingsFile m_CachedSettings;
         bool m_IsDirty = true;
+        DateTime m_CachedWriteTime;
 
         public EnvironmentSaveSystem(IFileSystem fileSystem)
         {
@@ -25,12 +26,18 @@ namespace Unity.Services.Core.Editor.Environments.Save
                 });
         }
 
+        public DateTime GetSettingsFileWriteTime()
+        {
+            return m_FileSystem.GetLastWriteTime(k_SettingsPath);
+        }
+
         public void SaveEnvironment(EnvironmentSettings settings)
         {
             ReloadIfDirty();
             m_CachedSettings.EnvironmentName = settings.EnvironmentName;
             m_CachedSettings.EnvironmentId = settings.EnvironmentId;
             m_FileSystem.SaveFile(k_SettingsPath, m_JsonSerializer.SerializeObject(m_CachedSettings));
+            m_CachedWriteTime = GetSettingsFileWriteTime();
         }
 
         public EnvironmentSettings LoadEnvironment()
@@ -50,16 +57,30 @@ namespace Unity.Services.Core.Editor.Environments.Save
             return new EnvironmentSettings(m_CachedSettings.EnvironmentName, m_CachedSettings.EnvironmentId);
         }
 
-
         void ReloadIfDirty()
         {
+            var currentWriteTime = GetSettingsFileWriteTime();
+
+            if (!m_IsDirty && currentWriteTime != m_CachedWriteTime)
+            {
+                m_IsDirty = true;
+            }
+
             if (!m_IsDirty)
                 return;
 
+            m_CachedWriteTime = currentWriteTime;
             var fileContent = m_FileSystem.GetFileContent(k_SettingsPath);
-            m_CachedSettings = !string.IsNullOrEmpty(fileContent)
-                ? m_JsonSerializer.DeserializeObject<SettingsFile>(fileContent) ?? new SettingsFile()
-                : new SettingsFile();
+            try
+            {
+                m_CachedSettings = !string.IsNullOrEmpty(fileContent)
+                    ? m_JsonSerializer.DeserializeObject<SettingsFile>(fileContent) ?? new SettingsFile()
+                    : new SettingsFile();
+            }
+            catch (JsonException)
+            {
+                m_CachedSettings = new SettingsFile();
+            }
             m_IsDirty = false;
         }
 

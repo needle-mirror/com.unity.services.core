@@ -2,6 +2,9 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using UnityEngine;
 
 namespace Unity.Services.Core.Internal
@@ -12,6 +15,9 @@ namespace Unity.Services.Core.Internal
     /// awaitable in tasks
     /// yieldable in coroutines
     /// </summary>
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     class TaskAsyncOperation : AsyncOperationBase, INotifyCompletion
     {
         /// <remarks>

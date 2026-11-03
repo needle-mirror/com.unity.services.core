@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using UnityEditor;
 using Unity.Services.Core.Internal;
 using Unity.Services.Core.Internal.Serialization;
@@ -11,6 +14,9 @@ namespace Unity.Services.Core.Editor
     /// <summary>
     /// Base implementation of the <see cref="IEditorGameServiceRegistry"/>
     /// </summary>
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public sealed class EditorGameServiceRegistry : IEditorGameServiceRegistry
     {
         internal readonly Dictionary<string, IEditorGameService> Services;
@@ -70,6 +76,14 @@ namespace Unity.Services.Core.Editor
             }
 
             Instance.StartListeningToProjectStateChanges();
+
+            AssemblyReloadEvents.beforeAssemblyReload += OnBeforeAssemblyReload;
+        }
+
+        static void OnBeforeAssemblyReload()
+        {
+            Instance.StopListeningToProjectStateChanges();
+            Instance.UserRoleHandler?.Dispose();
         }
 
         void StartListeningToProjectStateChanges()
@@ -80,14 +94,7 @@ namespace Unity.Services.Core.Editor
 #endif
         }
 
-        /// <summary>
-        /// Destructor of the registry.
-        /// </summary>
-        ~EditorGameServiceRegistry()
-        {
-            StopListeningToProjectStateChanges();
-            UserRoleHandler?.Dispose();
-        }
+        ~EditorGameServiceRegistry() {}
 
         void StopListeningToProjectStateChanges()
         {

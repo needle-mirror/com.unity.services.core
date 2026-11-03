@@ -7,6 +7,8 @@ using Unity.Services.Core.Device;
 using Unity.Services.Core.Device.Internal;
 using Unity.Services.Core.Environments;
 using Unity.Services.Core.Environments.Internal;
+using Unity.Services.Core.Releases;
+using Unity.Services.Core.Releases.Internal;
 using Unity.Services.Core.Internal;
 using Unity.Services.Core.Scheduler.Internal;
 using Unity.Services.Core.Telemetry.Internal;
@@ -39,6 +41,7 @@ namespace Unity.Services.Core.Registration
 
         internal Environments.Internal.Environments Environments { get; private set; }
 
+        internal Releases.Internal.Releases Releases { get; private set; }
 
         internal ExternalUserId ExternalUserId { get; private set; }
 
@@ -70,6 +73,7 @@ namespace Unity.Services.Core.Registration
                 .ProvidesComponent<ICloudProjectId>()
                 .ProvidesComponent<IActionScheduler>()
                 .ProvidesComponent<IEnvironments>()
+                .ProvidesComponent<IReleases>()
                 .ProvidesComponent<IProjectConfiguration>()
                 .ProvidesComponent<IMetricsFactory>()
                 .ProvidesComponent<IDiagnosticsFactory>()
@@ -124,6 +128,7 @@ namespace Unity.Services.Core.Registration
                 InitializeExternalUserId(ProjectConfig);
 
                 InitializeEnvironments(ProjectConfig);
+                InitializeReleases(ProjectConfig);
                 InitializeCloudProjectId();
                 if (string.IsNullOrEmpty(CloudProjectId.GetCloudProjectId()))
                 {
@@ -152,6 +157,7 @@ namespace Unity.Services.Core.Registration
                 registry.RegisterServiceComponent<IActionScheduler>(ActionScheduler);
                 registry.RegisterServiceComponent<IProjectConfiguration>(ProjectConfig);
                 registry.RegisterServiceComponent<IEnvironments>(Environments);
+                registry.RegisterServiceComponent<IReleases>(Releases);
                 registry.RegisterServiceComponent<IMetricsFactory>(MetricsFactory);
                 registry.RegisterServiceComponent<IDiagnosticsFactory>(DiagnosticsFactory);
                 registry.RegisterServiceComponent<ICloudProjectId>(CloudProjectId);
@@ -176,6 +182,7 @@ namespace Unity.Services.Core.Registration
         {
             ProjectConfig = null;
             Environments = null;
+            Releases = null;
             DiagnosticsFactory = null;
             MetricsFactory = null;
         }
@@ -250,12 +257,12 @@ namespace Unity.Services.Core.Registration
             // For backward compatibility, carry the analytics user id to external user id
             // Only do that if the external user id is not set already.
             // This should be removed once InitializationOptions.SetAnalyticsUserId is removed.
-            if (UnityServices.ExternalUserId == null)
+            if (string.IsNullOrEmpty(UnityServices.ExternalUserIdProperty.UserId))
             {
                 var analyticsUserId = projectConfiguration.GetString("com.unity.services.core.analytics-user-id");
                 if (!string.IsNullOrEmpty(analyticsUserId))
                 {
-                    UnityServices.ExternalUserId = analyticsUserId;
+                    UnityServices.ExternalUserIdProperty.UserId = analyticsUserId;
                 }
             }
 
@@ -280,6 +287,19 @@ namespace Unity.Services.Core.Registration
             };
         }
 
+        internal void InitializeReleases(IProjectConfiguration projectConfiguration)
+        {
+            if (!(Releases is null))
+            {
+                return;
+            }
+
+            Releases = new Releases.Internal.Releases
+            {
+                Pointer = projectConfiguration.GetString(ReleasesOptionsExtensions.ReleasePointerKey),
+                ReleaseName = projectConfiguration.GetString(ReleasesOptionsExtensions.ReleaseNameKey),
+            };
+        }
 
         internal void InitializeMetrics()
         {
@@ -327,6 +347,7 @@ namespace Unity.Services.Core.Registration
             InitializeActionScheduler();
             await InitializeProjectConfigAsync(registry.Options);
             InitializeEnvironments(ProjectConfig);
+            InitializeReleases(ProjectConfig);
             InitializeCloudProjectId();
             return DiagnosticsFactory;
         }

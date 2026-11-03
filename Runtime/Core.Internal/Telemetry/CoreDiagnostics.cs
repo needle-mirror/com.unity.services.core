@@ -1,11 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using Unity.Services.Core.Telemetry.Internal;
 using UnityEngine;
 
 namespace Unity.Services.Core.Internal
 {
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     class CoreDiagnostics
     {
         internal const string CorePackageName = "com.unity.services.core";

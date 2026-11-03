@@ -2,6 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+#if UNITY_6000_7_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 using Unity.Services.Core.Editor.ProjectBindRedirect;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -9,6 +12,9 @@ using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace Unity.Services.Core.Editor
 {
+#if UNITY_6000_7_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     static class ServiceInstallationListener
     {
         static IEditorGameServiceAnalyticsSender s_EditorGameServiceAnalyticsSender;

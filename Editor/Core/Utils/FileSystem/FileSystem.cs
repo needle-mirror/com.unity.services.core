@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace Unity.Services.Core.Editor
@@ -44,6 +45,11 @@ namespace Unity.Services.Core.Editor
         public bool FileExists(string path)
         {
             return File.Exists(path);
+        }
+
+        public DateTime GetLastWriteTime(string path)
+        {
+            return FileExists(path) ? File.GetLastWriteTimeUtc(path) : DateTime.MinValue;
         }
     }
 }

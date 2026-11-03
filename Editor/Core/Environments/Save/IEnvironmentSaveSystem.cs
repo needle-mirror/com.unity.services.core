@@ -5,6 +5,7 @@ namespace Unity.Services.Core.Editor.Environments.Save
 {
     interface IEnvironmentSaveSystem
     {
+        DateTime GetSettingsFileWriteTime();
         void SaveEnvironment(EnvironmentSettings environment);
         EnvironmentSettings LoadEnvironment();
     }
