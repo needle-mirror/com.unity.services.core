@@ -5,6 +5,11 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.19.1] - 2026-11-24
+
+### Fixed
+- Fixed an Editor memory leak on Unity 6.7+ (CoreCLR) caused by the background timer that watches the project ID and environment settings.
+
 ## [1.19.0] - 2026-11-03
 
 ### Added
